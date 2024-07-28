@@ -9,7 +9,7 @@ function App() {
   
 
   return (
-    <div className={`bg-[url(./assets/wallpaper.jeg)] bg-cover bg-center w-full min-h-screen flex flex-col`}>
+    <div className={`bg-[url(./assets/wallpaper.peg)] bg-cover bg-center w-full min-h-screen flex flex-col`}>
       <BrowserRouter>
       <Navbar user = {false} />
       <Routes>

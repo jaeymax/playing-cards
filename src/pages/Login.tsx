@@ -1,10 +1,12 @@
 import { useState } from "react"
-
+import { AiFillEye } from "react-icons/ai";
+import { AiFillEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className='flex-1 ' >
@@ -17,7 +19,12 @@ const Login = () => {
       </div>
       <div className="flex flex-col" >
       <label htmlFor="password" className="font-bold" >Password</label>
-      <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} className="bg-[#FFFFFF1A] outline-none p-4 rounded-md" placeholder='Type your password' name="password" id="password" />
+      <div className="flex bg-[#FFFFFF1A] items-center rounded-md p-4" >
+      <input type={`${showPassword?'text':'password'}`} value={password} onChange={(e)=>setPassword(e.target.value)} className="flex-1 outline-none  rounded-md" placeholder='Type your password' name="password" id="password" />
+        <div onClick={()=>setShowPassword(!showPassword)} >
+       {showPassword?<AiFillEyeInvisible className="cursor-pointer" />:<AiFillEye className="cursor-pointer" />}
+        </div>
+      </div>
        <p className="font-extralight text-xs cursor-pointer mt-1 ml-auto" >Forgot password?</p>
       </div>
       <input type="submit" className="cursor-pointer p-3 font-bold bg-[#81b64c] rounded-md" value="LOGIN" />
