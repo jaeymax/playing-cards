@@ -10,10 +10,10 @@ interface NavbarProps{
 
 const Navbar:React.FC<NavbarProps> = ({user}) => {
 
-  const [showMenu, setShowMenu] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <nav className="flex px-2 bg-[#FFFFFF1A] w-full gap-4 py h-14 items-center  shadow-md" >
+    <nav className="flex header px-2 bg[#FFFFFF1A] w-full gap-4 py h-14 items-center  shadow-md" >
        <div onClick={()=>setShowMenu(!showMenu)} >
         {showMenu?(
           <IoMdClose className="flex md:hidden  min-w-[40px] text-gray-400 cursor-pointer" fontSize={'45px'}  />

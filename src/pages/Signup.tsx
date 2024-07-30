@@ -38,7 +38,7 @@ const Signup = () => {
                 type={`${showPassword ? "text" : "password"}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className=" outline-none  rounded-md"
+                className=" outline-none bg-transparent rounded-md"
                 placeholder="Type your password"
                 name="password"
                 id="password"
@@ -60,7 +60,7 @@ const Signup = () => {
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="outline-none  rounded-md"
+              className="outline-none bg-transparent rounded-md"
               type={`${showConfirmPassword?'text':'password'}`}
               placeholder="Confirm your password"
               name="confirm-password"

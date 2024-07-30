@@ -32,7 +32,7 @@ const Home = () => {
   ]
 
   return (
-    <div className='p-5' >
+    <div className='p-5 flex-1' >
       
       <div className='items-center gap-5 flex max-sm:flex-col ' >
         {

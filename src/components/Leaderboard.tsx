@@ -14,7 +14,7 @@ const Leaderboard = () => {
   ];
 
   return (
-    <div className="w-full h-[300px]  flex flex-col px- rounded-md shadow-lg drop-shadow-lg border  border-gray-600  mt-5 ">
+    <div className="w-full h-[300px]  flex flex-col px- rounded-md shadow-lg drop-shadow-lg mt-5 ">
       <div className="p-2 flex gap-2 bg-[#FFFFFF1A]">
         <div className="w-7 h-7">
           <img className="w-full h-full object-contain" src={crown} alt="" />
