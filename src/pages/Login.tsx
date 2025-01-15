@@ -4,7 +4,7 @@ import { AiFillEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+ // const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 

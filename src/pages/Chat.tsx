@@ -1,4 +1,3 @@
-import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IoMdClose } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";

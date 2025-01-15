@@ -3,10 +3,10 @@ import { useAppContext } from "../contexts/AppContext";
 import { RiMenuFoldLine } from "react-icons/ri";
 
 interface SidebarProps {
-  open: boolean;
+  
 }
 
-const Sidebar: FC<SidebarProps> = ({ open }) => {
+const Sidebar: FC<SidebarProps> = () => {
   const { sidebarOpen, toggleSidebar } = useAppContext();
 
   return (

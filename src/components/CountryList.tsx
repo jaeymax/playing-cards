@@ -1,6 +1,5 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import CountryListItem from "./CountryListItem";
-import { countries } from "../data/countries";
 import globe from '../assets/earth.png'
 
 interface CountryListProps{

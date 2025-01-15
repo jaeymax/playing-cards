@@ -1,4 +1,3 @@
-import React from "react";
 import { SlSocialInstagram } from "react-icons/sl";
 import { TiSocialYoutube } from "react-icons/ti";
 import { TiSocialFacebookCircular } from "react-icons/ti";

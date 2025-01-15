@@ -3,24 +3,22 @@ import './App.css'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Main from './MainPage'
-import Navbar from './components/Navbar'
 import   Leaderboard  from './pages/Leaderboard'
 import Play from './pages/Play'
-import { useState } from 'react'
 import Support from './pages/Support'
 import Profile from './pages/Profile'
 import Deposit from './pages/Deposit'
 
 function App() {
   
-  const [open, setOpen] = useState(false);
+  
 
   return (
     <div className={`bg-[url(./assets/bglarge.jp)] bg-cover bg-center w-full min-h-screen flex flex-col`}>
       <BrowserRouter>
       {/* <Navbar user = {false} open = {open} updateOpen = {setOpen} /> */}
       <Routes>
-          <Route path='/' element = {<Main open = {open} />} />
+          <Route path='/' element = {<Main />} />
           <Route path = '/signup' element= {<Signup/>}/>
           <Route path = '/login' element = {<Login/>} />
           <Route path = '/leaderboard' element ={<Leaderboard/>} />

@@ -1,5 +1,3 @@
-import React from "react";
-import logo from "../assets/cards.png"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress";
 import { AiOutlineClose } from "react-icons/ai";
@@ -7,8 +5,6 @@ import { RiNotification2Fill } from "react-icons/ri";
 import { MdOutlinePrivacyTip } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
-import { FaUserLarge } from "react-icons/fa6";
-import { BsShare } from "react-icons/bs";
 import { GrShareOption } from "react-icons/gr";
 import { HiOutlineUser } from "react-icons/hi2";
 

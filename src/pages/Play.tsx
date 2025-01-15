@@ -12,14 +12,14 @@ const Play = () => {
   return (
     <div className="flex-1 bg-[url(./assets/background1.jpg)] bg-cover bg-center w-full flex flex-col justify-between" >
         <div className="container flex justify-aroun  borde borde-red-600">
-          { [kingofheart,kingofspade, kingofclub,kingofclub, kingofdiamond].map((image, index)=>
+          { [kingofheart,kingofspade, kingofclub,kingofclub, kingofdiamond].map((image)=>
             (
               <img src={image} className="card  object-contain"  alt="" />
             )
           ) }
         </div>
         <div className="container borde borde-blue-500 flex justify-aroun">
-          { [queenofheart,queenofspade,queenofclub,queenofdiamond, jackofclub].map((image, index)=>
+          { [queenofheart,queenofspade,queenofclub,queenofdiamond, jackofclub].map((image)=>
             (
               <img src={image} className="card object-contain"  alt="" />
             )

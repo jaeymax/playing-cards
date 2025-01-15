@@ -1,29 +1,18 @@
 import { Link } from "react-router-dom";
-import { IoMenu } from "react-icons/io5";
 import logo from "../assets/cards.png";
-import { IoMdClose } from "react-icons/io";
-import { useState } from "react";
 import { RiMenuFold2Line } from "react-icons/ri";
 import { RiMenuFoldLine } from "react-icons/ri";
-import { IoIosNotificationsOutline } from "react-icons/io";
 import { IoMdNotifications } from "react-icons/io";
-import { CiMail } from "react-icons/ci";
 import { IoMdMailOpen } from "react-icons/io";
-import { IoChatbubbleEllipses } from "react-icons/io5";
 import { useAppContext } from "../contexts/AppContext";
-import { IoPersonSharp } from "react-icons/io5";
 import { FaUserFriends } from "react-icons/fa";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarProps {
   user: boolean;
-  open: boolean;
-  updateOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user, open, updateOpen }) => {
-  const [showMenu, setShowMenu] = useState(false);
+const Navbar: React.FC<NavbarProps> = ({ user }) => {
   const { sidebarOpen, toggleSidebar } = useAppContext();
 
   return (
@@ -72,10 +61,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, open, updateOpen }) => {
             <IoMdMailOpen className="w-5 h-5 cursor-pointer" />
             {/* <IoPersonSharp className="w-5 h-5 cursor-pointer" /> */}
             <div>
-            <Avatar className="w-8 h-8" >
-              <AvatarImage src = "https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
+              <Avatar className="w-8 h-8">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
             </div>
           </div>
         ) : (

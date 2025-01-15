@@ -1,9 +1,6 @@
-import React from "react";
 import { FaHome } from "react-icons/fa";
 import { PiHandDeposit } from "react-icons/pi";
 import { BiSupport } from "react-icons/bi";
-import { CgProfile } from "react-icons/cg";
-import { FcOnlineSupport } from "react-icons/fc";
 import { useAppContext } from "../contexts/AppContext";
 import { BsChatDotsFill } from "react-icons/bs";
 
