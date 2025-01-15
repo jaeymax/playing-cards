@@ -28,7 +28,7 @@ const Leaderboard = () => {
         </div>
         <h1 className="font-extrabold text-4xl">Leaderboard</h1>
       </div>
-      <div className="bg-[#FFFFFF1A] flex items-center p-3 gap-3 mt-10 relative">
+      <div className="bg-[#FFFFFF1A] flex items-center p-3 gap-3 mt-10 relative mb-10">
         <div className="w-[30px] h-[30px]">
           <img className="w-full h-full object-cover" src={flag} alt="" />
         </div>
@@ -38,6 +38,9 @@ const Leaderboard = () => {
         </div>
         <CountryList collapse = {collapse} countries={countries} onClick={handleClick} />
         
+      </div>
+      <div className="bg-[#FFFFFF1A] w-full h-[500px]" >
+
       </div>
     </div>
   );
