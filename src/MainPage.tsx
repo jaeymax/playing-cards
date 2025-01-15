@@ -48,7 +48,7 @@ const Main: FC<HomeProps> = ({ open }) => {
 
   return (
     <div className="p- flex-1 flex flex-col relative b-[url('https://aeadmin.adamellis.com/wp-content/uploads/2023/10/adam-ellis-wallpaper-playing-cards-landscape-full-artwork.jpg')]">
-      <Navbar user={true} />
+      <Navbar open = {true} updateOpen={()=>{}} user={true} />
       <Sidebar open={open} />
       {/* <div className='flex gap-10' >
         <div className=' flex-1' >
