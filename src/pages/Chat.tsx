@@ -64,10 +64,10 @@ const Chat = () => {
             </div>
           ))}
         </div>
-        <div className="p-3">
+        <div className="p-3 sm:mb-0 mb-14">
            <div className="flex gap-3 borde" >
               <div className="flex-1 flex items-center  message rounded-md px-4 min-w-0" >
-                 <input type="text" className="flex-1 message min-w-0" placeholder="Your message..." />
+                 <input type="text" className="flex-1 message min-w-0 outline-none" placeholder="Your message..." />
                  <GrEmoji/>
               </div>
               <div className="bo message rounded-md px-3 py-3 grid place-items-center" >

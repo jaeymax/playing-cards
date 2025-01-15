@@ -91,16 +91,16 @@ const Home = () => {
               {
                 topPlayers.map((player, index)=>(
                   <div className="player flex items-center gap-2" key={index} >
-                  <div className={`w-8 h-8 ${index+1 === 1?"bg-yellow-500":index+1 === 2?"bg-gray-400":index+1 === 3?"bg-red-300":""}rounded grid place-items-center`} >
+                  <div className={`w-8 h-8 ${index+1 === 1?"bg-yellow-500":index+1 === 2?"bg-gray-400":index+1 === 3?"bg-red-300":""} rounded grid place-items-center`} >
                         <p className="font-bold" >{`#${index+1}`}</p>
                   </div>
-                  <div className="w-8 h-8 rounded" >
-                      <img src={player.imageUrl} className="w-full h-full object-contain" alt="" />
+                  <div className="w-8 h-8 rounded-md " >
+                      <img src={player.imageUrl} className="w-full h-full rounded-md object-cover" alt="" />
                   </div>
                   <div className="flex-1 flex items-center gap-1" >
                     <p className="font-bold" >{player.name}</p>
-                     <div className="w-4 h-4" >
-                        <img src={player.countryImageUrl} className="w-full h-full object-contain" alt="" />
+                     <div className="" >
+                        <img src={player.countryImageUrl} className="w-full h-full object-cover" alt="" />
                      </div>
                   </div>
                   <div>
