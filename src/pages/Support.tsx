@@ -25,7 +25,7 @@ const Support = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="font-normal text-sm no-underline" >How to Play Game?</AccordionTrigger>
             <AccordionContent>
-              <div className="text-xs text-green-400" >
+              <div className="text-xs" >
                 <p>How to Play Games:</p>
                 <div>
                     <p>1. Sign up by your own phone number</p>
@@ -41,7 +41,7 @@ const Support = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="font-normal text-sm no-underline" >How to Deposit?</AccordionTrigger>
             <AccordionContent>
-              <div className="text-xs text-green-400" >
+              <div className="text-xs" >
                 <p>
                   After Registering, you can click Deposit moving to the deposit page.Then you can choose the amount you want to deposit or enter the amount you want.Please pay attention to the minimum deposit
                 </p>
@@ -53,7 +53,7 @@ const Support = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="font-normal text-sm no-underline" >How to Withdraw?</AccordionTrigger>
             <AccordionContent>
-              <div className="text-xs text-green-400" >
+              <div className="text-xs" >
                 <p>
                   Withdraw is easy and fast. Click the withdraw button, follow steps, make sure your withdraw account information is correct.
                 </p>
@@ -74,7 +74,7 @@ const Support = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="font-normal text-sm no-underline" >How to Get Promotion Bonus?</AccordionTrigger>
             <AccordionContent>
-              <div className="text-xs text-green-400" >
+              <div className="text-xs" >
                 <p>
                   Thanks for joining in our promotion program. First, you should know that if you only invite friends to register or share your referral to others, there is no bonus.
                   Second, if you wanna win cash bonus, you can invite or encourage them to play games. once they deposit to play games, you will get your bonus.How much you get depends on how much they deposit to play
@@ -87,7 +87,7 @@ const Support = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="font-formal text-sm no-underline" >Deposit and Withdraw Failed?</AccordionTrigger>
             <AccordionContent>
-              <div className="text-xs text-green-400">
+              <div className="text-xs">
                 <p>
                   Deposit failed: please keep your payment transaction message as the proof, and then contact our Online game
                   Support below.

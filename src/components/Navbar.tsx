@@ -68,12 +68,12 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
             </div>
           </div>
         ) : (
-          <div className="flex gap-2  w-[200px] items-center ml-auto">
-            <button className="border border-green-500 flex-1  text-sm border-gray-400 h-9 flex items-center rounded-sm min-w-fit p-2 font-bold">
-              <p className="mx-auto text-green-500">Login</p>
+          <div className="flex gap-2  w-[150px] items-center ml-auto">
+            <button className="button flex-1  text-sm h-9 flex items-center rounded-sm shadow-md min-w-fit p- font-bold">
+              <p className="mx-auto">Log In</p>
             </button>
-            <button className="bg-green-500 flex-1  text-sm rounded-sm p-2 flex items-center h-9 font-bold min-w-fit">
-              <p className="mx-auto">Register</p>
+            <button className="bg-green-600 hover:bg-green-700 flex-1  text-sm rounded-sm p- flex items-center h-9 font-bold min-w-fit">
+              <p className="mx-auto">Sign Up</p>
             </button>
           </div>
         )}

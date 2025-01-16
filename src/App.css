@@ -36,6 +36,17 @@ body{
 .button{
   background: rgba(51, 49, 49, 0.863);
   /* background: rgb(15, 14, 14); */
+  cursor: pointer;
+}
+
+.button:hover{
+  background: rgba(54, 52, 52, 0.979);
+
+}
+
+.overlay{
+  background: rgba(0, 0, 0, 0.281);
+  z-index:5;
 }
 
 .chat{
