@@ -5,7 +5,7 @@ import { IoClose } from 'react-icons/io5'
 
 const Signup = () => {
 
-  const {updateSignupOpen} = useAppContext();
+  const {updateSignupOpen, updateLoginOpen} = useAppContext();
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -18,6 +18,11 @@ const Signup = () => {
       e.preventDefault();
   }
 
+  const handleSignIn = () =>{
+    updateSignupOpen(false);
+    updateLoginOpen(true);
+  }
+
   return (
     <div className="bottom-nav z-50 absolute w-full p-8 rounded-md shadow-md  pb-[400px] left-0 top-0 bottom-0 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:max-w-[450px]" >
         <div className="flex items-center justify-between" >
@@ -28,13 +33,13 @@ const Signup = () => {
         </div>
         <form className="mt-5 flex flex-col gap-4" onSubmit={handleSubmit} >
             <div className="border border-gray-600 rounded-md p-3 form-input" >
-                <input type="text" placeholder="Phone" value={phone} onChange={(e)=>setPhone(e.target.value)} className="bg-transparent outline-none" />
+                <input type="text" placeholder="Phone" value={phone} onChange={(e)=>setPhone(e.target.value)} className="bg-transparent font-bold focus:font-normal outline-none" />
             </div>
             <div className="border border-gray-600 rounded-md p-3 form-input" >
-                <input type="text" placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} className="bg-transparent outline-none" />
+                <input type="text" placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} className="bg-transparent font-bold focus:font-normal outline-none" />
             </div>
             <div className="border border-gray-600 rounded-md p-3 form-input flex items-center gap-2">
-                <input type={`${showPassword?"text":"password"}`} placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="outline-none bg-transparent flex-1" />
+                <input type={`${showPassword?"text":"password"}`} placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="outline-none font-bold focus:font-normal bg-transparent flex-1" />
                 <div onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <AiFillEyeInvisible className="cursor-pointer" />
@@ -44,7 +49,7 @@ const Signup = () => {
               </div>
             </div>
             <div className="border border-gray-600 rounded-md p-3 form-input flex items-center gap-2">
-                <input type={`${showConfirmPassword?"text":"password"}`} placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} className="outline-none bg-transparent flex-1" />
+                <input type={`${showConfirmPassword?"text":"password"}`} placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} className="outline-none font-bold focus:font-normal bg-transparent flex-1" />
                 <div onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                 {showConfirmPassword ? (
                   <AiFillEyeInvisible className="cursor-pointer" />
@@ -55,7 +60,7 @@ const Signup = () => {
             </div>
             
             <button className="font-bold bg-green-600 hover:bg-green-700 p-3 rounded-md mt-10" >Sign Up</button>
-            <p className="font-bold mt-4" >Already have an account?<span className="text-green-500 ml-3" >Sign In</span></p>
+            <p className="font-bold mt-4" >Already have an account?<span onClick={handleSignIn} className="text-green-500 ml-3 cursor-pointer hover:text-green-600" >Sign In</span></p>
         </form>
     </div>
   )

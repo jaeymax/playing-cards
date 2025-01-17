@@ -6,6 +6,8 @@ import { useAppContext } from "@/contexts/AppContext";
 
 const Login = () => {
 
+  const {updateLoginOpen, updateSignupOpen} = useAppContext();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +16,11 @@ const Login = () => {
     e.preventDefault();
   };
 
-  const { updateLoginOpen } = useAppContext();
+  const handleCreateAccount = () =>{
+    updateLoginOpen(false);
+    updateSignupOpen(true);
+  }
+
   ("left-0 top-0 bottom-0 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:max-w-[450px]");
   return (
     <div className="bottom-nav z-50 absolute left-0 top-0 w-full bottom-0 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 p-8 rounded-md shadow-md sm:max-w-[450px] pb-[400px]">
@@ -59,7 +65,7 @@ const Login = () => {
         </button>
         <p className="font-bold mt-4">
           New to BC.GAME?
-          <span className="text-green-500 ml-3">Create account</span>
+          <span onClick={handleCreateAccount} className="text-green-500 ml-3 cursor-pointer hover:text-green-600">Create account</span>
         </p>
       </form>
     </div>
