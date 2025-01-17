@@ -13,10 +13,10 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ user }) => {
-  const { sidebarOpen, toggleSidebar } = useAppContext();
+  const { sidebarOpen, toggleSidebar, updateLoginOpen, updateSignupOpen } = useAppContext();
 
   return (
-    <nav className="flex header px-5 b-gray-800 w-full gap-4 py- h-14  items-center shadow-md">
+    <nav className="flex header px-5 b-gray-800 w-full gap-4 py- h-14  items-center shadow-sm">
       <div className="lg:hidden" onClick={() => toggleSidebar()}>
         {sidebarOpen ? (
           <RiMenuFoldLine className="w-7 h-7 cursor-pointer" />
@@ -69,10 +69,10 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           </div>
         ) : (
           <div className="flex gap-2  w-[150px] items-center ml-auto">
-            <button className="button flex-1  text-sm h-9 flex items-center rounded-sm shadow-md min-w-fit p- font-bold">
+            <button onClick={()=> updateLoginOpen(true)} className="button flex-1  text-sm h-9 flex items-center rounded-sm shadow-md min-w-fit p- font-bold">
               <p className="mx-auto">Log In</p>
             </button>
-            <button className="bg-green-600 hover:bg-green-700 flex-1  text-sm rounded-sm p- flex items-center h-9 font-bold min-w-fit">
+            <button onClick={()=> updateSignupOpen(true)} className="bg-green-600 hover:bg-green-700 flex-1  text-sm rounded-sm p- flex items-center h-9 font-bold min-w-fit">
               <p className="mx-auto">Sign Up</p>
             </button>
           </div>

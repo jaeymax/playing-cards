@@ -5,6 +5,7 @@ import playLogo from '../assets/play.png'
 import starLogo from '../assets/star.png'
 import Footer from "@/components/Footer";
 import Leaderboard from "@/components/Leaderboard";
+import TournamentWinners from '@/components/TournamentWinners'
 
 const Home = () => {
 
@@ -67,24 +68,11 @@ const Home = () => {
           <Leaderboard/>
         </div>
       </div>
-      <div className="flex gap-14 borde sm:flex-row flex-col" >
+      <div className="flex gap-14 borde sm:flex-row items-cente flex-col" >
         <div className="w-[100px h-[100px borde flex-1" >
         <img className="rounded-md shadow-md object-contain" src={"https://i.pinimg.com/originals/73/8a/f6/738af624ab6799643747e5099e622cce.gif"} alt="" />
         </div>
-        <div className="flex-1 " >
-           <div className="header" >
-              Recent Activities
-           </div>
-           <div className="button h-full">
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-            <p>Hi there how are you doing</p>
-           </div>
-        </div>
+        <TournamentWinners/>
       </div>
       <Footer/>
     </div>

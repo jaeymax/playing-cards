@@ -94,12 +94,12 @@ const Leaderboard = () => {
           </div>
           <div className="flex-1 flex items-center gap-1" >
             <p className="font-bold" >{player.name}</p>
-             <div className="" >
-                <img src={player.countryImageUrl} className="w-full h-full object-cover" alt="" />
+             <div className="w-4 h-3" >
+                <img src={player.countryImageUrl} className="w-full h-full object-contain" alt="" />
              </div>
           </div>
           <div>
-              <p className="font-bold text-xs" >{player.rating}</p>
+              <p className="font-bold text-xs text-white" >{player.rating}</p>
           </div>
       </div>
         ))
