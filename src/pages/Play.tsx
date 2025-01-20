@@ -225,9 +225,6 @@ const Play = () => {
          });
     }
 
-    const handleClick = (e: Event) =>{
- 
-    }
 
 
    /* cards.forEach((card)=>{

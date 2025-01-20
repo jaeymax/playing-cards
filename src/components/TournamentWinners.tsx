@@ -1,4 +1,3 @@
-import TournamentWinnersItem from "./TournamentWinnersItem";
 import trophyLogo from "../assets/trophy.png";
 
 const TournamentWinners = () => {

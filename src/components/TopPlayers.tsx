@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -47,7 +47,7 @@ const Leaderboard = () => {
     }
   ];
 
-  const getRankIcon = (rank) => {
+  const getRankIcon = (rank:any) => {
     switch (rank) {
       case 1:
         return <Trophy className="w-6 h-6 text-yellow-400" />;
@@ -60,7 +60,7 @@ const Leaderboard = () => {
     }
   };
 
-  const getRankChangeIcon = (change) => {
+  const getRankChangeIcon = (change:any) => {
     if (change > 0) {
       return <TrendingUp className="w-4 h-4 text-green-500" />;
     } else if (change < 0) {
