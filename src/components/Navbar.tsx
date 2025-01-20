@@ -9,10 +9,13 @@ import { FaUserFriends } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarProps {
-  user: boolean;
+  
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user }) => {
+const Navbar: React.FC<NavbarProps> = () => {
+
+  const {user} = useAppContext();
+
   const { sidebarOpen, toggleSidebar, updateLoginOpen, updateSignupOpen } = useAppContext();
 
   return (

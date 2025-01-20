@@ -6,7 +6,7 @@ import { useAppContext } from "@/contexts/AppContext";
 
 const Login = () => {
 
-  const {updateLoginOpen, updateSignupOpen} = useAppContext();
+  const {updateLoginOpen, updateSignupOpen, updateUser} = useAppContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +14,11 @@ const Login = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    updateUser({
+      username:"jaeymax",
+      email:email
+    })
+    updateLoginOpen(false);
   };
 
   const handleCreateAccount = () =>{
