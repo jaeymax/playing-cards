@@ -19,7 +19,7 @@ const Navbar: React.FC<NavbarProps> = () => {
   const { sidebarOpen, toggleSidebar, updateLoginOpen, updateSignupOpen } = useAppContext();
 
   return (
-    <nav className="flex header px-5 b-gray-800 w-full gap-4 py- h-14  items-center shadow-sm">
+    <nav className="flex px-5 w-full gap-4 header h-14 backdrop-blur-md items-center shadow-sm">
       <div className="lg:hidden" onClick={() => toggleSidebar()}>
         {sidebarOpen ? (
           <RiMenuFoldLine className="w-7 h-7 cursor-pointer" />

@@ -64,12 +64,12 @@ const Login = () => {
                 )}
               </div>
         </div>
-        <p className="font-bold ml-auto">Forgot your password?</p>
+        <p className="font-light ml-auto text-xs">Forgot your password?</p>
         <button className="font-bold bg-green-600 hover:bg-green-700 p-3 rounded-md mt-5">
           Sign In
         </button>
         <p className="font-bold mt-4">
-          New to BC.GAME?
+          New to Cards?
           <span onClick={handleCreateAccount} className="text-green-500 ml-3 cursor-pointer hover:text-green-600">Create account</span>
         </p>
       </form>

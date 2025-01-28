@@ -41,7 +41,7 @@ class Card {
         cardBack.className = 'card-back';
         const cardBackImage = document.createElement('img');
         cardBackImage.className = 'card-img'
-        cardBackImage.src = '/card_back_black.png'
+        cardBackImage.src = '/card_back_blue.jpeg'
         cardBack.appendChild(cardBackImage);
 
         cardInner.appendChild(cardFront);

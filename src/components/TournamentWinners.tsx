@@ -47,8 +47,8 @@ const TournamentWinners = () => {
   ];
 
   return (
-    <div className="flex-1 button">
-      <div className="header flex font-bold p-1 items-center">
+    <div className="flex-1 form rounded-md">
+      <div className="bottom-nav flex font-bold p-1 items-center rounded-t-md">
         <div className="w-7 h-7">
           <img src={trophyLogo} alt="" />
         </div>

@@ -69,8 +69,8 @@ const Leaderboard = () => {
 
 
   return (
-    <div className="w-[300p h-[300px button rounded shadow-md">
-    <div className="header flex items-center p-1">
+    <div className="w-[300p h-[300px form rounded shadow-md flex-1">
+    <div className="bottom-nav flex items-center p-1 rounded-t-md">
       <div className="w-7 h-7">
         <img
           className="w-full h-full object-contain"

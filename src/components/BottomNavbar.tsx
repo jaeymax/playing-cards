@@ -28,7 +28,7 @@ const BottomNavbar = () => {
   ];
 
   return (
-    <nav className="sm:hidden flex  flex items-center shadow- fixed bottom-0 left-0 justify-between right-0 bottom-nav b-gray-800">
+    <nav className="sm:hidden flex hidden items-center shadow- fixed bottom-0 left-0 justify-between right-0 bottom-nav b-gray-800">
       {tabs.map((tab, index) => (
         <div onClick={()=>setActiveTabState(tab.name)}
           key={index}

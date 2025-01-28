@@ -6,87 +6,86 @@
 
 /* rgba(153, 153, 153, .14); */
 
-
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;  
-
+  font-family: "Inter", sans-serif;
 }
 
 /* bg-[#81b64c] */
 
-.header{
-  background: rgba(31, 29, 29, 0.795);
+.header {
+  /* background: rgba(31, 29, 29, 0.795); */
+  background: rgba(31, 29, 29, 0.3);
+
+  /* backdrop-filter: blur(10px); */
 }
 
-body{
+body {
   /* background: rgb(43, 41, 41); */
   background: #1f1b1b;
-  
 }
 
-.body{
+/* .body{
   background: #1f1b1b;
-}
+} */
 
-.messages{
+.messages {
   background: #2e2e2e;
 }
 
-/* .message{
+.message {
   background: #4e4e4e;
-} */
-
-.form-input{
-  /* background: rgba(31, 29, 29, 0.377); */
-  /* background: rgba(168, 160, 160, 0.226); */
-   background: #13111181;
 }
 
-.button{
+.form-input {
+  /* background: rgba(31, 29, 29, 0.377); */
+  /* background: rgba(168, 160, 160, 0.226); */
+  background: #13111181;
+}
+
+.button {
   background: rgba(51, 49, 49, 0.863);
   /* background: rgb(15, 14, 14); */
   cursor: pointer;
 }
 
-.button:hover{
+.button:hover {
   background: rgba(54, 52, 52, 0.979);
-
 }
 
-.form{
+.form {
   background: rgba(51, 49, 49, 0.863);
 }
 
-.overlay{
+.overlay {
   background: rgba(0, 0, 0, 0.281);
-  z-index:5;
+  z-index: 5;
 }
 
-.chat{
+.chat {
   background: rgba(31, 29, 29);
 }
 
-.profile{
+.profile {
   background: rgba(31, 29, 29);
 }
 
-.login{
-  background:#2e2e2e;
+.login {
+  background: #2e2e2e;
 }
 
 /* .form-input{
   background: rgba(24, 27, 27, 0.747);
 } */
 
-.login{
+.login {
   background: rgb(39, 43, 44);
   /* background-color: rgb(31, 29, 29); */
 }
 
-.bottom-nav{
+.bottom-nav {
   background-color: rgb(31, 29, 29);
 }
 
@@ -125,31 +124,52 @@ body{
   -moz-osx-font-smoothing: grayscale;
 }
 
-.gray:hover{
+.gray:hover {
   background: rgba(255, 255, 255, 0.164);
 }
 
-.container{
-  position: absolute;
+.container {
+  /* position: absolute; */
   width: fit-content;
-  background: black;
-  z-index: -1;
 }
 
-.card{
-  width: 100px;
-  height: 140px;
+#deal-cards:disabled, #shuffle:disabled {
+  background: #cecece;
+}
+
+.card {
+  width: 60px;
+  height: 80px;
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 30;
   transition: all 0.4s;
-  transform-style: preserve-3d;
-  /* border: 1px solid #ccc */
-  
+
+  border-radius: 8px;
 }
 
-.card-front, .card-back{
+.card-slot {
+  width: 60px;
+  height: 80px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  /* visibility: hidden; */
+}
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: all 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -159,32 +179,22 @@ body{
   -webkit-backface-visibility: hidden;
 }
 
-.card-front{
-  transform: rotateY(180deg);
-  opacity: 1;
+.card-front {
+  /* transform: rotateY(180deg); */
 }
 
-.card:hover .card-inner{
+.card-back {
+  opacity: 0;
+}
+
+.card:hover .card-inner {
   transform: rotateY(180deg);
 }
 
-.card-img{
-  width: 100%;
-  height: 100%;
-  /* border-radius: 13%; */
-  object-fit: contain;
-}
 /* 50 * 80 */
 /* 100 * 140 */
-.card-slot{
-  width: 100px;
-  height: 140px;
-  border: 2px dashed rgba(255,255,255,0.3);
-  border-radius: 8px;
-  z-index: 10;
-}
 
-.card:hover{
+.card:hover {
   /* scale: 1.2; */
   cursor: pointer;
 }
@@ -194,32 +204,22 @@ body{
   z-index: 1000;
 } */
 
-.card-inner{
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: all 0.6s;
-  transform-style: preserve-3d; 
-  z-index: 30;
-}
-
-
-
-
-@media screen and (max-width: 640px){
-  .card{
-    width: 50px;
-    height: 80px;
+@media screen and (max-width: 640px) {
+  .card {
+    width: 30px;
+    height: 60px;
+    /* border-radius: 8px; */
   }
-  
-  .card-slot{
-    width: 50px;
-    height: 80px;
+
+  .card-slot {
+    width: 30px;
+    height: 60px;
   }
-  
-  .card-img{
-    
-    border-radius: 5%;
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    /* border-radius: 8px; */
   }
 }
 

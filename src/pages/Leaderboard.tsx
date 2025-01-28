@@ -21,9 +21,9 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="flex-1 h-100  py-5">
-      <div className="flex items-center gap-5">
-        <div className="w-[40px] h-[40px]">
+    <div className="flex-1 h-100  py-5 rounded-md">
+      <div className="flex items-center gap-5 rounded-md">
+        <div className="w-[40px] h-[40px] rounded-md">
           <img src={leaderboard} alt="" />
         </div>
         <h1 className="font-extrabold text-4xl">Leaderboard</h1>
