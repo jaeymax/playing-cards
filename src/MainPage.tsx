@@ -14,6 +14,8 @@ import Chat from "./pages/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import { socket } from "./socket";
+//import HomePage from "./pages/tests/Home";
+import Game from "./pages/tests/Game";
 
 interface HomeProps {}
 
@@ -54,13 +56,13 @@ const Main: FC<HomeProps> = () => {
       {activeTab === "support" && <Support />}
       {activeTab === "profile" && <Profile />}
       {activeTab === "chat" && <Chat />}
-      <div
+      {/* <div
         className={`${
           isConnected ? "bg-green-600" : "bg-red-500"
-        } fixed bottom-0 left-0 py-1 px-2 font-bold`}
+        } fixed bottom-0 left-0 py- px-2 font-semibold w-full text-center text-xs`}
       >
         {isConnected ? "Connected" : "Reconnecting"}
-      </div>
+      </div> */}
       <BottomNavbar />
     </div>
   );

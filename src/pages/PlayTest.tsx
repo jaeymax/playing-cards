@@ -291,7 +291,7 @@ const PlayTest = () => {
   };
 
   const dealCards = async () => {
-    if (isDealing) return;
+    if (isDealing || isShuffling) return;
     setIsDealing(true);
 
     let cardIndex = 0;
@@ -308,12 +308,7 @@ const PlayTest = () => {
     setIsDealing(false);
   };
 
-  const reset = () => {
-    if (!isDealing) {
-      createCards();
-    }
-  };
-
+  
   useEffect(() => {
     createCards();
   }, []);

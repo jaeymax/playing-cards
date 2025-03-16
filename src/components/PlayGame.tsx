@@ -12,7 +12,10 @@ const PlayGame = () => {
 
   return (
     <div className="flex flex-col gap-3 items-center flex-1 borde">
-          <h1 className="font-extrabold text-4xl text-center" >Play Cards Online on the #1 Site!</h1>
+          <h1 className="font-extrabold italic text-4xl text-center" >
+          Play Compete Rise to the Top!
+          </h1>
+          <p className='text-sm italic p-5 text-center' >Join the ultimate online Spa card game challenge players, earn ratings, and climb the leaderboard to become the best.</p>
           <div onClick={()=>navigate('/play')} className="bg-green-600 hover:bg-green-700 w-full text-center rounded p-2 hover:cursor-pointer shadow-md">
             <div  className="flex gap-3 mx-auto w-fit items-center" >
                  <div className="w-6 h-6" >
