@@ -131,7 +131,7 @@ const NotificationsPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className="containe mx-auto px-4 py-6">
+      <main className="max-w-3xl mx-auto px-4 py-6">
         <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
           {/* Notifications Header */}
           <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700">

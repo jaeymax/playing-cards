@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -6,17 +7,42 @@ const SignInPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSignIn, setIsSignIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch(
+        "https://playing-cards-api.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      if (response.status === 200) {
+        // Successful login
+        const data = await response.json();
+        // Here you might want to store the token in localStorage or context
+        navigate("/");
+      } else if (response.status === 400) {
+        alert("Invalid input. Please check your email and password.");
+      } else if (response.status === 401) {
+        alert("Invalid credentials. Please try again.");
+      } else {
+        alert("An error occurred. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
       setIsLoading(false);
-      // Redirect would happen here in production
-      console.log("Form submitted:", { email, password, rememberMe });
-    }, 1500);
+    }
   };
 
   return (
@@ -142,7 +168,7 @@ const SignInPage = () => {
                   </div>
                 </div>
 
-                {!isSignIn && (
+                {/* {!isSignIn && (
                   <div>
                     <label
                       htmlFor="confirmPassword"
@@ -177,7 +203,7 @@ const SignInPage = () => {
                       />
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
               <div className="flex items-center justify-between">
@@ -200,12 +226,12 @@ const SignInPage = () => {
 
                 {isSignIn && (
                   <div className="text-sm">
-                    <a
-                      href="#"
+                    <Link
+                      to="/forgot-password"
                       className="font-medium text-blue-400 hover:text-blue-300"
                     >
                       Forgot password?
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -249,7 +275,7 @@ const SignInPage = () => {
                     <button
                       type="button"
                       className="font-medium text-blue-400 hover:text-blue-300 focus:outline-none"
-                      onClick={() => setIsSignIn(false)}
+                      onClick={() => navigate("/signup")}
                     >
                       Create an account
                     </button>
@@ -338,13 +364,19 @@ const SignInPage = () => {
             {/* Terms and Privacy Policy */}
             <div className="px-6 pb-6 text-center text-xs text-gray-400">
               By continuing, you agree to our{" "}
-              <a href="#" className="text-blue-400 hover:text-blue-300">
+              <Link
+                to="/terms-of-service"
+                className="text-blue-400 hover:text-blue-300"
+              >
                 Terms of Service
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a href="#" className="text-blue-400 hover:text-blue-300">
+              <Link
+                to="/privacy-policy"
+                className="text-blue-400 hover:text-blue-300"
+              >
                 Privacy Policy
-              </a>
+              </Link>
             </div>
           </div>
 

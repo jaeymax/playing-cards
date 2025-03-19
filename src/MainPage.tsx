@@ -46,8 +46,7 @@ const Main: FC<HomeProps> = () => {
   }, []);
 
   return (
-    <div className="p- flex-1 flex flex-col relative b-[url('https://aeadmin.adamellis.com/wp-content/uploads/2023/10/adam-ellis-wallpaper-playing-cards-landscape-full-artwork.jpg')]">
-      <Navbar />
+    <div className="p- flex-1 flex flex-col relative bg-[url('https://aeadmin.adamellis.com/wp-content/uploads/2023/10/adam-ellis-wallpaper-playing-cards-landscape-full-artwork.jpg')]">
       {loginOpen && <Login />}
       {signupOpen && <Signup />}
       <Sidebar />

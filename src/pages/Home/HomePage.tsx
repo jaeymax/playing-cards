@@ -7,6 +7,7 @@ import Announcements from "./components/Announcements";
 import RecentActivities from "./components/RecentActivities";
 import RecentGames from "./components/RecentGames";
 import NavBar from "../../components/NavBar";
+import Footer from "../../components/Footer";
 
 const HomePage: React.FC = () => {
   return (
@@ -14,7 +15,10 @@ const HomePage: React.FC = () => {
       <NavBar />
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero Section with Game Preview */}
-        <HeroSection />
+        <HeroSection 
+          onPlayComputer={() => {}} 
+          onInviteFriend={() => {}} 
+        />
 
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -37,6 +41,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

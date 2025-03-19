@@ -7,15 +7,44 @@ interface EmailStepProps {
 const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setEmailError(""); // Clear any previous errors
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.status === 200) {
+        // Successful login
+        const data = await response.json();
+        console.log(data);
+
+        onSubmit(email);
+        // Here you might want to store the token in localStorage or context
+      } else if (response.status === 400) {
+        alert("email required");
+      } else if (response.status === 409) {
+        setEmailError(
+          "This email is already registered. Please use a different email."
+        );
+      } else {
+        alert("An error occurred. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
       setIsLoading(false);
-      onSubmit(email);
-    }, 1000);
+    }
   };
 
   return (
@@ -63,6 +92,9 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+          {emailError && (
+            <p className="mt-2 text-sm text-red-500">{emailError}</p>
+          )}
         </div>
 
         <button

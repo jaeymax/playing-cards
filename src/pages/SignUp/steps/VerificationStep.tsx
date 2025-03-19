@@ -45,10 +45,40 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
   const handleSubmit = async (finalCode: string) => {
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp: finalCode }),
+      });
+      
+      const data = await response.json();
+      if (response.status === 200) {
+        // Successful verification
+        console.log(data);
+
+        onSubmit(finalCode);
+
+      } else if (response.status === 400) {
+        alert(data.message);
+      } else {
+        alert("An error occurred. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
       setIsLoading(false);
-      onSubmit(finalCode);
-    }, 1000);
+    }
+
+
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    //   onSubmit(finalCode);
+    // }, 1000);
   };
 
   const handleResend = () => {

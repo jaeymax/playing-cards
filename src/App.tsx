@@ -1,28 +1,23 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Main from "./MainPage";
-//import Leaderboard from "./pages/Leaderboard";
-//import LeaderboardPage from "./pages/tests/Leaderboard";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import Play from "./pages/Play";
 //import Support from "./pages/Support";
+//import HomePage from "./pages/tests/Game";
+import HomePage from "./pages/Home/HomePage";
 import SupportPage from "./pages/tests/Support";
-//import Profile from "./pages/Profile";
-import Profile from "./pages/tests/Profile";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import Deposit from "./pages/Deposit";
 import { useAppContext } from "./contexts/AppContext";
 import PlayTest from "./pages/PlayTest";
 import MailPage from "./pages/Mail";
-//import NotificationsPage from "./pages/Notifications";
-import FriendsPage from "./pages/tests/Friends";
+import FriendsPage from "./pages/Friends/FriendsPage";
 import { Toaster } from "./components/ui/toaster";
-import SignupFlow from "./pages/SignupFlow";
-import SignupForm from "./pages/SignupForm";
 import NotificationsPage from "./pages/tests/Notifications";
 import EventsPage from "./pages/tests/Events";
-import DashboardPage from "./pages/admin/Dashboard";
+import DashboardPage from "./pages/admin/DashboardPage";
 import SettingsPage from "./pages/tests/Settings";
-// import TournamentsPage from "./pages/tests/Tournaments";
 import TournamentPage from "./pages/Tournament/TournamentPage";
 import AboutPage from "./pages/About/AboutPage";
 import HelpPage from "./pages/tests/Help";
@@ -33,30 +28,41 @@ import SignInPage from "./pages/tests/Signin";
 import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import SignUp from "./pages/SignUp/SignUp";
-import HomePage from "./pages/Home/HomePage";
+//import HomePage from "./pages/Home/HomePage";
 import TermsOfService from "./pages/Legal/TermsOfService";
 import PrivacyPolicy from "./pages/Legal/PrivacyPolicy";
 import ContactPage from "./pages/Support/ContactPage";
+import TournamentsPage from "./pages/Tournaments/TournamentsPage";
+import FAQ from "./pages/FAQ/FAQ";
+import TeamPage from "./pages/About/TeamPage";
+import CareersPage from "./pages/About/CareersPage";
+import RecentGamesPage from "./pages/RecentGames/RecentGamesPage";
+import GameDetailsPage from "./pages/GameDetails/GameDetailsPage";
+import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
+import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 
 function App() {
   const { overlay } = useAppContext();
 
   return (
     <div
-      className={`bg-[url(./assets/bglarge.jp)] relative bg-cover bg-center bg-gray-900 w-full  min-h-screen flex flex-col`}
+      className={
+        "bg-[url('https://lichess1.org/assets/lifat/background/gallery/bg08.webp')] relative bg-cover bg-center bg-gray-900 w-full  min-h-screen flex flex-col"
+      }
     >
       {overlay && (
         <div className={`overlay absolute top-0 left-0 right-0 bottom-0`}></div>
       )}
 
       <BrowserRouter>
-        {/* <Navbar user = {false}  /> */}
         <Routes>
-          <Route path="/" element={<Main />} />
+          {/* <Route path="/" element={<Main />} /> */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/play" element={<PlayTest />} />
           <Route path="/support" element={<SupportPage />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/deposit" element={<Deposit />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
@@ -66,7 +72,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          {/* <Route path="/tournaments" element={<TournamentsPage />} /> */}
+          <Route path="/tournaments" element={<TournamentsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/rules" element={<RulesPage />} />
@@ -76,11 +82,17 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path = '/home' element = {<HomePage />} />
-          <Route path = '/tournament' element = {<TournamentPage/>} />
-          <Route path = '/terms-of-service' element = {<TermsOfService/>} />
-          <Route path = '/privacy-policy' element = {<PrivacyPolicy/>} />
-          <Route path = '/contact' element = {<ContactPage/>} />
+          <Route path="/tournament/:id" element={<TournamentPage />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/team" element={<TeamPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/recent-games" element={<RecentGamesPage />} />
+          <Route path="/game-details/:id" element={<GameDetailsPage />} />
+          <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/activities" element={<RecentActivitiesPage />} />
         </Routes>
       </BrowserRouter>
       <Toaster />

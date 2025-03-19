@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const RecentActivities: React.FC = () => {
   const activities = [
@@ -56,9 +57,12 @@ const RecentActivities: React.FC = () => {
         ))}
       </div>
       <div className="p-3 border-t border-gray-700">
-        <button className="text-blue-400 hover:text-blue-300 text-sm w-full text-center">
+        <Link
+          to="/activities"
+          className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
+        >
           View All Activities
-        </button>
+        </Link>
       </div>
     </div>
   );

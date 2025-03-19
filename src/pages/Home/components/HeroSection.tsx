@@ -1,6 +1,14 @@
 import React from "react";
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onPlayComputer: () => void;
+  onInviteFriend: () => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({
+  onPlayComputer,
+  onInviteFriend,
+}) => {
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       {/* Left: Call to Action */}
@@ -16,10 +24,16 @@ const HeroSection: React.FC = () => {
           <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105">
             Play Now
           </button>
-          <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105">
+          <button
+            onClick={onInviteFriend}
+            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105"
+          >
             Invite Friend
           </button>
-          <button className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105">
+          <button
+            onClick={onPlayComputer}
+            className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105"
+          >
             Play vs Computer
           </button>
         </div>

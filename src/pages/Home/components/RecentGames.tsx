@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const RecentGames: React.FC = () => {
   const games = [
@@ -30,7 +31,7 @@ const RecentGames: React.FC = () => {
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700">
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-gray-700 flex justify-between items-center">
         <h2 className="text-lg font-bold text-white">Recent Games</h2>
       </div>
       <div className="divide-y divide-gray-700">
@@ -74,9 +75,12 @@ const RecentGames: React.FC = () => {
         ))}
       </div>
       <div className="p-3 border-t border-gray-700">
-        <button className="text-blue-400 hover:text-blue-300 text-sm w-full text-center">
+      <Link
+          to="/recent-games"
+          className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
+        >
           View Match History
-        </button>
+        </Link>
       </div>
     </div>
   );

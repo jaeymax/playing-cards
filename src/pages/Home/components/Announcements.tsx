@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Announcements: React.FC = () => {
   const announcements = [
@@ -65,9 +66,12 @@ const Announcements: React.FC = () => {
         ))}
       </div>
       <div className="p-3 border-t border-gray-700">
-        <button className="text-blue-400 hover:text-blue-300 text-sm w-full text-center">
+        <Link
+          to="/announcements"
+          className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
+        >
           View All Announcements
-        </button>
+        </Link>
       </div>
     </div>
   );

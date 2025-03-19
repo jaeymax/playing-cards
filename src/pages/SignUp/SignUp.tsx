@@ -19,6 +19,7 @@ const SignUp: React.FC = () => {
   const handleEmailSubmit = (email: string) => {
     setEmail(email);
     // Simulate sending verification code
+
     setCurrentStep("verification");
   };
 
