@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useAppContext } from "@/contexts/AppContext";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const SignInPage = () => {
@@ -9,7 +10,9 @@ const SignInPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const {updateUser} = useAppContext();
+
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -28,6 +31,9 @@ const SignInPage = () => {
       if (response.status === 200) {
         // Successful login
         const data = await response.json();
+        console.log(data);
+        sessionStorage.setItem('accessToken', data.token);
+        updateUser(data);
         // Here you might want to store the token in localStorage or context
         navigate("/");
       } else if (response.status === 400) {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface CredentialsStepProps {
-  onSubmit: (username: string, password: string) => void;
+  onSubmit: (username: string, password: string, setIsLoading:any) => void;
 }
 
 const CredentialsStep: React.FC<CredentialsStepProps> = ({ onSubmit }) => {
@@ -20,11 +20,13 @@ const CredentialsStep: React.FC<CredentialsStepProps> = ({ onSubmit }) => {
     setError("");
     setIsLoading(true);
 
+     onSubmit(username, password, setIsLoading);
+
     // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      onSubmit(username, password);
-    }, 1000);
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    //   onSubmit(username, password);
+    // }, 1000);
   };
 
   return (

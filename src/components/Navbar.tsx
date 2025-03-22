@@ -1,19 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/cards.png";
-import { CiMail } from "react-icons/ci";
-import { RiMenuFold2Line } from "react-icons/ri";
 import { HiOutlineChatBubbleOvalLeftEllipsis } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
-import { RiMenuFoldLine } from "react-icons/ri";
-import { IoMdNotifications } from "react-icons/io";
-import { IoMdMailOpen } from "react-icons/io";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { useAppContext } from "../contexts/AppContext";
-import { FaUserFriends } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import mailLogo from "../assets/gmail.png";
-import bellLogo from "../assets/notification.png";
-import friendsLogo from "../assets/friendship.png";
 import menuLogo from "../assets/menu.png";
 
 interface NavbarProps {}

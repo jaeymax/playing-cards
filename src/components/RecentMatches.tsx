@@ -1,6 +1,5 @@
-import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { PlayCircle, Clock, Users, Trophy, Timer, ArrowUp, ArrowDown } from 'lucide-react';
+import { Timer, ArrowUp, ArrowDown } from 'lucide-react';
 
 const RecentMatches = () => {
     const matches = [

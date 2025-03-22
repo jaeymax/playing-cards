@@ -1,9 +1,13 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React, { useState } from "react";
 
 const ProfileSettings: React.FC = () => {
+
+
+  const {user} = useAppContext();
   const [settings, setSettings] = useState({
-    username: "CardMaster123",
-    email: "player@example.com",
+    username: user?.username || "Player",
+    email: user?.email || "player@example.com",
     avatar: "👑",
     notifications: {
       gameInvites: true,

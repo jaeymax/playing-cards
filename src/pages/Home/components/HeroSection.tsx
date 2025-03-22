@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
+import InviteFriendModal from "./InviteFriendModal";
+import PlayNowModal from "./PlayNowModal";
+import PlayVsComputerModal from "./PlayVsComputerModal";
 
-interface HeroSectionProps {
-  onPlayComputer: () => void;
-  onInviteFriend: () => void;
-}
+interface HeroSectionProps {}
 
-const HeroSection: React.FC<HeroSectionProps> = ({
-  onPlayComputer,
-  onInviteFriend,
-}) => {
+const HeroSection: React.FC<HeroSectionProps> = () => {
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isPlayNowModalOpen, setIsPlayNowModalOpen] = useState(false);
+  const [isPlayVsComputerModalOpen, setIsPlayVsComputerModalOpen] =
+    useState(false);
+
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       {/* Left: Call to Action */}
@@ -21,17 +23,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           legendary card master.
         </p>
         <div className="flex flex-wrap gap-4">
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105">
+          <button
+            onClick={() => setIsPlayNowModalOpen(true)}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105"
+          >
             Play Now
           </button>
           <button
-            onClick={onInviteFriend}
+            onClick={() => setIsInviteModalOpen(true)}
             className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Invite Friend
           </button>
           <button
-            onClick={onPlayComputer}
+            onClick={() => setIsPlayVsComputerModalOpen(true)}
             className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play vs Computer
@@ -53,6 +58,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Add Modal at the end of the component */}
+      <InviteFriendModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+      />
+      <PlayNowModal
+        isOpen={isPlayNowModalOpen}
+        onClose={() => setIsPlayNowModalOpen(false)}
+      />
+      <PlayVsComputerModal
+        isOpen={isPlayVsComputerModalOpen}
+        onClose={() => setIsPlayVsComputerModalOpen(false)}
+      />
     </div>
   );
 };

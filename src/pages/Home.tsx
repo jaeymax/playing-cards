@@ -1,12 +1,6 @@
-import Footer from "@/components/Footer";
-import Leaderboard from "@/components/Leaderboard";
-import TournamentWinners from "@/components/TournamentWinners";
-import Updates from "@/components/Updates";
-import CardVideo from "@/components/CardVideo";
+
 import PlayGame from "@/components/PlayGame";
-import ActiveGames from "@/components/ActiveGames";
-import RecentMatches from "@/components/RecentMatches";
-import RecentEvents from "@/components/RecentEvents";
+
 import { ChevronRight } from "lucide-react";
 
 {

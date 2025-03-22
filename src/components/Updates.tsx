@@ -1,4 +1,3 @@
-import { timeStamp } from "console";
 
 const Updates = () => {
   const updates = [

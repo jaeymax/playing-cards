@@ -14,6 +14,9 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [verificationError, setVerificationError] = useState<string>(
+    ""
+  );
   const inputs = Array(6).fill(0);
 
   useEffect(() => {
@@ -44,26 +47,30 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
 
   const handleSubmit = async (finalCode: string) => {
     setIsLoading(true);
-    // Simulate API call
+    setVerificationError(""); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, otp: finalCode }),
-      });
-      
+      const response = await fetch(
+        "https://playing-cards-api.onrender.com/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, otp: finalCode }),
+        }
+      );
+
       const data = await response.json();
       if (response.status === 200) {
         // Successful verification
         console.log(data);
 
         onSubmit(finalCode);
-
       } else if (response.status === 400) {
-        alert(data.message);
+        setVerificationError("Invalid verification code. Please try again.");
+        setCode(["", "", "", "", "", ""]);
+        document.getElementById(`code-${0}`)?.focus();
       } else {
         alert("An error occurred. Please try again later.");
       }
@@ -73,7 +80,6 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
     } finally {
       setIsLoading(false);
     }
-
 
     // setTimeout(() => {
     //   setIsLoading(false);
@@ -121,6 +127,12 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
             />
           ))}
         </div>
+
+        {verificationError && (
+          <p className="text-center text-sm text-red-500 mt-2">
+            {verificationError}
+          </p>
+        )}
 
         <div className="text-center">
           {timeLeft > 0 ? (

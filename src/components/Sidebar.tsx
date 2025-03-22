@@ -1,6 +1,5 @@
 import { FC, useState } from "react";
 import { useAppContext } from "../contexts/AppContext";
-import { RiMenuFoldLine } from "react-icons/ri";
 import houseLogo from "../assets/house.png"
 import learnLogo from "../assets/learn.png"
 import socialLogo from "../assets/social.png"

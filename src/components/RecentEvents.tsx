@@ -1,11 +1,11 @@
 
 import { Shield, Sword, Trophy, Users, Star, Crown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useState } from 'react';
+
 
 const RecentEvents = () => {
   // Sample data - in a real app, this would come from your backend
-  const [events, setEvents] = useState([
+  const events = [
     {
       id: 1,
       type: 'battle',
@@ -46,9 +46,9 @@ const RecentEvents = () => {
       time: '20 mins ago',
       icon: 'crown'
     }
-  ]);
+  ];
 
-  const getIcon = (iconType) => {
+  const getIcon = (iconType:any) => {
     switch (iconType) {
       case 'sword':
         return <Sword className="w-5 h-5 text-red-500" />;
@@ -93,18 +93,20 @@ const RecentEvents = () => {
           ))}
         </div>
       </CardContent>
-      <style jsx = "true">{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
+      <style>
+        {`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </Card>
   );
 };

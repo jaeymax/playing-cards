@@ -3,7 +3,6 @@ import { AiFillEye } from "react-icons/ai";
 import { AiFillEyeInvisible } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import { useAppContext } from "@/contexts/AppContext";
-import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -13,10 +12,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState("");
+  const [emailError] = useState("");
+  const [passwordError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

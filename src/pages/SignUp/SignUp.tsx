@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "@/contexts/AppContext";
 
 type SignUpStep = "email" | "verification" | "credentials";
 
@@ -9,6 +11,10 @@ const SignUp: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<SignUpStep>("email");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+
+  const {updateUser} = useAppContext();
+
+  const navigate = useNavigate();
 
   const steps = [
     { key: "email", label: "Email" },
@@ -28,9 +34,37 @@ const SignUp: React.FC = () => {
     setCurrentStep("credentials");
   };
 
-  const handleCredentialsSubmit = (username: string, password: string) => {
+  const handleCredentialsSubmit = async (username: string, password: string, setIsLoading:any) => {
     // Handle final signup
     console.log("Sign up complete", { email, username, password });
+    try {
+      const response = await fetch(
+        "https://playing-cards-api.onrender.com/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password, email }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.status === 201) {
+        // Successful registration
+        console.log(data);
+        sessionStorage.setItem('accessToken', data.token);
+        updateUser(data);
+        navigate('/')
+      } else if (response.status === 400) {
+        alert("Email, username, and password are required");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

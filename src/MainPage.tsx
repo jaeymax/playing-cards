@@ -3,7 +3,7 @@
 import Sidebar from "./components/Sidebar";
 import { FC, useEffect, useState } from "react";
 import BottomNavbar from "./components/BottomNavbar";
-import Navbar from "./components/Navbar";
+
 
 import { useAppContext } from "./contexts/AppContext";
 import Home from "./pages/Home";
@@ -15,13 +15,15 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import { socket } from "./socket";
 //import HomePage from "./pages/tests/Home";
-import Game from "./pages/tests/Game";
+
 
 interface HomeProps {}
 
 const Main: FC<HomeProps> = () => {
   const { activeTab, loginOpen, signupOpen } = useAppContext();
   const [isConnected, setIsConnected] = useState(socket.connected);
+  console.log(isConnected);
+  
 
   useEffect(() => {
     function onConnect() {

@@ -1,6 +1,15 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 
 const ProfileHeader: React.FC = () => {
+
+  const {user} = useAppContext();
+
+  const getJoinedDate = (date: string) => {
+    const joinedDate = new Date(date);  
+    return joinedDate.toLocaleDateString();
+  };
+
   return (
     <div className="bg-gray-800 border-b border-gray-700">
       <div className="container mx-auto px-4 py-8">
@@ -9,7 +18,7 @@ const ProfileHeader: React.FC = () => {
           <div className="relative">
             <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 p-1">
               <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center text-5xl">
-                👑
+                <img src={user?.image_url} alt="User Avatar" className="rounded-full w-full h-full" />
               </div>
             </div>
             <div className="absolute bottom-2 right-2">
@@ -34,7 +43,7 @@ const ProfileHeader: React.FC = () => {
           {/* User Info */}
           <div className="text-center md:text-left flex-grow">
             <div className="flex flex-col md:flex-row items-center gap-4">
-              <h1 className="text-3xl font-bold text-white">CardMaster123</h1>
+              <h1 className="text-3xl font-bold text-white">{user?.username}</h1>
               <div className="flex gap-2">
                 <span className="px-3 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full">
                   Pro Player
@@ -44,7 +53,7 @@ const ProfileHeader: React.FC = () => {
                 </span>
               </div>
             </div>
-            <p className="text-gray-400 mt-2">Joined March 2024</p>
+            <p className="text-gray-400 mt-2">Joined {getJoinedDate(user?.created_at)}</p>
           </div>
 
           {/* Quick Stats */}
@@ -54,11 +63,11 @@ const ProfileHeader: React.FC = () => {
               <div className="text-sm text-gray-400">Global Rank</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">68%</div>
+              <div className="text-2xl font-bold text-white">{user?.games_won ? ((user.games_won / user.games_played) * 100).toFixed(2) : 0}%</div>
               <div className="text-sm text-gray-400">Win Rate</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">1,234</div>
+              <div className="text-2xl font-bold text-white">{user?.games_played}</div>
               <div className="text-sm text-gray-400">Matches</div>
             </div>
           </div>

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import Deck from "@/utils/Deck";
-import Card from "@/utils/Card";
 import { shuffleCards } from "@/utils/Functions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 

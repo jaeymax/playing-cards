@@ -1,9 +1,26 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 
 interface User {
   username: string;
   email: string;
   image_url: string;
+  games_played:number;
+  games_won:number;
+  rating:number;
+  location:string;
+  created_at:string;
+  updated_at:string;
+  id:number;
+  role:string;
+  bio:string;
+  phone:string;
+  dob:string;
 }
 
 interface AppState {
@@ -19,6 +36,7 @@ interface AppState {
   updateSignupOpen: (value: boolean) => void;
   updateOverlay: (value: boolean) => void;
   updateUser: (user: User) => void;
+  isLoading: boolean;
 }
 
 interface AppProviderProps {
@@ -34,6 +52,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activeTab, setActiveTab] = useState("home");
   const [overlay, setOverlay] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    if (accessToken && !user) {
+      setIsLoading(true);
+      fetch("https://playing-cards-api.onrender.com/api/users/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to fetch user data");
+          return response.json();
+        })
+        .then((userData) => {
+          setUser(userData);
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+          sessionStorage.removeItem("accessToken"); // Clear invalid token
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [user]);
 
   const toggleSidebar = () => {
     setSidebarOpen((prev) => {
@@ -42,7 +88,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   };
 
-  const updateUser = (user: User) => {
+  const updateUser = (user: User | null) => {
     setUser(user);
   };
 
@@ -77,6 +123,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         activeTab,
         toggleSidebar,
         setActiveTabState,
+        isLoading,
       }}
     >
       {children}

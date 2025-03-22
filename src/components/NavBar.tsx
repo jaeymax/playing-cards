@@ -1,3 +1,4 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -11,6 +12,8 @@ type Message = {
 };
 
 const NavBar: React.FC = () => {
+  // Add new loading state
+  //const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -22,7 +25,9 @@ const NavBar: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojis, setShowEmojis] = useState(false);
   const [activeEmojiTab, setActiveEmojiTab] = useState("smileys");
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user, updateUser } = useAppContext();
+
+  const { isLoading } = useAppContext();
 
   const navigate = useNavigate();
 
@@ -287,6 +292,33 @@ const NavBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleLogout = () => {
+    // Clear session storage
+    sessionStorage.removeItem("accessToken");
+    // Clear user context
+    updateUser(null);
+    // Close profile dropdown
+    setIsProfileOpen(false);
+    // Redirect to signin page
+    navigate("/signin");
+  };
+
+  // Add new LoadingBubbles component inside NavBar
+  const LoadingBubbles = () => (
+    <div className="flex space-x-2 items-center px-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className={`w-2 h-2 bg-gray-400 rounded-full animate-bounce`}
+          style={{
+            animationDelay: `${i * 0.2}s`,
+            animationDuration: "0.8s",
+          }}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <>
       <nav className="bg-gray-800 border-b border-gray-700">
@@ -313,11 +345,11 @@ const NavBar: React.FC = () => {
                 </svg>
               </button>
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 hidden sm:flex" >
-                   <img src="./cards.png" className="object-contain" alt="" />
+                <div className="w-8 h-8 hidden sm:flex">
+                  <img src="./cards.png" className="object-contain" alt="" />
                 </div>
                 <span className="text-2xl hidden sm:flex font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  PLAYSPA
+                  PlaySpa
                 </span>
               </Link>
             </div>
@@ -350,7 +382,9 @@ const NavBar: React.FC = () => {
 
             {/* Right side - adjusted with additional spacing */}
             <div className="flex items-center gap- borde">
-              {isLoggedIn ? (
+              {isLoading ? (
+                <LoadingBubbles />
+              ) : user ? (
                 <>
                   {/* Chat Icon */}
                   <div className="relative">
@@ -545,7 +579,7 @@ const NavBar: React.FC = () => {
                         </button>
                         <div className="border-t border-gray-700">
                           <button
-                            onClick={() => console.log("Logout")}
+                            onClick={handleLogout}
                             className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
                           >
                             <svg

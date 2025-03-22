@@ -1,6 +1,6 @@
 import React from "react";
-import { SlSocialInstagram } from "react-icons/sl";
-import { TiSocialFacebookCircular, TiSocialYoutube } from "react-icons/ti";
+// import { SlSocialInstagram } from "react-icons/sl";
+// import { TiSocialFacebookCircular, TiSocialYoutube } from "react-icons/ti";
 
 const Footer: React.FC = () => {
   const footerLinks = [

@@ -19,7 +19,7 @@ const LeaderboardPage: React.FC = () => {
         onSearchChange={setSearchQuery}
       />
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="containe max-w-4xl mx-auto px-4 py-8 space-y-8">
         <TopThree currentFilter={currentFilter} />
         <LeaderboardTable
           currentFilter={currentFilter}

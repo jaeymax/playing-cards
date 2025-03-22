@@ -1,6 +1,6 @@
 import { useAppContext } from "@/contexts/AppContext";
-import { FormEvent, useState } from "react";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useState } from "react";
+// import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 
 const Signup = () => {
@@ -9,16 +9,8 @@ const Signup = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-  };
 
   const handleSignIn = () => {
     updateSignupOpen(false);
