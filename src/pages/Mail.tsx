@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react';
-import { Mail, Star, Inbox, Send, Archive, Trash2, Search, ChevronDown, MoreVertical, Paperclip } from 'lucide-react';
+import { Mail, Star, Inbox, Send, Archive, Trash2, Search, MoreVertical, Paperclip } from 'lucide-react';
 
 interface Folder {
   id: string;

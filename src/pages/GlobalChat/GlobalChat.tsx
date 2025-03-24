@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { Message } from "./types";
 import MessageList from "./components/MessageList";
 import OnlineUsers from "./components/OnlineUsers";
@@ -6,7 +6,7 @@ import MessageInput from "./components/MessageInput";
 
 const GlobalChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-const [onlineUsers, setOnlineUsers] = useState<string[]>([
+const [onlineUsers] = useState<string[]>([
     "Alice Smith",
     "Bob Johnson",
     "Carol Williams",

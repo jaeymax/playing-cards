@@ -5,6 +5,9 @@ interface TopThreeProps {
 }
 
 const TopThree: React.FC<TopThreeProps> = ({ currentFilter }) => {
+
+  currentFilter
+
   const topPlayers = [
     { rank: 2, name: "PokerQueen", points: 2350, winRate: "75%", avatar: "🎭" },
     {

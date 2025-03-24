@@ -1,14 +1,7 @@
-import React, { useState } from "react";
 import {
   Activity,
-  Users,
-  Bell,
-  MessageSquare,
-  Clock,
   Trophy,
   Star,
-  ChevronRight,
-  User,
   Zap,
 } from "lucide-react";
 

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Users, UserPlus, Search, MoreVertical, Circle, GamepadIcon, Clock, MessageSquare } from 'lucide-react';
 
 
 const FriendsPage = () => {
   const [filter, setFilter] = useState('all');
-  const [friends, setFriends] = useState([
+  const [friends] = useState([
     {
       id: 1,
       name: 'Sarah Chen',
@@ -53,7 +53,7 @@ const FriendsPage = () => {
     { label: 'Recent', value: 'recent', icon: Clock }
   ];
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status:any) => {
     switch (status) {
       case 'online': return 'text-green-500';
       case 'away': return 'text-yellow-500';

@@ -1,11 +1,8 @@
-import React from "react";
+
 import {
-  Building2,
-  Users2,
   Briefcase,
   Clock,
   Globe,
-  Leaf,
   Heart,
   Zap,
 } from "lucide-react";

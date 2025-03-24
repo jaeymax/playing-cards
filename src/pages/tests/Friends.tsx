@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Users,
   Search,
   UserPlus,
   MessageCircle,
-  Crown,
-  Star,
-  Shield,
   Settings,
   X,
   Check,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Calendar,
   Trophy,
@@ -6,8 +6,6 @@ import {
   Users,
   Star,
   ChevronRight,
-  Gift,
-  Medal,
   Target,
 } from "lucide-react";
 
@@ -223,13 +221,13 @@ const EventsPage = () => {
                           {event.description}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {event.rewards.map((reward, index) => (
+                          {event.rewards?.map((reward, index) => (
                             <div
                               key={index}
                               className="px-3 py-1 bg-gray-800 rounded-full text-sm border border-gray-700"
                             >
-                              {reward.type === "card" ? "🃏" : "💰"}{" "}
-                              {reward.name || reward.amount}
+                              {'type' in reward ? (reward.type === "card" ? "🃏" : "💰") : reward.icon}{" "}
+                              {'type' in reward ? (reward.name || reward.amount) : reward.reward}
                             </div>
                           ))}
                         </div>

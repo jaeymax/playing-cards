@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -50,7 +50,7 @@ const NotificationsPage = () => {
     }
   ]);
 
-  const markAsRead = (id) => {
+  const markAsRead = (id: number) => {
     setNotifications(
       notifications.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
@@ -64,7 +64,7 @@ const NotificationsPage = () => {
     return notifications.filter(n => n.type === activeTab);
   };
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: string) => {
     switch(type) {
       case 'challenge':
         return '⚔️';
@@ -81,7 +81,7 @@ const NotificationsPage = () => {
     }
   };
 
-  const getTypeColor = (type) => {
+  const getTypeColor = (type: string) => {
     switch(type) {
       case 'challenge':
         return 'bg-blue-600';

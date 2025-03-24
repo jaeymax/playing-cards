@@ -2,15 +2,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Main from "./MainPage";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
-import Play from "./pages/Play";
-//import Support from "./pages/Support";
-//import HomePage from "./pages/tests/Game";
 import HomePage from "./pages/Home/HomePage";
 import SupportPage from "./pages/tests/Support";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import Deposit from "./pages/Deposit";
 import { useAppContext } from "./contexts/AppContext";
-import PlayTest from "./pages/PlayTest";
+// import PlayTest from "./pages/PlayTest";
 import MailPage from "./pages/Mail";
 import FriendsPage from "./pages/Friends/FriendsPage";
 import { Toaster } from "./components/ui/toaster";
@@ -22,13 +19,11 @@ import TournamentPage from "./pages/Tournament/TournamentPage";
 import AboutPage from "./pages/About/AboutPage";
 import HelpPage from "./pages/tests/Help";
 import RulesPage from "./pages/tests/Rules";
-import GamePage from "./pages/GamePage/GamePage";
 import GlobalChat from "./pages/GlobalChat/GlobalChat";
 import SignInPage from "./pages/tests/Signin";
 import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import SignUp from "./pages/SignUp/SignUp";
-//import HomePage from "./pages/Home/HomePage";
 import TermsOfService from "./pages/Legal/TermsOfService";
 import PrivacyPolicy from "./pages/Legal/PrivacyPolicy";
 import ContactPage from "./pages/Support/ContactPage";
@@ -56,11 +51,10 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          {/* <Route path="/" element={<Main />} /> */}
+          <Route path="/main" element={<Main />} />
           <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/play" element={<PlayTest />} />
+          {/* <Route path="/play" element={<PlayTest />} /> */}
           <Route path="/support" element={<SupportPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/deposit" element={<Deposit />} />
@@ -76,11 +70,11 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/rules" element={<RulesPage />} />
-          <Route path="/game" element={<GamePage />} />
+          {/* <Route path="/game" element={<GamePage />} /> */}
           <Route path="/chat" element={<GlobalChat />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/tournament/:id" element={<TournamentPage />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />

@@ -4,16 +4,58 @@ const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
+
+    if(!/\S+@\S+\.\S+/.test(email)){
+      setErrorMessage("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    } else {
+      setStatus("idle");
+    }
+
+    try {
+      const response = await fetch("https://playing-cards-api.onrender.com/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        setStatus("success");
+      } else if (response.status === 400) {
+        setErrorMessage(data.message);
+      } else if (response.status === 404) {
+        setErrorMessage(
+          "This email address is not registered. Please use a different email."
+        );
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
 
     // Simulate API call
-    setTimeout(() => {
+   /* setTimeout(() => {
       setIsLoading(false);
-      setStatus("success");
-    }, 1500);
+      if (email.includes("error")) {
+        // This is just for demonstration
+        setErrorMessage("This email address is not registered.");
+      } else {
+        setStatus("success");
+      }
+    }, 1500); */
   };
 
   return (
@@ -125,12 +167,17 @@ const ForgotPasswordPage: React.FC = () => {
                       name="email"
                       type="email"
                       required
-                      className="bg-gray-700 block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`bg-gray-700 block w-full pl-10 pr-3 py-2 border ${
+                        errorMessage ? "border-red-500" : "border-gray-600"
+                      } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                       placeholder="wizard@nexuscards.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
+                  {errorMessage && (
+                    <p className="mt-2 text-sm text-red-500">{errorMessage}</p>
+                  )}
                 </div>
 
                 <button

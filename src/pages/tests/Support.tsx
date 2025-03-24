@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   MessageCircle,
-  AlertCircle,
   Search,
   Clock,
   Mail,
   ChevronRight,
   ArrowRight,
   CornerDownRight,
-  Flag,
 } from "lucide-react";
 
 const SupportPage = () => {

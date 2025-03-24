@@ -53,7 +53,7 @@ const ProfileHeader: React.FC = () => {
                 </span>
               </div>
             </div>
-            <p className="text-gray-400 mt-2">Joined {getJoinedDate(user?.created_at)}</p>
+            <p className="text-gray-400 mt-2">Joined {getJoinedDate(user?.created_at ?? '')}</p>
           </div>
 
           {/* Quick Stats */}

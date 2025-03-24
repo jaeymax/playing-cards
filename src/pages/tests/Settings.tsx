@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Settings,
   Bell,
-  Volume2,
-  Mail,
-  Lock,
-  Eye,
   Shield,
   User,
-  Globe,
   Moon,
   Sun,
-  Toggle,
-  RadioTower,
   MessageSquare,
 } from "lucide-react";
 
@@ -395,7 +388,7 @@ const SettingsPage = () => {
                           className="flex items-center justify-between"
                         >
                           <span className="text-gray-300">{label}</span>
-                          <button
+                          {/* <button
                             onClick={() => updateSetting(key, !settings[key])}
                             className={`w-12 h-6 rounded-full transition-colors ${
                               settings[key] ? "bg-blue-600" : "bg-gray-700"
@@ -408,7 +401,7 @@ const SettingsPage = () => {
                                   : "translate-x-1"
                               }`}
                             />
-                          </button>
+                          </button> */}
                         </div>
                       ))}
                     </div>
@@ -471,7 +464,7 @@ const SettingsPage = () => {
                             <label className="font-medium">{label}</label>
                             <p className="text-sm text-gray-400">{desc}</p>
                           </div>
-                          <button
+                          {/* <button
                             onClick={() => updateSetting(key, !settings[key])}
                             className={`w-12 h-6 rounded-full transition-colors ${
                               settings[key] ? "bg-blue-600" : "bg-gray-700"
@@ -484,7 +477,7 @@ const SettingsPage = () => {
                                   : "translate-x-1"
                               }`}
                             />
-                          </button>
+                          </button> */}
                         </div>
                       ))}
                     </div>

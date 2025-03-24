@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Trophy,
   Users,
   Clock,
   Star,
-  Calendar,
   ChevronRight,
   Filter,
   Search,
   Shield,
-  Award,
+  Bell,
 } from "lucide-react";
 
 const TournamentsPage = () => {

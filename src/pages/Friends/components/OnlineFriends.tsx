@@ -45,7 +45,9 @@ const OnlineFriends: React.FC = () => {
     },
   ] as const;
 
-  const getActivityColor = (activity: string) => {
+  const getActivityColor = (activity: string | undefined) => {
+    if (!activity) return "text-gray-400";
+    
     switch (activity) {
       case "In Tournament Match":
         return "text-purple-400";

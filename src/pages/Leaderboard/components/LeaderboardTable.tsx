@@ -9,6 +9,11 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   currentFilter,
   searchQuery,
 }) => {
+
+
+  currentFilter
+  searchQuery
+
   const players = [
     {
       rank: 4,

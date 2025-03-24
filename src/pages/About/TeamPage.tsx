@@ -1,5 +1,5 @@
-import React from "react";
-import { Github, Linkedin, Twitter, Mail } from "lucide-react";
+
+import {  Github, Linkedin, Mail, Twitter } from "lucide-react";
 
 const teamMembers = [
   {

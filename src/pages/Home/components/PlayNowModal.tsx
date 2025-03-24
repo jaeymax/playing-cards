@@ -21,6 +21,11 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
         setMatchFound(true);
       }, 5000);
 
+      if(!isOpen) {
+        setMatchFound(false);
+        setSearchTime(0);
+      }
+
       return () => {
         clearInterval(timer);
         clearTimeout(matchTimer);

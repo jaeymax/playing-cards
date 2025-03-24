@@ -35,7 +35,7 @@ interface AppState {
   updateLoginOpen: (value: boolean) => void;
   updateSignupOpen: (value: boolean) => void;
   updateOverlay: (value: boolean) => void;
-  updateUser: (user: User) => void;
+  updateUser: (user: User | null) => void;
   isLoading: boolean;
 }
 

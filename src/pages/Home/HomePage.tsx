@@ -6,8 +6,8 @@ import OnlineFriends from "./components/OnlineFriends";
 import Announcements from "./components/Announcements";
 import RecentActivities from "./components/RecentActivities";
 import RecentGames from "./components/RecentGames";
-import NavBar from "../../components/NavBar";
-import Footer from "../../components/Footer";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 
 const HomePage: React.FC = () => {
   return (
@@ -16,8 +16,8 @@ const HomePage: React.FC = () => {
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero Section with Game Preview */}
         <HeroSection 
-          onPlayComputer={() => {}} 
-          onInviteFriend={() => {}} 
+          // onPlayComputer={() => {}} 
+          // onInviteFriend={() => {}} 
         />
 
         {/* Main Grid Layout */}

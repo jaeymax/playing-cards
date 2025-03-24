@@ -1,21 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Users,
   Activity,
   Trophy,
-  Bell,
   Calendar,
   ChevronUp,
-  ChevronDown,
   Ban,
   Flag,
   Settings,
   Plus,
   Edit,
   Trash,
-  Search,
-  Filter,
-  MessageSquare,
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -68,24 +63,24 @@ const AdminDashboard = () => {
     ],
   };
 
-  const users = [
-    {
-      id: 1,
-      username: "Player123",
-      status: "active",
-      gamesPlayed: 156,
-      reports: 0,
-      joinDate: "2024-02-15",
-    },
-    {
-      id: 2,
-      username: "ToxicPlayer",
-      status: "warned",
-      gamesPlayed: 89,
-      reports: 3,
-      joinDate: "2024-02-10",
-    },
-  ];
+  // const users = [
+  //   {
+  //     id: 1,
+  //     username: "Player123",
+  //     status: "active",
+  //     gamesPlayed: 156,
+  //     reports: 0,
+  //     joinDate: "2024-02-15",
+  //   },
+  //   {
+  //     id: 2,
+  //     username: "ToxicPlayer",
+  //     status: "warned",
+  //     gamesPlayed: 89,
+  //     reports: 3,
+  //     joinDate: "2024-02-10",
+  //   },
+  // ];
 
   const announcements = [
     {

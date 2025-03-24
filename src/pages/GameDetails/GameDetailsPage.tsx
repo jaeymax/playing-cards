@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import NavBar from "../../components/NavBar";
-import Footer from "../../components/Footer";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 
 type CardMove = {
   id: number;

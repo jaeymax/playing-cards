@@ -1,14 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Shield,
   Star,
-  Trophy,
-  Activity,
   Clock,
-  Users,
   Settings,
-  Award,
-  ChevronRight,
   Crown,
 } from "lucide-react";
 

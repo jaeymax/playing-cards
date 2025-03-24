@@ -1,14 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Trophy,
-  Users,
-  Bell,
-  Star,
-  Medal,
   Crown,
   ChevronUp,
-  ChevronDown,
   Search,
+  Trophy,
 } from "lucide-react";
 
 const LeaderboardPage = () => {

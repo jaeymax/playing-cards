@@ -28,6 +28,8 @@ const Main: FC<HomeProps> = () => {
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
+      console.log('connected');
+      
     }
 
     function onDisconnect() {

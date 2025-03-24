@@ -1,13 +1,12 @@
-import React from "react";
+
 import {
-  Github,
-  Twitter,
-  
   Mail,
   Heart,
   Award,
   Shield,
   Zap,
+  Github,
+  Twitter,
 } from "lucide-react";
 
 const AboutPage = () => {

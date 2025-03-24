@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 
-interface ResetPasswordProps {
-  token?: string; // Token from URL
-}
 
-const ResetPassword: React.FC<ResetPasswordProps> = ({ token }) => {
+const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const {token} = useParams();
+  console.log(token);
+  
+
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setErrorMessage("Passwords do not match");
@@ -19,11 +21,36 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ token }) => {
     }
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch("https://playing-cards-api.onrender.com/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password, token }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        // Successful password reset
+        setStatus("success");
+      } else if (response.status === 400) {
+        setErrorMessage(data.message);
+      }
+      
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to connect to the server. Please try again later.");
+    } finally {
       setIsLoading(false);
-      setStatus("success");
-    }, 1500);
+    }
+
+    // Simulate API call
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    //   setStatus("success");
+    // }, 1500);
   };
 
   return (

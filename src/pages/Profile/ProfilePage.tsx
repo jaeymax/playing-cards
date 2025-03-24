@@ -5,7 +5,7 @@ import MatchHistory from "./components/MatchHistory";
 import Statistics from "./components/Statistics";
 import Achievements from "./components/Achievements";
 import ProfileSettings from "./components/ProfileSettings";
-import { useAppContext } from "@/contexts/AppContext";
+
 
 type ProfileTab =
   | "overview"
@@ -25,7 +25,6 @@ const ProfilePage: React.FC = () => {
     { id: "settings", label: "Settings" },
   ];
 
-  const {user} = useAppContext();
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">

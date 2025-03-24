@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Book,
   Play,
@@ -89,7 +89,7 @@ const RulesPage = () => {
         <div className="max-w-4xl mx-auto">
           {/* Quick Navigation */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {Object.entries(rules).map(([key, value]) => (
+            {Object.entries(rules).map(([key]) => (
               <button
                 key={key}
                 onClick={() => setExpandedSection(key)}

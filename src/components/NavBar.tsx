@@ -1,4 +1,5 @@
 import { useAppContext } from "@/contexts/AppContext";
+import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -6,7 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 type Message = {
   id: number;
   text: string;
-  sender: string;
+  sender_id: number | undefined;
+  sender_name: string;
   timestamp: Date;
   avatar: string; // Add avatar field
 };
@@ -17,17 +19,19 @@ const NavBar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount] = useState(3);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojis, setShowEmojis] = useState(false);
   const [activeEmojiTab, setActiveEmojiTab] = useState("smileys");
   const { user, updateUser } = useAppContext();
+  const { lastMessage, sendMessage } = useSocket();
 
   const { isLoading } = useAppContext();
+  const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -252,23 +256,49 @@ const NavBar: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const getGlobalChatMessages = async () => {
+    try {
+      setIsMessagesLoading(true);
+      const response = await fetch("https://playing-cards-api.onrender.com/api/messages/global");
+      if (!response.ok) {
+        throw new Error("Failed to fetch messages");
+      }
+      const data = await response.json();
+      setMessages(data);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setIsMessagesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getGlobalChatMessages();
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
   const handleSendMessage = () => {
     if (currentMessage.trim()) {
-      const newMessage: Message = {
+      const newMessage = {
         id: Date.now(),
         text: currentMessage,
-        sender: "John Doe", // Replace with actual user name
+        sender_id: user?.id,
+        sender_name: user?.username || "John Doe", // Replace with actual user name
         timestamp: new Date(),
-        avatar: "👤", // Add default avatar - replace with actual user avatar
+        avatar: user?.image_url || "👤", // Add default avatar - replace with actual user avatar
       };
       setMessages([...messages, newMessage]);
+      sendMessage("message", newMessage);
       setCurrentMessage("");
+      console.log("Message sent:", newMessage);
     }
   };
+
+  console.log(messages);
+  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -292,6 +322,20 @@ const NavBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (lastMessage) {
+      const socketMessage: Message = {
+        id: lastMessage.id,
+        text: lastMessage.text,
+        sender_id: lastMessage.sender_id,
+        sender_name: lastMessage.sender_name,
+        timestamp: new Date(lastMessage.timestamp),
+        avatar: lastMessage.avatar,
+      };
+      setMessages((prevMessages) => [...prevMessages, socketMessage]);
+    }
+  }, [lastMessage]);
+
   const handleLogout = () => {
     // Clear session storage
     sessionStorage.removeItem("accessToken");
@@ -309,7 +353,7 @@ const NavBar: React.FC = () => {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className={`w-2 h-2 bg-gray-400 rounded-full animate-bounce`}
+          className={`w-2 h-2 bg-blue-500 rounded-full animate-bounce`}
           style={{
             animationDelay: `${i * 0.2}s`,
             animationDuration: "0.8s",
@@ -702,35 +746,46 @@ const NavBar: React.FC = () => {
 
             {/* Chat Content */}
             <div className="flex-1 p-4 overflow-y-auto">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div key={message.id} className="flex gap-3">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
-                        <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                          <span className="text-sm">{message.avatar}</span>
+              {isMessagesLoading ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className="flex gap-3">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
+                          <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
+                            {/*<span className="text-sm">{message.avatar}</span>*/}
+                            <img
+                              src={message.avatar}
+                              className="w-full h-full object-contain rounded-full"
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Message Content */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-400 text-sm font-semibold">
+                            {message.sender_name}
+                          </span>
+                          <span className="text-gray-500 text-xs">
+                            {new Date(message.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="bg-gray-700 rounded-lg p-3 mt-1 w-fit">
+                          <p className="text-gray-200">{message.text}</p>
                         </div>
                       </div>
                     </div>
-                    {/* Message Content */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-400 text-sm font-semibold">
-                          {message.sender}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          {message.timestamp.toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <div className="bg-gray-700 rounded-lg p-3 mt-1 w-fit">
-                        <p className="text-gray-200">{message.text}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
             </div>
 
             {/* Message Input */}

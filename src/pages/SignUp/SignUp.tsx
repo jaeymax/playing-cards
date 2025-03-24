@@ -11,7 +11,8 @@ const SignUp: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<SignUpStep>("email");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-
+ 
+  verificationCode
   const {updateUser} = useAppContext();
 
   const navigate = useNavigate();

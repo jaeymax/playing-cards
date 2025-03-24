@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -176,7 +176,12 @@ const HomePage = () => {
                           {activity.type === 'card' && '🃏'}
                         </div>
                         <div className="ml-3">
-                          <p className="text-sm">{activity.content}</p>
+                          <p className="text-sm">
+                            {activity.type === 'card' 
+                              ? `${activity.action} ${activity.cardName} (${activity.rarity})`
+                              : `${activity.type === 'win' ? 'Won against' : 'Lost to'} ${activity.opponent} (${activity.reward})`
+                            }
+                          </p>
                           <span className="text-xs text-gray-400">{activity.time}</span>
                         </div>
                       </div>
