@@ -13,7 +13,7 @@ interface Card {
 }
 
 const Card:React.FC<Card> = ({value, rank, suit, imageUrl, transform}) => {
-  console.log(value);
+  //console.log(value);
   
   const handleCardClick = ()=> {
      console.log(`${rank} of ${suit} clicked`);

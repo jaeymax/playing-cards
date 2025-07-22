@@ -199,8 +199,8 @@ body {
   height: 100%;
   left: 0;
   top: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
 }
 
 .card-front {
@@ -208,7 +208,7 @@ body {
 }
 
 .card-back {
-  opacity: 1;
+  opacity: 0;
 }
 
 .card:hover .card-inner {

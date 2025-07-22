@@ -11,6 +11,10 @@ const SearchFriends: React.FC = () => {
       matchesPlayed: number;
     }>
   >([]);
+  const [pendingRequests, setPendingRequests] = useState<Set<string>>(
+    new Set()
+  );
+  const [isRequestLoading, setIsRequestLoading] = useState<string | null>(null);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -38,6 +42,14 @@ const SearchFriends: React.FC = () => {
         matchesPlayed: 312,
       },
     ]);
+  };
+
+  const handleFriendRequest = async (userId: string) => {
+    setIsRequestLoading(userId);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setPendingRequests((prev) => new Set([...prev, userId]));
+    setIsRequestLoading(null);
   };
 
   return (
@@ -83,9 +95,54 @@ const SearchFriends: React.FC = () => {
               </div>
             </div>
 
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
-              Add Friend
-            </button>
+            {pendingRequests.has(result.id) ? (
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-300 rounded-lg">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>Request Sent</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleFriendRequest(result.id)}
+                disabled={isRequestLoading === result.id}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:bg-blue-400 flex items-center gap-2 min-w-[120px] justify-center"
+              >
+                {isRequestLoading === result.id ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    <span>Add Friend</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         ))}
       </div>

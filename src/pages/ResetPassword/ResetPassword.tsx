@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-
+import { baseUrl } from "@/config/api";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://playing-cards-api.onrender.com/api/auth/reset-password", {
+      const response = await fetch(`${baseUrl}/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,13 +56,13 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
+      {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-center md:justify-start">
             <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="flex-grow flex items-center justify-center px-4 py-12">

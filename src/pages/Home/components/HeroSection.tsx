@@ -2,14 +2,39 @@ import React, { useState } from "react";
 import InviteFriendModal from "./InviteFriendModal";
 import PlayNowModal from "./PlayNowModal";
 import PlayVsComputerModal from "./PlayVsComputerModal";
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
+//import animationlogo from '@/assets/animationPicture.png';
+import animationVideo from "@/assets/animationVideo.webm";
 
 interface HeroSectionProps {}
 
 const HeroSection: React.FC<HeroSectionProps> = () => {
+  const { user } = useAppContext();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isPlayNowModalOpen, setIsPlayNowModalOpen] = useState(false);
   const [isPlayVsComputerModalOpen, setIsPlayVsComputerModalOpen] =
     useState(false);
+
+  const handlePlayNowModalClicked = () => {
+    setIsPlayNowModalOpen(true);
+    const response = fetch(`${baseUrl}/matchmaking/join`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: user?.id, rating: user?.rating }),
+    });
+
+    response
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Matchmaking response:", data);
+      })
+      .catch((error) => {
+        console.error("Error joining matchmaking:", error);
+      });
+  };
 
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-center">
@@ -24,7 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         </p>
         <div className="flex flex-wrap gap-4">
           <button
-            onClick={() => setIsPlayNowModalOpen(true)}
+            onClick={handlePlayNowModalClicked}
             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play Now
@@ -48,14 +73,20 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       <div className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden shadow-2xl border border-gray-700">
         <div className="absolute inset-0 flex items-center justify-center">
           {/* Add your game preview animation here */}
-          <div className="flex gap-4 animate-float">
+          {/* <div className="flex gap-4 animate-float">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="w-32 h-48 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg transform rotate-3 hover:rotate-0 transition-transform"
               />
             ))}
-          </div>
+          </div> */}
+          
+            <video autoPlay = {true} muted ={true} loop = {true} className="w-full h-full object-cover">
+              <source src={animationVideo} type="video/webm" />
+              Your browser does not support the video tag.
+            </video>
+          
         </div>
       </div>
 
@@ -77,13 +108,3 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
 };
 
 export default HeroSection;
-
-// Add this to your global CSS or Tailwind config
-// @keyframes float {
-//   0% { transform: translateY(0px); }
-//   50% { transform: translateY(-20px); }
-//   100% { transform: translateY(0px); }
-// }
-// .animate-float {
-//   animation: float 3s ease-in-out infinite;
-// }

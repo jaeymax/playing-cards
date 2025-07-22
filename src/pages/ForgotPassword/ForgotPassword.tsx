@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { baseUrl } from "@/config/api";
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ const ForgotPasswordPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch("https://playing-cards-api.onrender.com/api/auth/forgot-password", {
+      const response = await fetch(`${baseUrl}/auth/forgot-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,13 +62,13 @@ const ForgotPasswordPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
+      {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-center md:justify-start">
             <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="flex-grow flex items-center justify-center px-4 py-12">

@@ -6,6 +6,8 @@ import React, {
   useEffect,
 } from "react";
 
+import { baseUrl } from "@/config/api";
+
 interface User {
   username: string;
   email: string;
@@ -56,19 +58,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
+    
+    
     if (accessToken && !user) {
       setIsLoading(true);
-      fetch("https://playing-cards-api.onrender.com/api/users/me", {
+      fetch(`${baseUrl}/users/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       })
         .then((response) => {
+          
           if (!response.ok) throw new Error("Failed to fetch user data");
           return response.json();
         })
         .then((userData) => {
+         
+          
           setUser(userData);
         })
         .catch((error) => {
@@ -77,6 +84,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         })
         .finally(() => {
           setIsLoading(false);
+          
         });
     }
   }, [user]);

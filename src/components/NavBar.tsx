@@ -2,6 +2,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { baseUrl } from "@/config/api";
 
 // Add Message type
 type Message = {
@@ -259,7 +260,9 @@ const NavBar: React.FC = () => {
   const getGlobalChatMessages = async () => {
     try {
       setIsMessagesLoading(true);
-      const response = await fetch("https://playing-cards-api.onrender.com/api/messages/global");
+      const response = await fetch(
+        `${baseUrl}/messages/global`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch messages");
       }
@@ -298,7 +301,6 @@ const NavBar: React.FC = () => {
   };
 
   console.log(messages);
-  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -365,7 +367,7 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <nav className="bg-gray-800 border-b border-gray-700">
+      <nav className="bg-gray-800 border-b z-50 border-gray-700">
         <div className="max-w-[1920px] mx-auto px-4 borde">
           <div className="flex justify-between items-center h-16">
             {/* Left side - adjusted with additional spacing */}
@@ -507,9 +509,12 @@ const NavBar: React.FC = () => {
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
                       className="flex items-center space-x-3 focus:outline-none"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                          <span className="text-lg">👤</span>
+                          <img className="rounded-full" src={user?.image_url} alt="" />
+                          {/* <span className="text-lg">
+                            👤
+                          </span> */}
                         </div>
                       </div>
                       {/* <span className="hidden md:block text-white">
@@ -650,13 +655,13 @@ const NavBar: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => navigate("/signin")}
-                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => navigate("/signup")}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
                   >
                     Sign Up
                   </button>
@@ -669,46 +674,118 @@ const NavBar: React.FC = () => {
 
       {/* Mobile Sidebar */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" style={{ top: "64px" }}>
+        <div className="fixed inset-0 z-40 lg:hidden" style={{ top: "65px" }}>
           {" "}
           {/* 64px is navbar height (h-16) */}
           {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black z- bg-opacity-50"
+            className="fixed inset-0 bg-black  bg-opacity-40"
             onClick={() => setIsMenuOpen(false)}
+            style={{ top: "65px" }}
           />
           {/* Sidebar */}
-          <div className="fixed left-0 h-[calc(100vh-64px)] w-64 bg-gray-800 shadow-lg">
+          <div className="fixed left-0 h-[calc(100vh-65px)] w-64 bg-gray-800 shadow-lg">
             <div className="p-4">
               <div className="space-y-2">
                 <Link
                   to="/"
-                  className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    />
+                  </svg>
                   Home
                 </Link>
                 <Link
                   to="#"
-                  className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
                   Play
                 </Link>
                 <Link
                   to="/tournaments"
-                  className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
                   Tournaments
                 </Link>
                 <Link
                   to="/leaderboard"
-                  className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
                   Leaderboard
                 </Link>
                 <Link
                   to="/shop"
-                  className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                    />
+                  </svg>
                   Shop
                 </Link>
               </div>
