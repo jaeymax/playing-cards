@@ -177,7 +177,7 @@ body {
   height: 80px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   border-radius: 8px;
-  /* visibility: hidden; */
+   visibility: hidden; 
 }
 .card-img {
   width: 100%;
@@ -190,6 +190,7 @@ body {
   height: 100%;
   transition: all 0.6s;
   transform-style: preserve-3d;
+ 
 }
 
 .card-front,
@@ -199,19 +200,28 @@ body {
   height: 100%;
   left: 0;
   top: 0;
-  backface-visibility: visible;
-  -webkit-backface-visibility: visible;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-back{
+  opacity: 1;
+}
+
+.card-front{
+  opacity: 1;
 }
 
 .card-front {
   transform: rotateY(180deg);
 }
 
-.card-back {
-  opacity: 0;
+
+.player-card{
+  transform: rotateY(180deg);
 }
 
-.card:hover .card-inner {
+.card:hover .card-inner{
   transform: rotateY(180deg);
 }
 
@@ -236,14 +246,36 @@ body {
   }
 
   .card-slot {
-    width: 30px;
-    height: 60px;
+    width: 25px;
+    height: 35px;
   }
 
   .card-img {
     width: 100%;
     height: 100%;
     /* border-radius: 8px; */
+  }
+
+  .avatar-image{
+    width: 30px;
+    height: 30px;
+  }
+
+  .player-name, .player-score{
+    font-size: 10px;
+  }
+
+  #deal-cards{
+    
+  }
+
+  #shuffle{
+    
+  }
+
+  .button-container{
+    flex-direction: column;
+    display: none;
   }
 }
 

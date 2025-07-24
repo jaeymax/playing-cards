@@ -5,30 +5,36 @@ import Card from "@/components/Card";
 import { useParams } from "react-router-dom";
 import { socket } from "@/socket";
 import { useAppContext } from "@/contexts/AppContext";
+import {
+  extractDealingSequence,
+  shuffleCards,
+  dealSequenceToPositions,
+} from "@/utils/Functions";
 
 const PlayerInfo = ({
   name,
   avatar,
   cards,
   points,
+  styles,
 }: {
   name: string;
   avatar: string;
   cards: number;
   points: number;
+  styles: string;
 }) => (
   <div
-    className="player-info mt-5 borde mb-5 w-fit mx-auto flex flex-col
-    items-center"
+    className={`player-info absolute ${styles} mt- borde mb- w-fit mx-auto flex flex-col items-center`}
   >
-    <Avatar className="w-12 h-12">
+    <Avatar className="w-12 h-12 avatar-image">
       <AvatarImage src={avatar} />
       <AvatarFallback>{name[0]}</AvatarFallback>
     </Avatar>
     <div className="text-center">
-      <div className="font-medium">{name}</div>
+      <div className="font-medium player-name">{name}</div>
       {/* <div className="text-sm">{cards} cards</div> */}
-      <div className="text-sm font-semibold">{points} pts</div>
+      <div className="text-sm font-semibold player-score">{points} pts</div>
     </div>
   </div>
 );
@@ -49,19 +55,48 @@ const PlayTest = () => {
 
   const [cards, setCards] = useState<Card[]>(playing_cards);
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
-  //const [opponentCards, setOpponentCards] = useState<Card[]>([]);
+  const [opponentCards, setOpponentCards] = useState<Card[]>([]);
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
-  const opponentAreaRef = useRef<HTMLDivElement>(null);
-  const playerAreaRef = useRef<HTMLDivElement>(null);
+  const opponentOneHandRef = useRef<HTMLDivElement>(null);
+  const opponentTwoHandRef = useRef<HTMLDivElement>(null);
+  const opponentThreeHandRef = useRef<HTMLDivElement>(null);
+  const playerHandRef = useRef<HTMLDivElement>(null);
   const [game, setGame] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [me, setMe] = useState<any>(null);
   const [secondOpponent, setSecondOpponent] = useState<any>(null);
-  const [thirdOpponent, setThirdOpponent] = useState<any>(null);
-  const [fourthOpponent, setFourthOpponent] = useState<any>(null);
+  const [thirdOpponent, setThirdOpponent] = useState<any>({
+    game_id: 274,
+    id: 377,
+    is_dealer: true,
+    position: 1,
+    score: 0,
+    status: "active",
+    user: {
+      id: 377,
+      username: "Witty",
+      image_url:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXcLBAnNaG9u_juSWT6vyOeW1Q3N3xh0QWA&s",
+    },
+  });
+
+  const [fourthOpponent, setFourthOpponent] = useState<any>({
+    game_id: 274,
+    id: 377,
+    is_dealer: true,
+    position: 1,
+    score: 0,
+    status: "active",
+    user: {
+      id: 377,
+      username: "Tony",
+      image_url:
+        "https://static.vecteezy.com/system/resources/previews/016/773/467/non_2x/gamer-esport-gaming-mascot-logo-design-illustration-vector.jpg",
+    },
+  });
 
   const { code } = useParams();
 
@@ -82,6 +117,10 @@ const PlayTest = () => {
     setGame(data);
 
     setPlayers(data.players);
+    data.cards.forEach((card: any, i: number) => {
+      card.pos_x = card.pos_x * i;
+      card.pos_y = card.pos_y * i;
+    });
     setGameCards(data.cards);
     getMyData(data.players);
     getOpponentsData(data.players);
@@ -93,19 +132,30 @@ const PlayTest = () => {
 
   const dealtCardsCallback = (cards: any) => {
     console.log("DealtCards", cards);
+    const currentMe = meRef.current;
+    //extractDealingSequence(cards, currentMe.id);
+    setGameCards(cards);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        dealCards(cards, currentMe.id);
+      });
+    });
   };
 
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
-    // Update state and ensure the animation runs after state is updated
     setGameCards(cards);
-    // Use requestAnimationFrame to ensure DOM has updated
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        shuffleCards(cards); // Pass cards directly to shuffleCards
+        shuffleCards(cards, setGameCards, setIsShuffling);
       });
     });
   };
+
+  const meRef = useRef(me);
+  useEffect(() => {
+    meRef.current = me;
+  }, [me]);
 
   useEffect(() => {
     console.log("Game code:", code);
@@ -121,7 +171,7 @@ const PlayTest = () => {
       socket.off("shuffledDeck", shuffledDeckCallback);
       socket.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket]);
+  }, []);
 
   const handleShuffle = () => {
     socket.emit("shuffleDeck", code);
@@ -131,208 +181,30 @@ const PlayTest = () => {
     socket.emit("dealCards", code);
   };
 
-  const shuffleCards = async (cardsToShuffle: any[]) => {
-    if (isShuffling) return;
-    setIsShuffling(true);
-
-    try {
-      const updatedCards = [...cardsToShuffle]; // Use passed cards instead of gameCards state
-
-      for (let i = 0; i < updatedCards.length; i++) {
-        updatedCards[i].pos_y = i;
-      }
-
-      const leftHalf = updatedCards.slice(0, updatedCards.length / 2);
-      const rightHalf = updatedCards.slice(
-        updatedCards.length / 2,
-        updatedCards.length
-      );
-
-      await splitDeck(leftHalf, rightHalf, updatedCards); // Pass updatedCards to splitDeck
-      await riffleCards(leftHalf, rightHalf, updatedCards); // Pass updatedCards here
-      await bridgeFinish(updatedCards); // Pass updatedCards to bridgeFinish
-    } catch (error) {
-      console.error("Error shuffling cards:", error);
-    } finally {
-      setIsShuffling(false);
-    }
-  };
-
-  const splitDeck = (
-    leftHalf: any[],
-    rightHalf: any[],
-    currentCards: any[]
-  ) => {
-    return new Promise<void>((resolve) => {
-      const updatedCards = [...currentCards];
-
-      leftHalf.forEach((_, i) => {
-        updatedCards[i].pos_x = -120;
-        updatedCards[i].pos_y = i * 0.5;
-        updatedCards[i].rotation = -5;
-      });
-
-      rightHalf.forEach((_, i) => {
-        updatedCards[i + leftHalf.length].pos_x = 120;
-        updatedCards[i + leftHalf.length].pos_y = i * 0.5;
-        updatedCards[i + leftHalf.length].rotation = 5;
-      });
-
-      setGameCards(updatedCards);
-      setTimeout(resolve, 500);
-    });
-  };
-
-  const riffleCards = (
-    leftHalf: any[],
-    rightHalf: any[],
-    currentCards: any[]
-  ) => {
-    return new Promise<void>((resolve) => {
-      const updatedCards = [...currentCards]; // Use passed in cards instead of gameCards state
-      let delay = 0;
-      const shuffledPositions: any[] = [];
-
-      for (let i = 0; i < Math.max(leftHalf.length, rightHalf.length); i++) {
-        if (i < leftHalf.length) {
-          setTimeout(() => {
-            const randomOffset = Math.random() * 3 - 1.5;
-            if (updatedCards[i]) {
-              updatedCards[i].pos_x = randomOffset; // Fixed typo: pox_x -> pos_x
-              updatedCards[i].pos_y = shuffledPositions.length * 0.5;
-              shuffledPositions.push(updatedCards[i]);
-            }
-            setGameCards([...updatedCards]);
-          }, delay);
-          delay += 50;
-        }
-
-        if (i < rightHalf.length) {
-          setTimeout(() => {
-            const randomOffset = Math.random() * 3 - 1.5;
-            const rightIndex = i + leftHalf.length;
-            if (updatedCards[rightIndex]) {
-              updatedCards[rightIndex].pos_x = randomOffset; // Fixed typo: pox_x -> pos_x
-              updatedCards[rightIndex].pos_y = shuffledPositions.length * 0.5;
-              shuffledPositions.push(updatedCards[rightIndex]);
-            }
-            setGameCards([...updatedCards]);
-          }, delay);
-          delay += 50;
-        }
-      }
-
-      setTimeout(resolve, delay + 500);
-    });
-  };
-
-  const bridgeFinish = (currentCards: any[]) => {
-    return new Promise<void>((resolve) => {
-      const updatedCards = [...currentCards];
-
-      // First animation - arch formation
-      updatedCards.forEach((card, i) => {
-        const progress = i / updatedCards.length;
-        const archHeight = Math.sin(progress * Math.PI) * 30;
-
-        if (card) {
-          card.pos_y = i * 0.5 - archHeight;
-          card.rotation = (progress - 0.5) * 2;
-        }
-      });
-
-      setGameCards([...updatedCards]);
-
-      // Second animation - final deck position
-      setTimeout(() => {
-        updatedCards.forEach((card, i) => {
-          if (card) {
-            card.pos_x = i * 0.5; // Reduced spacing for tighter deck
-            card.pos_y = i * 0.1; // Add slight vertical offset
-            card.rotation = 0; // Reset rotation
-          }
-        });
-        setGameCards([...updatedCards]);
-
-        setTimeout(resolve, 300); // Give time for final animation
-      }, 600);
-    });
-  };
-
-  const dealingSequence = [
-    { target: "opponent", positions: [0, 1, 2] },
-    { target: "player", positions: [0, 1, 2] },
-    { target: "opponent", positions: [3, 4] },
-    { target: "player", positions: [3, 4] },
-  ];
-
-  const createCards = () => {
-    let updatedCards = [...cards];
-
-    for (let i = 0; i < updatedCards.length; i++) {
-      updatedCards[i].transform = `translate(${i * 0.3}px, ${i * 0.1}px)`;
-    }
-    setCards(updatedCards);
-  };
-
-  const dealSequenceToPositions = (
-    startIndex: number,
-    target: string,
-    positions: number[]
-  ) => {
-    return new Promise<void>((resolve) => {
-      const targetArea =
-        target === "opponent" ? opponentAreaRef.current : playerAreaRef.current;
-      let delay = 0;
-
-      positions.forEach((position, index) => {
-        setTimeout(() => {
-          const updatedCards = [...cards];
-          const cardToMove = updatedCards[startIndex + index];
-          if (!targetArea) return;
-          const slot = targetArea.children[position];
-          const slotRect = slot.getBoundingClientRect();
-          if (!deckRef.current) return;
-          const deckRect = deckRef.current.getBoundingClientRect();
-
-          const xOffset = slotRect.left - deckRect.left;
-          const yOffset = slotRect.top - deckRect.top;
-
-          cardToMove.transform = `translate(${xOffset}px, ${yOffset}px)`;
-          cardToMove.inSlot = true;
-          cardToMove.slotPosition = { target, position };
-
-          setCards(updatedCards);
-
-          if (index === positions.length - 1) resolve();
-        }, delay);
-
-        delay += 300;
-      });
-    });
-  };
-
-  const dealCards = async () => {
+  const dealCards = async (cards: any[], current_player_id: number) => {
     if (isDealing || isShuffling) return;
     setIsDealing(true);
 
     let cardIndex = 0;
 
-    for (const sequence of dealingSequence) {
+    for (const sequence of extractDealingSequence(cards, current_player_id)) {
       await dealSequenceToPositions(
         cardIndex,
         sequence.target,
-        sequence.positions
+        sequence.positions,
+        cards,
+        playerHandRef,
+        opponentOneHandRef,
+        opponentTwoHandRef,
+        opponentThreeHandRef,
+        deckRef,
+        setGameCards
       );
       cardIndex += sequence.positions.length;
     }
 
     setIsDealing(false);
   };
-
-  useEffect(() => {
-    createCards();
-  }, []);
 
   return (
     <div className="min-h-screen b-green-800 bg-[url(./assets/background1.jpg)] bg-cover  gap-4 bg-center w-full flex flex-col justify-betwee">
@@ -341,11 +213,48 @@ const PlayTest = () => {
         avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
         cards={playerCards.length}
         points={secondOpponent?.score}
+        styles="left-1/2 -translate-x-1/2 top-1"
       />
+      <PlayerInfo
+        name={thirdOpponent?.user.username || "Opponent 2"}
+        avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
+        cards={playerCards.length}
+        points={thirdOpponent?.score}
+        styles="top-1/2 -translate-y-1/2 left-1"
+      />
+      <PlayerInfo
+        name={fourthOpponent?.user.username || "Opponent 3"}
+        avatar={fourthOpponent?.user.image_url || "path/to/avatar.jpg"}
+        cards={playerCards.length}
+        points={fourthOpponent?.score}
+        styles="top-1/2 -translate-y-1/2 right-1"
+      />
+      {/* opponent area 1 */}
       <div
         id="opponentArea"
-        ref={opponentAreaRef}
-        className="borde container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        ref={opponentOneHandRef}
+        className="borde absolute left-1/2 -translate-x-1/2 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+      >
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="card-slot" data-position={index}></div>
+        ))}
+      </div>
+      {/* opponent area 2 */}
+      <div
+        id="opponentArea"
+        ref={opponentTwoHandRef}
+        className="borde rotate-90 absolute left-0 top-1/3  mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+      >
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="card-slot" data-position={index}></div>
+        ))}
+      </div>
+
+      {/* opponent area 3 */}
+      <div
+        id="opponentArea"
+        ref={opponentThreeHandRef}
+        className="borde absolute rotate-90 top-1/3  right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
       >
         {[...Array(5)].map((_, index) => (
           <div key={index} className="card-slot" data-position={index}></div>
@@ -384,8 +293,12 @@ const PlayTest = () => {
                 rank={card.card.rank}
                 value={card.card.value}
                 suit={card.card.suit}
+                card_player_id={card.player_id}
+                current_player_id={me?.id}
                 // transform={`translate(${0.2 * i}px, ${0.1 * i}px)`}
-                transform={`translate(${card.pos_x}px, ${card.pos_y}px) rotate(${card.rotation}deg)`}
+                transform={`translate(${card.pos_x}px, ${
+                  card.pos_y
+                }px) rotate(${card.rotation + 0}deg)`}
                 inSlot={card.inSlot}
                 slotPosition={card.slotPosition}
               />
@@ -407,10 +320,10 @@ const PlayTest = () => {
             ))}  */}
           </div>
           {me?.is_dealer && (
-            <div className="flex gap-3 mt-5">
+            <div className="flex gap-3 mt-5 button-container">
               <button
                 id="deal-cards"
-                // disabled={isDealing}
+                disabled={isDealing}
                 className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg 
                 hover:from-purple-500 hover:to-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
                 font-medium shadow-lg hover:shadow-xl"
@@ -472,6 +385,8 @@ const PlayTest = () => {
               inSlot={card.inSlot}
               slotPosition={card.slotPosition}
               transform={card.transform}
+              card_player_id={0}
+              current_player_id={me?.id}
             />
           ))}
         </div>
@@ -486,8 +401,8 @@ const PlayTest = () => {
       </div> */}
       <div
         id="playerArea"
-        className="container player-area flex gap- mx-auto w-full mbx-20"
-        ref={playerAreaRef}
+        className="container mb-[100px] player-area flex gap- mx-auto w-full mbx-20"
+        ref={playerHandRef}
       >
         {[...Array(5)].map((_, index) => (
           <div key={index} className="card-slot" data-position={index}></div>
@@ -498,6 +413,7 @@ const PlayTest = () => {
         avatar={me?.user.image_url || "path/to/avatar.jpg"}
         cards={playerCards.length}
         points={me?.score}
+        styles="left-1/2 -translate-x-1/2 bottom-1"
       />
     </div>
   );

@@ -123,7 +123,63 @@ const Test = () => {
 
 
 
-   
+  const dealSequenceToPositions = (
+    startIndex: number,
+    target: string,
+    positions: number[],
+  ) => {
+    return new Promise<void>((resolve) => {
+      const targetArea =
+        target === "opponent" ? opponentAreaRef.current : playerAreaRef.current;
+      let delay = 0;
+
+      positions.forEach((position, index) => {
+        setTimeout(() => {
+          const updatedCards = [...cards];
+          const cardToMove = updatedCards[startIndex + index];
+          if (!targetArea) return;
+          const slot = targetArea.children[position];
+          const slotRect = slot.getBoundingClientRect();
+          if (!deckRef.current) return;
+          const deckRect = deckRef.current.getBoundingClientRect();
+
+          const xOffset = slotRect.left - deckRect.left;
+          const yOffset = slotRect.top - deckRect.top;
+
+          cardToMove.transform = `translate(${xOffset}px, ${yOffset}px)`;
+          cardToMove.inSlot = true;
+          cardToMove.slotPosition = { target, position };
+
+          setCards(updatedCards);
+
+          if (index === positions.length - 1) resolve();
+        }, delay);
+
+        delay += 300;
+      });
+    });
+  };
+
+  const dealCards = async () => {
+    if (isDealing || isShuffling) return;
+    setIsDealing(true);
+
+    let cardIndex = 0;
+
+    for (const sequence of dealingSequence) {
+      await dealSequenceToPositions(
+        cardIndex,
+        sequence.target,
+        sequence.positions
+      );
+      cardIndex += sequence.positions.length;
+    }
+
+    setIsDealing(false);
+  };
+ 
+
+
 
   useEffect(() => {
 
