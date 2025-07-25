@@ -18,7 +18,11 @@ const Card:React.FC<Card> = ({card_player_id, current_player_id, value, rank, su
   //console.log(value);
   
   const handleCardClick = ()=> {
-     console.log(`${rank} of ${suit} clicked`);
+    if(card_player_id == current_player_id){
+      console.log(`${rank} of ${suit} clicked`);
+    }else{
+      console.log(`Can't click opponent's card`);
+    }
   }
 
   return (

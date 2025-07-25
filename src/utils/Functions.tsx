@@ -1,5 +1,3 @@
-import { RefObject } from "react";
-
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
 
@@ -139,42 +137,38 @@ export const bridgeFinish = (
   });
 };
 
-export const extractDealingSequence = (
-  cards: any[],
-  current_player_id: number
-) => {
-  const player_ids_and_card_hand_postions = cards
-    .filter((card) => card.status == "in_hand")
-    .map((card) => {
-      return { player_id: card.player_id, hand_position: card.hand_position };
-    });
-  const opponents = ["opponent1", "opponent2", "opponent3"];
+export const extractDealingSequence = (cards: any[], current_player_id: number) => {
+  const player_ids_and_card_hand_postions = cards.filter((card) => card.status == "in_hand").map((card) => { return {player_id: card.player_id, hand_position: card.hand_position}; });
+  const opponents = ['opponent1', 'opponent2', 'opponent3'];
   let opponent_index = 0;
-  const sequence: any[] = [];
+  const sequence:any[] = [];
   const player_id_map = new Map();
   let hand_positions = [];
-  let target = "";
-  for (let id_and_hand_position of player_ids_and_card_hand_postions) {
-    const { player_id, hand_position } = id_and_hand_position;
-    if (player_id_map.has(player_id)) {
-      if (target == player_id_map.get(player_id)) {
+  let target = ''
+  for(let id_and_hand_position of player_ids_and_card_hand_postions){
+    const {player_id, hand_position} = id_and_hand_position;
+    if(player_id_map.has(player_id)){
+       if(target ==player_id_map.get(player_id)){
         hand_positions.push(hand_position);
-      } else {
-        sequence.push({ target, positions: hand_positions });
+       }
+       else{
+        sequence.push({target, positions: hand_positions});
         hand_positions = [];
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
-      }
-    } else {
-      sequence.push({ target, positions: hand_positions });
+       }
+    }
+    else{
+      sequence.push({target, positions: hand_positions});
       hand_positions = [];
-      target = "";
-      if (player_id == current_player_id) {
+      target = '';
+      if(player_id == current_player_id){
         console.log("current_player_id", current_player_id);
         player_id_map.set(player_id, "player");
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
-      } else {
+      }
+      else{
         player_id_map.set(player_id, opponents[opponent_index]);
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
@@ -182,38 +176,36 @@ export const extractDealingSequence = (
       }
     }
   }
-  sequence.push({ target, positions: hand_positions });
+  sequence.push({target, positions: hand_positions});
   sequence.shift();
   //console.log("player_id_map", player_id_map);
-  console.log("sequence", sequence);
-  return sequence;
-};
+console.log("sequence", sequence);
+return sequence;
+}
 
-export const dealSequenceToPositions = (
+
+const dealSequenceToPositions = (
   startIndex: number,
   target: string,
   positions: number[],
-  cardsToDeal: any[],
-  playerHandRef: RefObject<HTMLDivElement>,
-  opponentOneHandRef: RefObject<HTMLDivElement>,
-  opponentTwoHandRef: RefObject<HTMLDivElement>,
-  opponentThreeHandRef: RefObject<HTMLDivElement>,
-  deckRef: RefObject<HTMLDivElement>,
-  setGameCards: (cards: any[]) => void
+  cardsToDeal: any[]
 ) => {
   return new Promise<void>((resolve) => {
     let targetArea = playerHandRef.current;
 
-    if (target == "opponent1") {
-      targetArea = opponentOneHandRef.current;
-    } else if (target == "opponent2") {
+    if(target == 'opponent1'){
+       targetArea = opponentOneHandRef.current;
+    }
+    else if(target == 'opponent2'){
       targetArea = opponentTwoHandRef.current;
-    } else if (target == "opponent3") {
+    }
+    else if(target == 'opponent3'){
       targetArea = opponentThreeHandRef.current;
-    } else if (target == "player") {
+    }
+    else if(target == 'player'){
       targetArea = playerHandRef.current;
     }
-
+      
     let delay = 0;
 
     positions.forEach((position, index) => {
@@ -231,11 +223,7 @@ export const dealSequenceToPositions = (
 
         cardToMove.pos_x = xOffset;
         cardToMove.pos_y = yOffset;
-        target == "opponent2"
-          ? (cardToMove.rotation = 90)
-          : target == "opponent3"
-          ? (cardToMove.rotation = 90)
-          : (cardToMove.rotation = 0);
+        target == 'opponent2' ? cardToMove.rotation = 90 : target == 'opponent3' ? cardToMove.rotation = 90 : cardToMove.rotation = 0;
         cardToMove.inSlot = true;
         cardToMove.slotPosition = { target, position };
 

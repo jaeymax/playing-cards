@@ -5,18 +5,14 @@ import Card from "@/components/Card";
 import { useParams } from "react-router-dom";
 import { socket } from "@/socket";
 import { useAppContext } from "@/contexts/AppContext";
-import {
-  extractDealingSequence,
-  shuffleCards,
-  dealSequenceToPositions,
-} from "@/utils/Functions";
+import { extractDealingSequence, shuffleCards } from "@/utils/Functions";
 
 const PlayerInfo = ({
   name,
   avatar,
   cards,
   points,
-  styles,
+  styles
 }: {
   name: string;
   avatar: string;
@@ -25,8 +21,7 @@ const PlayerInfo = ({
   styles: string;
 }) => (
   <div
-    className={`player-info absolute ${styles} mt- borde mb- w-fit mx-auto flex flex-col items-center`}
-  >
+    className={`player-info absolute ${styles} mt- borde mb- w-fit mx-auto flex flex-col items-center`}>
     <Avatar className="w-12 h-12 avatar-image">
       <AvatarImage src={avatar} />
       <AvatarFallback>{name[0]}</AvatarFallback>
@@ -71,32 +66,33 @@ const PlayTest = () => {
   const [thirdOpponent, setThirdOpponent] = useState<any>({
     game_id: 274,
     id: 377,
-    is_dealer: true,
+    is_dealer: true,        
     position: 1,
     score: 0,
     status: "active",
-    user: {
+    user:{
       id: 377,
       username: "Witty",
-      image_url:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXcLBAnNaG9u_juSWT6vyOeW1Q3N3xh0QWA&s",
-    },
+      image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXcLBAnNaG9u_juSWT6vyOeW1Q3N3xh0QWA&s",
+    }
   });
 
   const [fourthOpponent, setFourthOpponent] = useState<any>({
     game_id: 274,
     id: 377,
-    is_dealer: true,
+    is_dealer: true,        
     position: 1,
     score: 0,
     status: "active",
-    user: {
+    user:{
       id: 377,
       username: "Tony",
-      image_url:
-        "https://static.vecteezy.com/system/resources/previews/016/773/467/non_2x/gamer-esport-gaming-mascot-logo-design-illustration-vector.jpg",
-    },
-  });
+      image_url: "https://static.vecteezy.com/system/resources/previews/016/773/467/non_2x/gamer-esport-gaming-mascot-logo-design-illustration-vector.jpg",
+    }
+  }
+  );
+
+  
 
   const { code } = useParams();
 
@@ -181,6 +177,61 @@ const PlayTest = () => {
     socket.emit("dealCards", code);
   };
 
+  
+ 
+  const dealSequenceToPositions = (
+    startIndex: number,
+    target: string,
+    positions: number[],
+    cardsToDeal: any[]
+  ) => {
+    return new Promise<void>((resolve) => {
+      let targetArea = playerHandRef.current;
+
+      if(target == 'opponent1'){
+         targetArea = opponentOneHandRef.current;
+      }
+      else if(target == 'opponent2'){
+        targetArea = opponentTwoHandRef.current;
+      }
+      else if(target == 'opponent3'){
+        targetArea = opponentThreeHandRef.current;
+      }
+      else if(target == 'player'){
+        targetArea = playerHandRef.current;
+      }
+        
+      let delay = 0;
+
+      positions.forEach((position, index) => {
+        setTimeout(() => {
+          const updatedCards = [...cardsToDeal];
+          const cardToMove = updatedCards[startIndex + index];
+          if (!targetArea) return;
+          const slot = targetArea?.children[position];
+          const slotRect = slot?.getBoundingClientRect();
+          if (!deckRef.current) return;
+          const deckRect = deckRef.current.getBoundingClientRect();
+
+          const xOffset = slotRect?.left - deckRect.left;
+          const yOffset = slotRect?.top - deckRect.top;
+
+          cardToMove.pos_x = xOffset;
+          cardToMove.pos_y = yOffset;
+          target == 'opponent2' ? cardToMove.rotation = 90 : target == 'opponent3' ? cardToMove.rotation = 90 : cardToMove.rotation = 0;
+          cardToMove.inSlot = true;
+          cardToMove.slotPosition = { target, position };
+
+          setGameCards(updatedCards);
+
+          if (index === positions.length - 1) resolve();
+        }, delay);
+
+        delay += 300;
+      });
+    });
+  };
+
   const dealCards = async (cards: any[], current_player_id: number) => {
     if (isDealing || isShuffling) return;
     setIsDealing(true);
@@ -192,13 +243,7 @@ const PlayTest = () => {
         cardIndex,
         sequence.target,
         sequence.positions,
-        cards,
-        playerHandRef,
-        opponentOneHandRef,
-        opponentTwoHandRef,
-        opponentThreeHandRef,
-        deckRef,
-        setGameCards
+        cards
       );
       cardIndex += sequence.positions.length;
     }
@@ -233,13 +278,13 @@ const PlayTest = () => {
       <div
         id="opponentArea"
         ref={opponentOneHandRef}
-        className="borde absolute left-1/2 -translate-x-1/2 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+          className="borde absolute left-1/2 -translate-x-1/2 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
       >
         {[...Array(5)].map((_, index) => (
           <div key={index} className="card-slot" data-position={index}></div>
         ))}
       </div>
-      {/* opponent area 2 */}
+     {/* opponent area 2 */}
       <div
         id="opponentArea"
         ref={opponentTwoHandRef}
@@ -250,8 +295,8 @@ const PlayTest = () => {
         ))}
       </div>
 
-      {/* opponent area 3 */}
-      <div
+        {/* opponent area 3 */}
+        <div
         id="opponentArea"
         ref={opponentThreeHandRef}
         className="borde absolute rotate-90 top-1/3  right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
@@ -385,8 +430,6 @@ const PlayTest = () => {
               inSlot={card.inSlot}
               slotPosition={card.slotPosition}
               transform={card.transform}
-              card_player_id={0}
-              current_player_id={me?.id}
             />
           ))}
         </div>
