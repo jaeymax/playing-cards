@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InviteFriendModal from "./InviteFriendModal";
 import PlayNowModal from "./PlayNowModal";
 import PlayVsComputerModal from "./PlayVsComputerModal";
@@ -6,6 +6,7 @@ import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 //import animationlogo from '@/assets/animationPicture.png';
 import animationVideo from "@/assets/animationVideo.webm";
+import { socket } from "@/socket";
 
 interface HeroSectionProps {}
 
@@ -34,6 +35,29 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       .catch((error) => {
         console.error("Error joining matchmaking:", error);
       });
+  };
+
+  useEffect(() => {
+    socket.on("queue_left", ()=>{
+      console.log("queue left");
+    });
+  }, []);
+
+  const handleLeaveQueue = () => {
+    socket.emit("leave_queue", { userId: user?.id });
+  };
+
+  const handClosePlayNowModal = () => {
+    setIsPlayNowModalOpen(false);
+    /*const response = fetch(`${baseUrl}/matchmaking/leave`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: user?.id }),
+    });
+    */
+    handleLeaveQueue();
   };
 
   return (
@@ -97,7 +121,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       />
       <PlayNowModal
         isOpen={isPlayNowModalOpen}
-        onClose={() => setIsPlayNowModalOpen(false)}
+        onClose={handClosePlayNowModal}
       />
       <PlayVsComputerModal
         isOpen={isPlayVsComputerModalOpen}

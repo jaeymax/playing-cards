@@ -36,7 +36,7 @@ import GameDetailsPage from "./pages/GameDetails/GameDetailsPage";
 import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
 import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 import PlayTest from "./pages/PlayTest";
-import Test from "./pages/Test";
+//import Test from "./pages/Test";
 
 function App() {
   const { overlay } = useAppContext();
@@ -54,7 +54,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/main" element={<Main />} />
-          <Route path="/test" element={<Test />} />
+          {/*<Route path="/test" element={<Test />} />*/}
           <Route path="/" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<PlayTest />} />

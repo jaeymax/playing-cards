@@ -184,26 +184,34 @@ return sequence;
 }
 
 
-const dealSequenceToPositions = (
+export const dealSequenceToPositions = (
   startIndex: number,
   target: string,
   positions: number[],
-  cardsToDeal: any[]
+  cardsToDeal: any[],
+  refs: {
+    playerHandRef: React.RefObject<HTMLDivElement>;
+    opponentOneHandRef: React.RefObject<HTMLDivElement>;
+    opponentTwoHandRef: React.RefObject<HTMLDivElement>;
+    opponentThreeHandRef: React.RefObject<HTMLDivElement>;
+    deckRef: React.RefObject<HTMLDivElement>;
+  },
+  setGameCards: SetGameCardsFunction
 ) => {
   return new Promise<void>((resolve) => {
-    let targetArea = playerHandRef.current;
+    let targetArea = refs.playerHandRef.current;
 
     if(target == 'opponent1'){
-       targetArea = opponentOneHandRef.current;
+       targetArea = refs.opponentOneHandRef.current;
     }
     else if(target == 'opponent2'){
-      targetArea = opponentTwoHandRef.current;
+      targetArea = refs.opponentTwoHandRef.current;
     }
     else if(target == 'opponent3'){
-      targetArea = opponentThreeHandRef.current;
+      targetArea = refs.opponentThreeHandRef.current;
     }
     else if(target == 'player'){
-      targetArea = playerHandRef.current;
+      targetArea = refs.playerHandRef.current;
     }
       
     let delay = 0;
@@ -215,8 +223,8 @@ const dealSequenceToPositions = (
         if (!targetArea) return;
         const slot = targetArea?.children[position];
         const slotRect = slot?.getBoundingClientRect();
-        if (!deckRef.current) return;
-        const deckRect = deckRef.current.getBoundingClientRect();
+        if (!refs.deckRef.current) return;
+        const deckRect = refs.deckRef.current.getBoundingClientRect();
 
         const xOffset = slotRect?.left - deckRect.left;
         const yOffset = slotRect?.top - deckRect.top;

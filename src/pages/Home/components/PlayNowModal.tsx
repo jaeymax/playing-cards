@@ -29,6 +29,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
   const [opponent, setOpponent] = useState<Player | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [startAnimation, setStartAnimation] = useState(false);
+  console.log(startAnimation);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,6 +81,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
     socket.on("matchFound", matchFoundCallback);
 
     socket.on('gameStarted', gameStartCallback);
+
 
     return () => {
       socket.off("matchFound", matchFoundCallback);

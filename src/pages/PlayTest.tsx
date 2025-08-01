@@ -1,22 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useRef, useState } from "react";
-import { playing_cards } from "@/data/cards";
+//import { playing_cards } from "@/data/cards";
 import Card from "@/components/Card";
 import { useParams } from "react-router-dom";
 import { socket } from "@/socket";
 import { useAppContext } from "@/contexts/AppContext";
-import { extractDealingSequence, shuffleCards } from "@/utils/Functions";
+import { extractDealingSequence, shuffleCards, dealSequenceToPositions } from "@/utils/Functions";
 
 const PlayerInfo = ({
   name,
   avatar,
-  cards,
   points,
   styles
 }: {
   name: string;
   avatar: string;
-  cards: number;
+  //cards: number;
   points: number;
   styles: string;
 }) => (
@@ -35,35 +34,257 @@ const PlayerInfo = ({
 );
 
 const PlayTest = () => {
-  interface Card {
-    id: number;
-    value: number;
-    rank: string;
-    suit: string;
-    imageUrl: string;
-    transform: string;
-    inSlot: boolean;
-    slotPosition: null | { target: string; position: number };
-  }
+   /* interface Card {
+      id: number;
+      value: number;
+      rank: string;
+      suit: string;
+      imageUrl: string;
+      transform: string;
+      inSlot: boolean;
+      slotPosition: null | { target: string; position: number };
+    }*/
 
   const { user } = useAppContext();
 
-  const [cards, setCards] = useState<Card[]>(playing_cards);
-  const [playerCards, setPlayerCards] = useState<Card[]>([]);
-  const [opponentCards, setOpponentCards] = useState<Card[]>([]);
+ // const [cards, setCards] = useState<Card[]>(playing_cards);
+  const [playerCards, setPlayerCards] = useState<any[]>([{
+    "id": 8576,
+    "game_id": 410,
+    "player_id": 649,
+    "status": "in_deck",
+    "hand_position": -1,
+    "trick_number": null,
+    "pos_x": 0,
+    "pos_y": 0,
+    "rotation": 0,
+    "z_index": 0,
+    "animation_state": "idle",
+    "card": {
+        "card_id": 5,
+        "suit": "Diamonds",
+        "value": 12,
+        "rank": "Queen",
+        "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-diamonds_mwbdwf.jpg"
+    }},
+    {
+      "id": 8577,
+      "game_id": 410,
+      "player_id": 649,
+      "status": "in_deck",
+      "hand_position": -1,
+      "trick_number": null,
+      "pos_x": 0.3,
+      "pos_y": 0.1,
+      "rotation": 0,
+      "z_index": 0,
+      "animation_state": "idle",
+      "card": {
+          "card_id": 33,
+          "suit": "Hearts",
+          "value": 12,
+          "rank": "Queen",
+          "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-hearts_cphfre.jpg"
+      }
+  },
+  {
+    "id": 8578,
+    "game_id": 410,
+    "player_id": 649,
+    "status": "in_deck",
+    "hand_position": -1,
+    "trick_number": null,
+    "pos_x": 0.6,
+    "pos_y": 0.2,
+    "rotation": 0,
+    "z_index": 0,
+    "animation_state": "idle",
+    "card": {
+        "card_id": 16,
+        "suit": "Clubs",
+        "value": 9,
+        "rank": "9",
+        "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486108/9-of-clubs_eu1knv.jpg"
+    }
+},
+{
+  "id": 8579,
+  "game_id": 410,
+  "player_id": 649,
+  "status": "in_deck",
+  "hand_position": -1,
+  "trick_number": null,
+  "pos_x": 0.8999999999999999,
+  "pos_y": 0.30000000000000004,
+  "rotation": 0,
+  "z_index": 0,
+  "animation_state": "idle",
+  "card": {
+      "card_id": 3,
+      "suit": "Diamonds",
+      "value": 6,
+      "rank": "6",
+      "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486105/6-of-diamonds_xxtnxt.jpg"
+  }
+},
+{
+"id": 8580,
+"game_id": 410,
+"player_id": 649,
+"status": "in_deck",
+"hand_position": -1,
+"trick_number": null,
+"pos_x": 1.2,
+"pos_y": 0.4,
+"rotation": 0,
+"z_index": 0,
+"animation_state": "idle",
+"card": {
+    "card_id": 17,
+    "suit": "Diamonds",
+    "value": 9,
+    "rank": "9",
+    "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486106/9-of-diamonds_fgujnc.jpg"
+}
+}]);
+  const [opponentOneCards, setOpponentOneCards] = useState<any[]>([{
+        "id": 8576,
+        "game_id": 410,
+        "player_id": 649,
+        "status": "in_deck",
+        "hand_position": -1,
+        "trick_number": null,
+        "pos_x": 0,
+        "pos_y": 0,
+        "rotation": 0,
+        "z_index": 0,
+        "animation_state": "idle",
+        "card": {
+            "card_id": 5,
+            "suit": "Diamonds",
+            "value": 12,
+            "rank": "Queen",
+            "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-diamonds_mwbdwf.jpg"
+        }},
+        {
+          "id": 8577,
+          "game_id": 410,
+          "player_id": 649,
+          "status": "in_deck",
+          "hand_position": -1,
+          "trick_number": null,
+          "pos_x": 0.3,
+          "pos_y": 0.1,
+          "rotation": 0,
+          "z_index": 0,
+          "animation_state": "idle",
+          "card": {
+              "card_id": 33,
+              "suit": "Hearts",
+              "value": 12,
+              "rank": "Queen",
+              "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-hearts_cphfre.jpg"
+          }
+      },
+      {
+        "id": 8578,
+        "game_id": 410,
+        "player_id": 649,
+        "status": "in_deck",
+        "hand_position": -1,
+        "trick_number": null,
+        "pos_x": 0.6,
+        "pos_y": 0.2,
+        "rotation": 0,
+        "z_index": 0,
+        "animation_state": "idle",
+        "card": {
+            "card_id": 16,
+            "suit": "Clubs",
+            "value": 9,
+            "rank": "9",
+            "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486108/9-of-clubs_eu1knv.jpg"
+        }
+    },
+    {
+      "id": 8579,
+      "game_id": 410,
+      "player_id": 649,
+      "status": "in_deck",
+      "hand_position": -1,
+      "trick_number": null,
+      "pos_x": 0.8999999999999999,
+      "pos_y": 0.30000000000000004,
+      "rotation": 0,
+      "z_index": 0,
+      "animation_state": "idle",
+      "card": {
+          "card_id": 3,
+          "suit": "Diamonds",
+          "value": 6,
+          "rank": "6",
+          "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486105/6-of-diamonds_xxtnxt.jpg"
+      }
+  },
+  {
+    "id": 8580,
+    "game_id": 410,
+    "player_id": 649,
+    "status": "in_deck",
+    "hand_position": -1,
+    "trick_number": null,
+    "pos_x": 1.2,
+    "pos_y": 0.4,
+    "rotation": 0,
+    "z_index": 0,
+    "animation_state": "idle",
+    "card": {
+        "card_id": 17,
+        "suit": "Diamonds",
+        "value": 9,
+        "rank": "9",
+        "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486106/9-of-diamonds_fgujnc.jpg"
+    }
+}
+      
+      ]);
+  const [opponentTwoCards, setOpponentTwoCards] = useState<any[]>([{
+        "id": 8576,
+        "game_id": 410,
+        "player_id": 649,
+        "status": "in_deck",
+        "hand_position": -1,
+        "trick_number": null,
+        "pos_x": 0,
+        "pos_y": 0,
+        "rotation": 0,
+        "z_index": 0,
+        "animation_state": "idle",
+        "card": {
+            "card_id": 5,
+            "suit": "Diamonds",
+            "value": 12,
+            "rank": "Queen",
+            "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-diamonds_mwbdwf.jpg"
+        }}]);
+  const [opponentThreeCards, setOpponentThreeCards] = useState<any[]>([]);
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
   const opponentOneHandRef = useRef<HTMLDivElement>(null);
   const opponentTwoHandRef = useRef<HTMLDivElement>(null);
   const opponentThreeHandRef = useRef<HTMLDivElement>(null);
+  const opponentOnePlayAreaRef = useRef<HTMLDivElement>(null);
+  const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
+  const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
   const playerHandRef = useRef<HTMLDivElement>(null);
+  const playerPlayAreaRef = useRef<HTMLDivElement>(null);
   const [game, setGame] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [me, setMe] = useState<any>(null);
-  const [secondOpponent, setSecondOpponent] = useState<any>(null);
-  const [thirdOpponent, setThirdOpponent] = useState<any>({
+  const [firstOpponent, setFirstOpponent] = useState<any>(null);
+  const [secondOpponent, setSecondOpponent] = useState<any>({
     game_id: 274,
     id: 377,
     is_dealer: true,        
@@ -76,8 +297,7 @@ const PlayTest = () => {
       image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXcLBAnNaG9u_juSWT6vyOeW1Q3N3xh0QWA&s",
     }
   });
-
-  const [fourthOpponent, setFourthOpponent] = useState<any>({
+  const [thirdOpponent, setThirdOpponent] = useState<any>({
     game_id: 274,
     id: 377,
     is_dealer: true,        
@@ -89,10 +309,20 @@ const PlayTest = () => {
       username: "Tony",
       image_url: "https://static.vecteezy.com/system/resources/previews/016/773/467/non_2x/gamer-esport-gaming-mascot-logo-design-illustration-vector.jpg",
     }
-  }
-  );
+  });
+
+  const [message, setMessage] = useState<string>("Your turn! Click to play");
 
   
+  useEffect(() => {
+    if (game?.current_player_position === me?.position) {
+      setMessage("Your turn! Click to play");
+    } else {
+      const player = players.find((player: any) => player.position === game?.current_player_position);
+      setMessage(`${player?.user.username}'s turn`);
+    }
+  }, [game]);
+
 
   const { code } = useParams();
 
@@ -103,9 +333,16 @@ const PlayTest = () => {
 
   const getOpponentsData = (data: any[]) => {
     const opponents = data.filter((player) => player.user.id !== user?.id);
-    if (opponents.length > 0) setSecondOpponent(opponents[0]);
-    if (opponents.length > 1) setThirdOpponent(opponents[1]);
-    if (opponents.length > 2) setFourthOpponent(opponents[2]);
+    if (opponents.length > 0) setFirstOpponent(opponents[0]);
+    if (opponents.length > 1) setSecondOpponent(opponents[1]);
+    if (opponents.length > 2) setThirdOpponent(opponents[2]);
+  };
+
+
+  const getUpdatedGameData = (data: any) => {
+    console.log("Updated game data received:", data);
+    setGame(data);
+    //setGameCards(data.cards);
   };
 
   const getGameDataCallback = (data: any) => {
@@ -129,7 +366,6 @@ const PlayTest = () => {
   const dealtCardsCallback = (cards: any) => {
     console.log("DealtCards", cards);
     const currentMe = meRef.current;
-    //extractDealingSequence(cards, currentMe.id);
     setGameCards(cards);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -158,14 +394,43 @@ const PlayTest = () => {
     socket.emit("getGameData", code);
 
     socket.on("gameData", getGameDataCallback);
-
+    socket.on("updatedGameData", getUpdatedGameData);
     socket.on("dealtCards", dealtCardsCallback);
     socket.on("shuffledDeck", shuffledDeckCallback);
 
+    //socket.on("playedCard", playedCardCallback);
+
+    socket.on("gameMessage", gameMessageCallback);
+
     return () => {
       socket.off("gameData", getGameDataCallback);
+      socket.off("updatedGameData", getUpdatedGameData);
       socket.off("shuffledDeck", shuffledDeckCallback);
       socket.off("dealtCards", dealtCardsCallback);
+      //socket.off("playedCard", playedCardCallback);
+      socket.off("gameMessage", gameMessageCallback);
+    };
+  }, []);
+
+  useEffect(() => {
+    if(game) {
+      socket.on("playedCard", playedCardCallback);
+    }
+
+    return () => {
+      socket.off("playedCard", playedCardCallback);
+    };
+  }, [game, gameCards]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: any) => {
+      e.preventDefault();
+     // socket.emit("leaveGame", code);
+      e.returnValue = "Are you sure you want to leave the game?";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
@@ -177,60 +442,119 @@ const PlayTest = () => {
     socket.emit("dealCards", code);
   };
 
-  
- 
-  const dealSequenceToPositions = (
-    startIndex: number,
-    target: string,
-    positions: number[],
-    cardsToDeal: any[]
-  ) => {
-    return new Promise<void>((resolve) => {
-      let targetArea = playerHandRef.current;
+  const getSlotByPosition = (position: number, ref: any) => {
+    if(!ref.current) return null;
+    return ref.current.querySelector(`[data-position="${position}"]`);
+  }
 
-      if(target == 'opponent1'){
-         targetArea = opponentOneHandRef.current;
-      }
-      else if(target == 'opponent2'){
-        targetArea = opponentTwoHandRef.current;
-      }
-      else if(target == 'opponent3'){
-        targetArea = opponentThreeHandRef.current;
-      }
-      else if(target == 'player'){
-        targetArea = playerHandRef.current;
-      }
-        
-      let delay = 0;
+  const getCardHandSlotRect = (card: any) => {
+    let targetArea = null;
 
-      positions.forEach((position, index) => {
-        setTimeout(() => {
-          const updatedCards = [...cardsToDeal];
-          const cardToMove = updatedCards[startIndex + index];
-          if (!targetArea) return;
-          const slot = targetArea?.children[position];
-          const slotRect = slot?.getBoundingClientRect();
-          if (!deckRef.current) return;
-          const deckRect = deckRef.current.getBoundingClientRect();
+    if(card.player_id === me?.id) {
+      console.log('me', me?.id, card.player_id);
+      
+      targetArea = playerHandRef.current;
+    } else if(card.player_id === firstOpponent?.id) {
+      targetArea = opponentOneHandRef.current;
+    } else if(card.player_id === secondOpponent?.id) {
+      targetArea = opponentTwoHandRef.current;
+    } else if(card.player_id === thirdOpponent?.id) {
+      targetArea = opponentThreeHandRef.current;
+    }
 
-          const xOffset = slotRect?.left - deckRect.left;
-          const yOffset = slotRect?.top - deckRect.top;
+    if(!targetArea) return null;
+    const slot = targetArea.children[card.hand_position];
+    console.log('slot from hand', slot);
+    
+    return slot?.getBoundingClientRect();
+  }
 
-          cardToMove.pos_x = xOffset;
-          cardToMove.pos_y = yOffset;
-          target == 'opponent2' ? cardToMove.rotation = 90 : target == 'opponent3' ? cardToMove.rotation = 90 : cardToMove.rotation = 0;
-          cardToMove.inSlot = true;
-          cardToMove.slotPosition = { target, position };
 
-          setGameCards(updatedCards);
-
-          if (index === positions.length - 1) resolve();
-        }, delay);
-
-        delay += 300;
-      });
+  const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
+    //console.log('slot', slot);
+   // destSlot?.style.setProperty('background-color', 'red');
+    console.log('destSlot', destSlot);
+    
+    const slotRect = destSlot?.getBoundingClientRect();
+    //console.log('slot_pos', card);
+    const deckRect = deckRef.current.getBoundingClientRect();
+    const xOffset = slotRect?.left - deckRect.left;
+    const yOffset = slotRect?.top - deckRect.top;
+    card.pos_x = xOffset;
+    card.pos_y = yOffset;
+    card.rotation = 0;
+    card.inSlot = true;
+    card.slotPosition = {target: 'player', position: 0};
+    setGameCards(prevCards=>{
+      return prevCards.map(c=>{
+        if(c.id === card.id) {
+          return {...c, pos_x: xOffset, status:'played', pos_y: yOffset, rotation: 0, inSlot: true, z_index: trick_number, slotPosition: {target: 'player', position: 0}};
+        }
+        return c;
+      })
     });
+    //card.style.setProperty('transform', `translate(${xOffset}px, ${yOffset}px)`);
+  }
+
+  //console.log('gameCards', gameCards);
+
+
+  const playedCardCallback = ({card_id, player_id, trick_number}: {card_id: number, player_id: number, trick_number: number}) => {
+    console.log("Played card:", card_id, player_id, trick_number);
+    console.log('here...');
+    console.log('game', game);
+    const card = gameCards.find((card: any) => card.id === card_id);
+    const player = game.players.find((player: any) => player.id === player_id);
+    console.log(`${player.user.username} played ${card.card.rank} of ${card.card.suit}`);
+
+  /*  console.log('cards', gameCards);
+    
+    console.log('card', card.pos_x, card.pos_y);
+    
+    
+    card.pos_x = 0;
+    card.pos_y = 0;
+    card.rotation = 0;
+    card.inSlot = true;
+    card.slotPosition = {target: 'player', position: 0};
+    setGameCards(prevCards=>{
+      return prevCards.map(c=>{
+        if(c.id === card.id) {
+          return {...c, pos_x: c.pos_x, pos_y: c.pos_y + 100, rotation: 0, inSlot: true, slotPosition: {target: 'player', position: 0}};
+        }
+        return c;
+      })
+    });
+
+    const cardAgain = gameCards.find((card: any) => card.id === card_id);
+    console.log('cardAgain', cardAgain);
+*/
+   
+
+    if(player_id === me?.id) {
+      const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
+      playCardToSlot(card, destSlot, trick_number);
+    } else if(player_id === firstOpponent?.id) {
+      const destSlot = getSlotByPosition(trick_number - 1, opponentOnePlayAreaRef);
+      playCardToSlot(card, destSlot, trick_number);
+    } else if(player_id === secondOpponent?.id) {
+      const destSlot = getSlotByPosition(trick_number - 1, opponentTwoPlayAreaRef);
+      playCardToSlot(card, destSlot, trick_number);
+    } else if(player_id === thirdOpponent?.id) {
+      const destSlot = getSlotByPosition(trick_number - 1, opponentThreePlayAreaRef);
+      playCardToSlot(card, destSlot, trick_number);
+    }
+
+   
+
+
   };
+
+  const gameMessageCallback = (message: string) => {
+    console.log("Game message:", message);
+    setMessage(message);
+  };
+
 
   const dealCards = async (cards: any[], current_player_id: number) => {
     if (isDealing || isShuffling) return;
@@ -243,37 +567,74 @@ const PlayTest = () => {
         cardIndex,
         sequence.target,
         sequence.positions,
-        cards
+        cards,
+        {
+          playerHandRef,
+          opponentOneHandRef,
+          opponentTwoHandRef,
+          opponentThreeHandRef,
+          deckRef
+        },
+        setGameCards
       );
       cardIndex += sequence.positions.length;
     }
 
     setIsDealing(false);
+    //deckRef.current?.style.setProperty('display', 'none');
   };
 
   return (
-    <div className="min-h-screen b-green-800 bg-[url(./assets/background1.jpg)] bg-cover  gap-4 bg-center w-full flex flex-col justify-betwee">
+    <div className="min-h-screen relative b-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-betwee">
       <PlayerInfo
-        name={secondOpponent?.user.username || "Opponent 1"}
-        avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
-        cards={playerCards.length}
-        points={secondOpponent?.score}
+        name={firstOpponent?.user.username || "Opponent 1"}
+        avatar={firstOpponent?.user.image_url || "path/to/avatar.jpg"}
+        //cards={playerCards.length}
+        points={firstOpponent?.score}
         styles="left-1/2 -translate-x-1/2 top-1"
       />
-      <PlayerInfo
-        name={thirdOpponent?.user.username || "Opponent 2"}
-        avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
-        cards={playerCards.length}
+   {secondOpponent && <PlayerInfo
+        name={secondOpponent?.user.username || "Opponent 2"}
+        avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
+        //cards={playerCards.length}
         points={thirdOpponent?.score}
         styles="top-1/2 -translate-y-1/2 left-1"
-      />
-      <PlayerInfo
-        name={fourthOpponent?.user.username || "Opponent 3"}
-        avatar={fourthOpponent?.user.image_url || "path/to/avatar.jpg"}
-        cards={playerCards.length}
-        points={fourthOpponent?.score}
+      />}
+      {thirdOpponent && <PlayerInfo
+        name={thirdOpponent?.user.username || "Opponent 3"}
+        avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
+        //cards={playerCards.length}
+        points={thirdOpponent?.score}
         styles="top-1/2 -translate-y-1/2 right-1"
-      />
+      />}
+
+       
+{me?.is_dealer && (
+            <div className="flex absolute justify-between borde top-2 left-0 right-0 button-container z-10">
+              <button
+                id="deal-cards"
+                disabled={isDealing}
+                className="flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg 
+                hover:from-purple-500 hover:to-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
+                font-medium shadow-lg hover:shadow-xl"
+                onClick={handleDeal}
+              >
+                {isDealing ? "Dealing..." : "Deal"}
+              </button>
+              <button
+                id="shuffle"
+                disabled={isShuffling}
+                className="flex items-center gap- px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-lg 
+                hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
+                font-medium shadow-lg hover:shadow-xl"
+                onClick={handleShuffle}
+              >
+                {isShuffling ? "Shuffling..." : "Shuffle"}
+              </button>
+            </div>
+          )}
+
+      
       {/* opponent area 1 */}
       <div
         id="opponentArea"
@@ -306,145 +667,82 @@ const PlayTest = () => {
         ))}
       </div>
 
-      <div className="flex-1 borde relative flex flex-col items-center ">
+      <div className="borde z-[100000] w-ful absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
         <div
-          className="flex-1 w-fit -ml-10 flex borde border-red-600 relative"
+          className="flex-col items-center h-[90px w-full opponent-one-play-area  flex borde border-red-500 relative"
           id="player-2"
+          ref ={opponentOnePlayAreaRef}
         >
-          {/* {opponentCards.map((card, index) => (
-            <Card
-              id={card.id}
-              imageUrl={card.imageUrl}
-              rank={card.rank}
-              suit={card.suit}
-              value={card.value}
-              key={card.id}
-              inSlot={card.inSlot}
-              slotPosition={card.slotPosition}
-              transform={card.transform}
-            />
-          ))} */}
+           {[...Array(5)].map((_, index) => (
+          <div key={index} className="card-slot" data-position={5 - index -1}></div>
+        ))}
+        
         </div>
-        <div className="borde flex flex-col items-center borde ">
+
+        <div className="borde gap-10 justify-betwee items-cente flex border-black">
+          <div className="opponent-two-play-area flex  borde border-blac w-ful" ref={opponentTwoPlayAreaRef}>
+          {[...Array(1)].map((_, index) => (
+          <div key={index} className="card-slot-2" data-position={index}></div>
+        ))}
+          </div>
           <div
-            className="flex deck p-2 relative borde w-[50px] border-red-600 h-[80px]"
+            className="flex deck  hidde absolute  top-1/4 p-2 left-1/3 borde  border-blue-600"
             ref={deckRef}
           >
-            {[...gameCards].map((card, i) => (
+            {[...gameCards].reverse().map((card) => (
               <Card
                 key={card.card.card_id}
                 imageUrl={card.card.image_url}
                 id={card.card.card_id}
+                game_code={game?.code}
+                game_card_id={card.id}
                 rank={card.card.rank}
                 value={card.card.value}
                 suit={card.card.suit}
                 card_player_id={card.player_id}
                 current_player_id={me?.id}
-                // transform={`translate(${0.2 * i}px, ${0.1 * i}px)`}
+                status={card.status}
                 transform={`translate(${card.pos_x}px, ${
                   card.pos_y
                 }px) rotate(${card.rotation + 0}deg)`}
+                zIndex={card.z_index}
                 inSlot={card.inSlot}
                 slotPosition={card.slotPosition}
               />
             ))}
 
-            {/* {[...cards].map((card, i) => (
-              <Card
-                key={card.id}
-                imageUrl={card.imageUrl}
-
-                id={card.id}
-                rank={card.rank}
-                value={card.value}
-                suit={card.suit}
-                transform={card.transform}
-                inSlot={card.inSlot}
-                slotPosition={card.slotPosition}
-              />
-            ))}  */}
           </div>
-          {me?.is_dealer && (
-            <div className="flex gap-3 mt-5 button-container">
-              <button
-                id="deal-cards"
-                disabled={isDealing}
-                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg 
-                hover:from-purple-500 hover:to-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
-                font-medium shadow-lg hover:shadow-xl"
-                onClick={handleDeal}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-                {isDealing ? "Dealing..." : "Deal Cards"}
-              </button>
-              <button
-                id="shuffle"
-                disabled={isShuffling}
-                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-lg 
-                hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
-                font-medium shadow-lg hover:shadow-xl"
-                onClick={handleShuffle}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                {isShuffling ? "Shuffling..." : "Shuffle Deck"}
-              </button>
-            </div>
-          )}
+          <div className="opponent-three-play-area flex borde border-black w-ful" ref={opponentThreePlayAreaRef}>
+          {[...Array(1)].map((_, index) => (
+          <div key={index} className="card-slot-2" data-position={index}></div>
+        ))}
+          </div>
+         
         </div>
+
+
         <div
-          className="flex-1 w inline-block -ml-10  borde border-green-600 relative"
+          className="flex w-full relative player-play-area items-center flex-col borde border-blue-600 relative"
           id="player-1"
+          ref={playerPlayAreaRef}
         >
-          {playerCards.map((card, index) => (
-            <Card
-              id={card.id}
-              imageUrl={card.imageUrl}
-              rank={card.rank}
-              suit={card.suit}
-              value={card.value}
-              key={card.id}
-              inSlot={card.inSlot}
-              slotPosition={card.slotPosition}
-              transform={card.transform}
-            />
-          ))}
+
+           {[...Array(5)].map((_, index) => (
+          <div key={index} className="card-slot" data-position={index}></div>
+        ))}
+         
         </div>
       </div>
-      {game?.current_player_position === me?.position && (
-        <div className="bg-yellow-200 text-black mx-auto max-w-md w-full p-4 rounded-md text-xs">
-          Your turn! Click to play
+
+
+        <div className="bg-yellow-200 message-box text-black mx-auto max-w-md w-full p-4 rounded-md text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
+            {message}
         </div>
-      )}
-      {/* <div className="bg-yellow-200 text-black mx-auto max-w-md w-full w- p-4 rounded-md text-xs">
-        Your turn! Click to play
-      </div> */}
+
+
       <div
         id="playerArea"
-        className="container mb-[100px] player-area flex gap- mx-auto w-full mbx-20"
+        className="container   absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
         ref={playerHandRef}
       >
         {[...Array(5)].map((_, index) => (
@@ -454,7 +752,7 @@ const PlayTest = () => {
       <PlayerInfo
         name={me?.user.username || "Player"}
         avatar={me?.user.image_url || "path/to/avatar.jpg"}
-        cards={playerCards.length}
+        //cards={playerCards.length}
         points={me?.score}
         styles="left-1/2 -translate-x-1/2 bottom-1"
       />
