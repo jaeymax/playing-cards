@@ -34,21 +34,10 @@ const PlayerInfo = ({
 );
 
 const PlayTest = () => {
-   /* interface Card {
-      id: number;
-      value: number;
-      rank: string;
-      suit: string;
-      imageUrl: string;
-      transform: string;
-      inSlot: boolean;
-      slotPosition: null | { target: string; position: number };
-    }*/
 
   const { user } = useAppContext();
 
- // const [cards, setCards] = useState<Card[]>(playing_cards);
-  const [playerCards, setPlayerCards] = useState<any[]>([{
+ /* const [playerCards, setPlayerCards] = useState<any[]>([{
     "id": 8576,
     "game_id": 410,
     "player_id": 649,
@@ -268,6 +257,8 @@ const PlayTest = () => {
             "image_url": "https://res.cloudinary.com/dbvame158/image/upload/v1753486110/queen-of-diamonds_mwbdwf.jpg"
         }}]);
   const [opponentThreeCards, setOpponentThreeCards] = useState<any[]>([]);
+*/
+
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
@@ -312,7 +303,8 @@ const PlayTest = () => {
   });
 
   const [message, setMessage] = useState<string>("Your turn! Click to play");
-
+  const [showDealButton, setShowDealButton] = useState(false);
+  const [showShuffleButton, setShowShuffleButton] = useState(false);
   
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -328,6 +320,10 @@ const PlayTest = () => {
 
   const getMyData = (data: any[]) => {
     const myData = data.find((player) => player.user.id === user?.id);
+    if(myData.is_dealer) {
+      setShowDealButton(true);
+      setShowShuffleButton(true);
+    }
     setMe(myData);
   };
 
@@ -469,6 +465,26 @@ const PlayTest = () => {
     return slot?.getBoundingClientRect();
   }
 
+  const moveDrawPileOffScreen = (cards: any[]) => {
+
+    const cardsInDrawPile = cards.filter((card: any) => card.status === 'in_drawpile');
+    const deckRect = deckRef.current?.getBoundingClientRect();
+    cardsInDrawPile.forEach((card: any) => {
+      setGameCards(prevCards=>{
+        return prevCards.map(c=>{
+          if(c.id === card.id) {
+            console.log('card', card);
+            
+            return {...c, pos_x: -1000, pos_y: 0, rotation: 0, inSlot: false, slotPosition: {target: 'player', position: 0}};
+          }
+          return c;
+        })
+      });
+    });
+    console.log('gameCards', cards);
+    console.log('cardsInDrawPile', cardsInDrawPile);
+    
+  }
 
   const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
     //console.log('slot', slot);
@@ -581,6 +597,11 @@ const PlayTest = () => {
     }
 
     setIsDealing(false);
+    setShowDealButton(false);
+    setShowShuffleButton(false);
+    console.log('here...');
+    
+    moveDrawPileOffScreen(cards);
     //deckRef.current?.style.setProperty('display', 'none');
   };
 
@@ -609,8 +630,8 @@ const PlayTest = () => {
       />}
 
        
-{me?.is_dealer && (
-            <div className="flex absolute justify-between borde top-2 left-0 right-0 button-container z-10">
+{showDealButton && showShuffleButton && (
+            <div className="flex absolute w-fit gap-2 borde top-1/2 left-1/2 -translate-x-1/2 button-container z-[1000000000000]">
               <button
                 id="deal-cards"
                 disabled={isDealing}

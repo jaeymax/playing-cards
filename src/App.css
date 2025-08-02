@@ -176,8 +176,8 @@ body {
   height: 80px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   border-radius: 8px;
-   visibility: hidden;
-   /*background-color: rgba(255, 0, 0, 0.2);*/
+   visibility: visible;
+   background-color: rgba(255, 0, 0, 0.2);
    z-index: 0;
    
 }
