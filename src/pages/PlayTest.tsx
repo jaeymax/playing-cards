@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useRef, useState } from "react";
 //import { playing_cards } from "@/data/cards";
 import Card from "@/components/Card";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { socket } from "@/socket";
 import { useAppContext } from "@/contexts/AppContext";
 import {
@@ -95,6 +95,8 @@ const PlayTest = () => {
   const [gameEnded, setGameEnded] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
       setMessage("Your turn! Click to play");
@@ -161,6 +163,18 @@ const PlayTest = () => {
       });
     });
   };
+  
+  const startNewHandCallback = (data: any) => {
+    console.log("Start new hand:", data);
+    setGameEnded(false);
+    setWinningPlayer(null);
+    setPlayers(data.players);
+    getMyData(data.players);
+    getOpponentsData(data.players);
+    setGame(data);
+    setGameCards(data.cards);
+  };
+
 
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
@@ -210,11 +224,13 @@ const PlayTest = () => {
     if (game) {
       socket.on("playedCard", playedCardCallback);
       socket.on("gameEnded", gameEndedCallback);
+      socket.on("startNewHand", startNewHandCallback);
     }
 
     return () => {
       socket.off("playedCard", playedCardCallback);
       socket.off("gameEnded", gameEndedCallback);
+      socket.off("startNewHand", startNewHandCallback);
     };
   }, [game, gameCards]);
 
@@ -243,27 +259,6 @@ const PlayTest = () => {
     return ref.current.querySelector(`[data-position="${position}"]`);
   };
 
-  const getCardHandSlotRect = (card: any) => {
-    let targetArea = null;
-
-    if (card.player_id === me?.id) {
-      console.log("me", me?.id, card.player_id);
-
-      targetArea = playerHandRef.current;
-    } else if (card.player_id === firstOpponent?.id) {
-      targetArea = opponentOneHandRef.current;
-    } else if (card.player_id === secondOpponent?.id) {
-      targetArea = opponentTwoHandRef.current;
-    } else if (card.player_id === thirdOpponent?.id) {
-      targetArea = opponentThreeHandRef.current;
-    }
-
-    if (!targetArea) return null;
-    const slot = targetArea.children[card.hand_position];
-    console.log("slot from hand", slot);
-
-    return slot?.getBoundingClientRect();
-  };
 
   const moveDrawPileOffScreen = (cards: any[]) => {
     const cardsInDrawPile = cards.filter(
@@ -294,12 +289,11 @@ const PlayTest = () => {
   };
 
   const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
-    //console.log('slot', slot);
-    // destSlot?.style.setProperty('background-color', 'red');
+
     console.log("destSlot", destSlot);
 
     const slotRect = destSlot?.getBoundingClientRect();
-    //console.log('slot_pos', card);
+
     const deckRect = deckRef.current.getBoundingClientRect();
     const xOffset = slotRect?.left - deckRect.left;
     const yOffset = slotRect?.top - deckRect.top;
@@ -348,28 +342,6 @@ const PlayTest = () => {
       `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
     );
 
-    /*  console.log('cards', gameCards);
-    
-    console.log('card', card.pos_x, card.pos_y);
-    
-    
-    card.pos_x = 0;
-    card.pos_y = 0;
-    card.rotation = 0;
-    card.inSlot = true;
-    card.slotPosition = {target: 'player', position: 0};
-    setGameCards(prevCards=>{
-      return prevCards.map(c=>{
-        if(c.id === card.id) {
-          return {...c, pos_x: c.pos_x, pos_y: c.pos_y + 100, rotation: 0, inSlot: true, slotPosition: {target: 'player', position: 0}};
-        }
-        return c;
-      })
-    });
-
-    const cardAgain = gameCards.find((card: any) => card.id === card_id);
-    console.log('cardAgain', cardAgain);
-*/
 
     if (player_id === me?.id) {
       const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
@@ -394,6 +366,7 @@ const PlayTest = () => {
       playCardToSlot(card, destSlot, trick_number);
     }
   };
+
 
   const gameMessageCallback = (message: string) => {
     console.log("Game message:", message);
@@ -645,10 +618,10 @@ const PlayTest = () => {
 
           <div className="text-center space-y-2">
             <h3 className="text-2xl font-bold text-yellow-400">
-              {winningPlayer?.user?.username} Wins!
+              {winningPlayer?.id === me?.id ? "You" : winningPlayer?.user.username} Won!
             </h3>
             <p className="text-gray-400">
-              Final Score: {winningPlayer?.score} points
+              Score: {winningPlayer?.score} points
             </p>
           </div>
 
@@ -656,7 +629,7 @@ const PlayTest = () => {
             <button
               onClick={() => {
                 setGameEnded(false);
-                socket.emit("readyForNextHand", code);
+                socket.emit("readyForNextHand", {code, winningPlayer});
               }}
               className="px-3 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-green-500 
                 hover:from-green-500 hover:to-green-400 text-white rounded-lg 

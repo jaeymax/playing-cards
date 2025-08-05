@@ -17,12 +17,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         onClick={onClose}
       ></div>
       <div className="relative bg-gray-800 rounded-lg p-6 w-full max-w-md z-50">
-        <button
+        {/*<button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
         >
           ×
-        </button>
+        </button>*/}
         <h2 className="text-xl font-bold mb-4">{title}</h2>
         {children}
       </div>
