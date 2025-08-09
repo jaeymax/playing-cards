@@ -264,7 +264,7 @@ const PlayTest = () => {
     const cardsInDrawPile = cards.filter(
       (card: any) => card.status === "in_drawpile"
     );
-    const deckRect = deckRef.current?.getBoundingClientRect();
+    //const deckRect = deckRef.current?.getBoundingClientRect();
     cardsInDrawPile.forEach((card: any) => {
       setGameCards((prevCards) => {
         return prevCards.map((c) => {
@@ -294,9 +294,9 @@ const PlayTest = () => {
 
     const slotRect = destSlot?.getBoundingClientRect();
 
-    const deckRect = deckRef.current.getBoundingClientRect();
-    const xOffset = slotRect?.left - deckRect.left;
-    const yOffset = slotRect?.top - deckRect.top;
+    const deckRect = deckRef?.current?.getBoundingClientRect();
+    const xOffset = slotRect?.left - (deckRect?.left || 0);
+    const yOffset = slotRect?.top - (deckRect?.top || 0);
     card.pos_x = xOffset;
     card.pos_y = yOffset;
     card.rotation = 0;

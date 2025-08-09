@@ -19,7 +19,7 @@ interface Card {
 }
 
 const Card:React.FC<Card> = ({card_player_id, game_code, game_card_id, current_player_id, value, status, rank, suit, imageUrl, transform, zIndex}) => {
-  //console.log(value);
+  console.log(value);
   
   
   const canView = (card_player_id: number, current_player_id: number, status: string) => {

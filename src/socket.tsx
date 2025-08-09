@@ -4,6 +4,6 @@ import { io } from "socket.io-client";
 // https://playing-cards-api.onrender.com
 // http://192.168.43.218:5000
 
-export const socket = io("http://192.168.43.218:5000", {
+export const socket = io("https://playing-cards-api.onrender.com", {
   autoConnect: true,
 });
