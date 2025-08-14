@@ -4,7 +4,7 @@ import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import HomePage from "./pages/Home/HomePage";
 import SupportPage from "./pages/tests/Support";
 import ProfilePage from "./pages/Profile/ProfilePage";
-import { useAppContext } from "./data/contexts/AppContext";
+import { useAppContext } from "./contexts/AppContext";
 import FriendsPage from "./pages/Friends/FriendsPage";
 import { Toaster } from "./components/ui/toaster";
 import NotificationsPage from "./pages/tests/Notifications";

@@ -3,7 +3,7 @@ import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
 
 type SignUpStep = "email" | "verification" | "credentials";

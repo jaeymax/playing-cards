@@ -1,4 +1,4 @@
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 
 const ProfileHeader: React.FC = () => {

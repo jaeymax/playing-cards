@@ -1,8 +1,8 @@
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider} from "@react-oauth/google";
 import GoogleSigninCustom from "../Home/components/GoogleSigninCustom";
 
 const SignInPage = () => {
@@ -10,32 +10,32 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  //const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const { updateUser } = useAppContext();
 
-  const handleSuccess = async (credentialResponse: any) => {
-    const idToken = credentialResponse.credential;
+  // const handleSuccess = async (credentialResponse: any) => {
+  //   const idToken = credentialResponse.credential;
 
-    // Send ID token to backend
-    const res = await fetch("http://localhost:5000/api/auth/google/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
+  //   // Send ID token to backend
+  //   const res = await fetch("http://localhost:5000/api/auth/google/login", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ idToken }),
+  //   });
 
-    const data = await res.json();
-    console.log("data", data);
-    console.log("Our JWT:", data.token);
+  //   const data = await res.json();
+  //   console.log("data", data);
+  //   console.log("Our JWT:", data.token);
 
-    // Store JWT for authenticated requests
-    localStorage.setItem("token", data.token);
-  };
+  //   // Store JWT for authenticated requests
+  //   localStorage.setItem("token", data.token);
+  // };
 
-  const handleError = () => {
-    console.error("Google Login Failed");
-  };
+  // const handleError = () => {
+  //   console.error("Google Login Failed");
+  // };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();

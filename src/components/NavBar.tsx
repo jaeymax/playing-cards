@@ -35,6 +35,8 @@ const NavBar: React.FC = () => {
   const { isLoading } = useAppContext();
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
+  (notificationCount)
+
   const navigate = useNavigate();
 
   const emojiCategories = {

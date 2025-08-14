@@ -1,8 +1,8 @@
 import React from "react";
 import HeroSection from "./components/HeroSection";
-import NavBar from "@/config/NavBar";
+import NavBar from "@/components/NavBar";
 import ConnectionStatusIndicator from "@/components/ConnectionStatusIndicator";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 
 const HomePage: React.FC = () => {
   const { user } = useAppContext();

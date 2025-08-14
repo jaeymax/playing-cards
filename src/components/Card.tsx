@@ -1,9 +1,8 @@
-import { useSocket } from "@/data/contexts/SocketProvider";
+import { useSocket } from "@/contexts/SocketProvider";
 import React from "react";
 
 interface Card {
   id: number;
-  value: number;
   rank: string;
   suit: string;
   status: string;
@@ -23,7 +22,6 @@ const Card: React.FC<Card> = ({
   game_code,
   game_card_id,
   current_player_id,
-  value,
   status,
   rank,
   suit,

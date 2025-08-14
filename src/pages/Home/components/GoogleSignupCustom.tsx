@@ -2,7 +2,7 @@ import { baseUrl } from "@/config/api";
 import { useGoogleLogin } from "@react-oauth/google";
 import { saveToken } from "@/utils/Functions";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 
 export default function GoogleSignupCustom() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import NavBar from "@/config/NavBar";
+import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 
 type CardMove = {

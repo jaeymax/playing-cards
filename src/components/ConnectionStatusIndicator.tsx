@@ -1,4 +1,4 @@
-import { useSocket } from "@/data/contexts/SocketProvider";
+import { useSocket } from "@/contexts/SocketProvider";
 import { useEffect, useState } from "react";
 
 const ConnectionStatusIndicator = () => {

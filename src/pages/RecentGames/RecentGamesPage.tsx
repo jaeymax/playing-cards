@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import NavBar from "@/config/NavBar";
+import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 

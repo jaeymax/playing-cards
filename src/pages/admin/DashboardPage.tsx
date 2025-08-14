@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import NavBar from "@/config/NavBar";
+import NavBar from "@/components/NavBar";
 import StatCard from "./components/StatCard";
 import CreateAnnouncementModal from "./components/CreateAnnouncementModal";
 import CreateTournamentModal from "./components/CreateTournamentModal";

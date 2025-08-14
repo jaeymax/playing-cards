@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
-import { useSocket } from "@/data/contexts/SocketProvider";
+import { useSocket } from "@/contexts/SocketProvider";
 
 interface PlayNowModalProps {
   isOpen: boolean;

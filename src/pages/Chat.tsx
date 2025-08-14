@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IoMdClose } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";
 import { GrEmoji } from "react-icons/gr";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 
 const Chat = () => {
   const messages = [

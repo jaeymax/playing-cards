@@ -1,5 +1,5 @@
 import { baseUrl } from "@/config/api";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { saveToken } from "@/utils/Functions";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";

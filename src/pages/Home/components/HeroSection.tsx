@@ -3,11 +3,11 @@ import InviteFriendModal from "./InviteFriendModal";
 import PlayNowModal from "./PlayNowModal";
 import PlayVsComputerModal from "./PlayVsComputerModal";
 import { baseUrl } from "@/config/api";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 //import animationlogo from '@/assets/animationPicture.png';
 import animationVideo from "@/assets/animationVideo.webm";
 import { ensureGuest, getToken } from "@/utils/Functions";
-import { useSocket } from "@/data/contexts/SocketProvider";
+import { useSocket } from "@/contexts/SocketProvider";
 
 interface HeroSectionProps {}
 
@@ -36,7 +36,10 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: user?.id || guestUser?.id, rating: user?.rating || guestUser?.rating }),
+      body: JSON.stringify({
+        userId: user?.id || guestUser?.id,
+        rating: user?.rating || guestUser?.rating,
+      }),
     });
 
     response

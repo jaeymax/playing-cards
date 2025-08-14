@@ -1,5 +1,4 @@
 import { baseUrl } from "@/config/api";
-import GoogleSignupButton from "@/pages/Home/components/GoogleSignupButton";
 import GoogleSignupCustom from "@/pages/Home/components/GoogleSignupCustom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import React, { useState } from "react";
@@ -13,9 +12,6 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState<string>("");
 
-  const handleGoogleSignIn = () => {
-    window.location.href = `${baseUrl}/auth/google`;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

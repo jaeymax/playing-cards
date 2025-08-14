@@ -2,14 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useRef, useState } from "react";
 import Card from "@/components/Card";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppContext } from "@/data/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import {
   extractDealingSequence,
   shuffleCards,
   dealSequenceToPositions,
 } from "@/utils/Functions";
 import Modal from "@/components/Modal";
-import { useSocket } from "@/data/contexts/SocketProvider";
+import { useSocket } from "@/contexts/SocketProvider";
 
 const PlayerInfo = ({
   name,
@@ -156,11 +156,11 @@ const PlayTest = () => {
     console.log("DealtCards", cards);
     const currentMe = meRef.current;
     setGameCards(cards);
-   // requestAnimationFrame(() => {
-     // requestAnimationFrame(() => {
-        dealCards(cards, currentMe.id);
-     // });
-   // });
+    // requestAnimationFrame(() => {
+    // requestAnimationFrame(() => {
+    dealCards(cards, currentMe.id);
+    // });
+    // });
   };
 
   const startNewHandCallback = (data: any) => {
@@ -177,10 +177,10 @@ const PlayTest = () => {
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
     setGameCards(cards);
-   // requestAnimationFrame(() => {
-     // requestAnimationFrame(() => {
-        shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
-     //});
+    // requestAnimationFrame(() => {
+    // requestAnimationFrame(() => {
+    shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
+    //});
     //});
   };
 
@@ -394,7 +394,7 @@ const PlayTest = () => {
     setIsDealing(false);
     setShowDealButton(false);
     setShowShuffleButton(false);
- 
+
     moveDrawPileOffScreen(cards);
   };
 
@@ -524,7 +524,6 @@ const PlayTest = () => {
                   game_code={game?.code}
                   game_card_id={card.id}
                   rank={card.card.rank}
-                  value={card.card.value}
                   suit={card.card.suit}
                   card_player_id={card.player_id}
                   current_player_id={me?.id}
