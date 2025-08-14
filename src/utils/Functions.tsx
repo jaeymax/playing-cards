@@ -1,5 +1,4 @@
 import { baseUrl } from "@/config/api";
-import { useAppContext } from "@/data/contexts/AppContext";
 
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
@@ -7,8 +6,12 @@ type SetShufflingFunction = (isShuffling: boolean) => void;
 export const shuffleCards = async (
   cardsToShuffle: any[],
   setGameCards: SetGameCardsFunction,
-  setIsShuffling: SetShufflingFunction
+  setIsShuffling: SetShufflingFunction,
+  isShuffling: boolean,
+  isDealing: boolean
 ) => {
+
+  if(isShuffling || isDealing) return; // Prevent multiple shuffles at once
   setIsShuffling(true);
 
   try {
@@ -24,9 +27,9 @@ export const shuffleCards = async (
       updatedCards.length
     );
 
-    await splitDeck(leftHalf, rightHalf, updatedCards, setGameCards);
-    await riffleCards(leftHalf, rightHalf, updatedCards, setGameCards);
-    await bridgeFinish(updatedCards, setGameCards);
+   await splitDeck(leftHalf, rightHalf, updatedCards, setGameCards);
+   await riffleCards(leftHalf, rightHalf, updatedCards, setGameCards);
+   await bridgeFinish(updatedCards, setGameCards);
   } catch (error) {
     console.error("Error shuffling cards:", error);
   } finally {
@@ -204,7 +207,7 @@ export const dealSequenceToPositions = (
   },
   setGameCards: SetGameCardsFunction
 ) => {
-  return new Promise<void>((resolve) => {
+   return new Promise<void>((resolve) => {
     let targetArea = refs.playerHandRef.current;
 
     if (target == "opponent1") {
@@ -244,12 +247,12 @@ export const dealSequenceToPositions = (
 
         setGameCards(updatedCards);
 
-        if (index === positions.length - 1) resolve();
+        if (index === positions.length - 1)resolve();
       }, delay);
 
       delay += 300;
     });
-  });
+   });
 };
 
 export const removeToken = () => {

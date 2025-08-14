@@ -156,11 +156,11 @@ const PlayTest = () => {
     console.log("DealtCards", cards);
     const currentMe = meRef.current;
     setGameCards(cards);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+   // requestAnimationFrame(() => {
+     // requestAnimationFrame(() => {
         dealCards(cards, currentMe.id);
-      });
-    });
+     // });
+   // });
   };
 
   const startNewHandCallback = (data: any) => {
@@ -177,11 +177,11 @@ const PlayTest = () => {
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
     setGameCards(cards);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        shuffleCards(cards, setGameCards, setIsShuffling);
-      });
-    });
+   // requestAnimationFrame(() => {
+     // requestAnimationFrame(() => {
+        shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
+     //});
+    //});
   };
 
   const meRef = useRef(me);
@@ -568,7 +568,7 @@ const PlayTest = () => {
         </div>
 
         {!gameEnded && (
-          <div className="bg-yellow-200/10 message-box text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
+          <div className="bg-yellow-200/0 message-box text-center text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
             {message}
           </div>
         )}
