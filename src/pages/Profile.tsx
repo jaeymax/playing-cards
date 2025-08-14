@@ -7,7 +7,7 @@ import { IoSettings } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import { GrShareOption } from "react-icons/gr";
 import { HiOutlineUser } from "react-icons/hi2";
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/data/contexts/AppContext";
 
 const Profile = () => {
   const handleClose = () => {

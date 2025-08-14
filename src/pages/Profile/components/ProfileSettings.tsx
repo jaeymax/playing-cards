@@ -1,10 +1,8 @@
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/data/contexts/AppContext";
 import React, { useState } from "react";
 
 const ProfileSettings: React.FC = () => {
-
-
-  const {user} = useAppContext();
+  const { user } = useAppContext();
   const [settings, setSettings] = useState({
     username: user?.username || "Player",
     email: user?.email || "player@example.com",

@@ -1,16 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useRef, useState } from "react";
-//import { playing_cards } from "@/data/cards";
 import Card from "@/components/Card";
 import { useNavigate, useParams } from "react-router-dom";
-import { socket } from "@/socket";
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/data/contexts/AppContext";
 import {
   extractDealingSequence,
   shuffleCards,
   dealSequenceToPositions,
 } from "@/utils/Functions";
 import Modal from "@/components/Modal";
+import { useSocket } from "@/data/contexts/SocketProvider";
 
 const PlayerInfo = ({
   name,
@@ -20,7 +19,6 @@ const PlayerInfo = ({
 }: {
   name: string;
   avatar: string;
-  //cards: number;
   points: number;
   styles: string;
 }) => (
@@ -33,7 +31,6 @@ const PlayerInfo = ({
     </Avatar>
     <div className="text-center">
       <div className="font-medium player-name">{name}</div>
-      {/* <div className="text-sm">{cards} cards</div> */}
       <div className="text-sm font-semibold player-score">{points} pts</div>
     </div>
   </div>
@@ -41,7 +38,7 @@ const PlayerInfo = ({
 
 const PlayTest = () => {
   const { user } = useAppContext();
-
+  const { socket } = useSocket();
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
@@ -58,7 +55,7 @@ const PlayTest = () => {
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [me, setMe] = useState<any>(null);
   const [firstOpponent, setFirstOpponent] = useState<any>(null);
- /* const [secondOpponent, setSecondOpponent] = useState<any>({
+  /* const [secondOpponent, setSecondOpponent] = useState<any>({
     game_id: 274,
     id: 377,
     is_dealer: true,
@@ -129,7 +126,9 @@ const PlayTest = () => {
   const getUpdatedGameData = (data: any) => {
     console.log("Updated game data received:", data);
     setGame(data);
-    const myData = data.players.find((player: any) => player.user.id === user?.id);
+    const myData = data.players.find(
+      (player: any) => player.user.id === user?.id
+    );
     setMe(myData);
     getOpponentsData(data.players);
     //setGameCards(data.cards);
@@ -163,7 +162,7 @@ const PlayTest = () => {
       });
     });
   };
-  
+
   const startNewHandCallback = (data: any) => {
     console.log("Start new hand:", data);
     setGameEnded(false);
@@ -174,7 +173,6 @@ const PlayTest = () => {
     setGame(data);
     setGameCards(data.cards);
   };
-
 
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
@@ -193,24 +191,24 @@ const PlayTest = () => {
 
   useEffect(() => {
     console.log("Game code:", code);
-    socket.emit("getGameData", code);
+    socket?.emit("getGameData", code);
 
-    socket.on("gameData", getGameDataCallback);
-    socket.on("updatedGameData", getUpdatedGameData);
-    socket.on("dealtCards", dealtCardsCallback);
-    socket.on("shuffledDeck", shuffledDeckCallback);
+    socket?.on("gameData", getGameDataCallback);
+    socket?.on("updatedGameData", getUpdatedGameData);
+    socket?.on("dealtCards", dealtCardsCallback);
+    socket?.on("shuffledDeck", shuffledDeckCallback);
 
     //socket.on("playedCard", playedCardCallback);
 
-    socket.on("gameMessage", gameMessageCallback);
+    socket?.on("gameMessage", gameMessageCallback);
 
     return () => {
-      socket.off("gameData", getGameDataCallback);
-      socket.off("updatedGameData", getUpdatedGameData);
-      socket.off("shuffledDeck", shuffledDeckCallback);
-      socket.off("dealtCards", dealtCardsCallback);
+      socket?.off("gameData", getGameDataCallback);
+      socket?.off("updatedGameData", getUpdatedGameData);
+      socket?.off("shuffledDeck", shuffledDeckCallback);
+      socket?.off("dealtCards", dealtCardsCallback);
       //socket.off("playedCard", playedCardCallback);
-      socket.off("gameMessage", gameMessageCallback);
+      socket?.off("gameMessage", gameMessageCallback);
     };
   }, []);
 
@@ -222,15 +220,15 @@ const PlayTest = () => {
 
   useEffect(() => {
     if (game) {
-      socket.on("playedCard", playedCardCallback);
-      socket.on("gameEnded", gameEndedCallback);
-      socket.on("startNewHand", startNewHandCallback);
+      socket?.on("playedCard", playedCardCallback);
+      socket?.on("gameEnded", gameEndedCallback);
+      socket?.on("startNewHand", startNewHandCallback);
     }
 
     return () => {
-      socket.off("playedCard", playedCardCallback);
-      socket.off("gameEnded", gameEndedCallback);
-      socket.off("startNewHand", startNewHandCallback);
+      socket?.off("playedCard", playedCardCallback);
+      socket?.off("gameEnded", gameEndedCallback);
+      socket?.off("startNewHand", startNewHandCallback);
     };
   }, [game, gameCards]);
 
@@ -247,18 +245,17 @@ const PlayTest = () => {
   }, []);
 
   const handleShuffle = () => {
-    socket.emit("shuffleDeck", code);
+    socket?.emit("shuffleDeck", code);
   };
 
   const handleDeal = () => {
-    socket.emit("dealCards", code);
+    socket?.emit("dealCards", code);
   };
 
   const getSlotByPosition = (position: number, ref: any) => {
     if (!ref.current) return null;
     return ref.current.querySelector(`[data-position="${position}"]`);
   };
-
 
   const moveDrawPileOffScreen = (cards: any[]) => {
     const cardsInDrawPile = cards.filter(
@@ -269,7 +266,7 @@ const PlayTest = () => {
       setGameCards((prevCards) => {
         return prevCards.map((c) => {
           if (c.id === card.id) {
-            console.log("card", card);
+            // console.log("card", card);
 
             return {
               ...c,
@@ -284,13 +281,12 @@ const PlayTest = () => {
         });
       });
     });
-    console.log("gameCards", cards);
-    console.log("cardsInDrawPile", cardsInDrawPile);
+    //console.log("gameCards", cards);
+    //console.log("cardsInDrawPile", cardsInDrawPile);
   };
 
   const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
-
-    console.log("destSlot", destSlot);
+    //console.log("destSlot", destSlot);
 
     const slotRect = destSlot?.getBoundingClientRect();
 
@@ -342,7 +338,6 @@ const PlayTest = () => {
       `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
     );
 
-
     if (player_id === me?.id) {
       const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
       playCardToSlot(card, destSlot, trick_number);
@@ -366,7 +361,6 @@ const PlayTest = () => {
       playCardToSlot(card, destSlot, trick_number);
     }
   };
-
 
   const gameMessageCallback = (message: string) => {
     console.log("Game message:", message);
@@ -400,10 +394,8 @@ const PlayTest = () => {
     setIsDealing(false);
     setShowDealButton(false);
     setShowShuffleButton(false);
-    console.log("here...");
-
+ 
     moveDrawPileOffScreen(cards);
-    
   };
 
   return (
@@ -561,7 +553,7 @@ const PlayTest = () => {
           </div>
 
           <div
-            className="flex w-full relative player-play-area items-center flex-col borde border-blue-600 relative"
+            className="flex w-full player-play-area items-center flex-col borde border-blue-600 relative"
             id="player-1"
             ref={playerPlayAreaRef}
           >
@@ -575,11 +567,11 @@ const PlayTest = () => {
           </div>
         </div>
 
-          {!gameEnded && (
-            <div className="bg-yellow-200 message-box text-black mx-auto max-w-md w-full p-4 rounded-md text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
-              {message}
-            </div>
-          )}
+        {!gameEnded && (
+          <div className="bg-yellow-200/10 message-box text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
+            {message}
+          </div>
+        )}
 
         <div
           id="playerArea"
@@ -618,18 +610,25 @@ const PlayTest = () => {
 
           <div className="text-center space-y-2">
             <h3 className="text-2xl font-bold text-yellow-400">
-              {winningPlayer?.id === me?.id ? "You" : winningPlayer?.user.username} Won!
+              {winningPlayer?.id === me?.id
+                ? "You"
+                : winningPlayer?.user.username}{" "}
+              Won!
             </h3>
-            <p className="text-gray-400">
-              Score: {winningPlayer?.score} points
-            </p>
+            <div className="text-gray-400 sm:text-sm text-xs">
+              <p>Score: {winningPlayer?.points} points</p>
+              <p>
+                Previous Score: {winningPlayer?.score - winningPlayer?.points}
+              </p>
+              <p>Total Score: {winningPlayer?.score}</p>
+            </div>
           </div>
 
           <div className="flex gap-3">
             <button
               onClick={() => {
                 setGameEnded(false);
-                socket.emit("readyForNextHand", {code, winningPlayer});
+                socket?.emit("readyForNextHand", { code, winningPlayer });
               }}
               className="px-3 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-green-500 
                 hover:from-green-500 hover:to-green-400 text-white rounded-lg 

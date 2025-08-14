@@ -1,14 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import Main from "./MainPage";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import HomePage from "./pages/Home/HomePage";
 import SupportPage from "./pages/tests/Support";
 import ProfilePage from "./pages/Profile/ProfilePage";
-import Deposit from "./pages/Deposit";
-import { useAppContext } from "./contexts/AppContext";
-// import PlayTest from "./pages/PlayTest";
-import MailPage from "./pages/Mail";
+import { useAppContext } from "./data/contexts/AppContext";
 import FriendsPage from "./pages/Friends/FriendsPage";
 import { Toaster } from "./components/ui/toaster";
 import NotificationsPage from "./pages/tests/Notifications";
@@ -36,7 +32,6 @@ import GameDetailsPage from "./pages/GameDetails/GameDetailsPage";
 import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
 import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 import PlayTest from "./pages/PlayTest";
-//import Test from "./pages/Test";
 
 function App() {
   const { overlay } = useAppContext();
@@ -44,7 +39,7 @@ function App() {
   return (
     <div
       className={
-        "bg-[url('https://lichess1.org/assets/lifat/background/gallery/bg08.webp')] relative bg-cover bg-center bg-gray-900 w-full  min-h-screen flex flex-col"
+        "relative bg-cover bg-center bg-gray-900 w-full  min-h-screen flex flex-col"
       }
     >
       {overlay && (
@@ -53,17 +48,13 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          <Route path="/main" element={<Main />} />
-          {/*<Route path="/test" element={<Test />} />*/}
           <Route path="/" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<PlayTest />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/deposit" element={<Deposit />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/mail" element={<MailPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -73,7 +64,6 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/rules" element={<RulesPage />} />
-          {/* <Route path="/game" element={<GamePage />} /> */}
           <Route path="/chat" element={<GlobalChat />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

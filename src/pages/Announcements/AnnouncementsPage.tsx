@@ -1,5 +1,5 @@
 import React from "react";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../config/NavBar";
 import Footer from "../../components/Footer";
 
 type Announcement = {

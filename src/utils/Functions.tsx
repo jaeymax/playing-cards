@@ -1,3 +1,6 @@
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/data/contexts/AppContext";
+
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
 
@@ -137,38 +140,42 @@ export const bridgeFinish = (
   });
 };
 
-export const extractDealingSequence = (cards: any[], current_player_id: number) => {
-  const player_ids_and_card_hand_postions = cards.filter((card) => card.status == "in_hand").map((card) => { return {player_id: card.player_id, hand_position: card.hand_position}; });
-  const opponents = ['opponent1', 'opponent2', 'opponent3'];
+export const extractDealingSequence = (
+  cards: any[],
+  current_player_id: number
+) => {
+  const player_ids_and_card_hand_postions = cards
+    .filter((card) => card.status == "in_hand")
+    .map((card) => {
+      return { player_id: card.player_id, hand_position: card.hand_position };
+    });
+  const opponents = ["opponent1", "opponent2", "opponent3"];
   let opponent_index = 0;
-  const sequence:any[] = [];
+  const sequence: any[] = [];
   const player_id_map = new Map();
   let hand_positions = [];
-  let target = ''
-  for(let id_and_hand_position of player_ids_and_card_hand_postions){
-    const {player_id, hand_position} = id_and_hand_position;
-    if(player_id_map.has(player_id)){
-       if(target ==player_id_map.get(player_id)){
+  let target = "";
+  for (let id_and_hand_position of player_ids_and_card_hand_postions) {
+    const { player_id, hand_position } = id_and_hand_position;
+    if (player_id_map.has(player_id)) {
+      if (target == player_id_map.get(player_id)) {
         hand_positions.push(hand_position);
-       }
-       else{
-        sequence.push({target, positions: hand_positions});
+      } else {
+        sequence.push({ target, positions: hand_positions });
         hand_positions = [];
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
-       }
-    }
-    else{
-      sequence.push({target, positions: hand_positions});
+      }
+    } else {
+      sequence.push({ target, positions: hand_positions });
       hand_positions = [];
-      target = '';
-      if(player_id == current_player_id){
+      target = "";
+      if (player_id == current_player_id) {
         console.log("current_player_id", current_player_id);
         player_id_map.set(player_id, "player");
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
-      }
-      else{
+      } else {
         player_id_map.set(player_id, opponents[opponent_index]);
         target = player_id_map.get(player_id);
         hand_positions.push(hand_position);
@@ -176,13 +183,12 @@ export const extractDealingSequence = (cards: any[], current_player_id: number) 
       }
     }
   }
-  sequence.push({target, positions: hand_positions});
+  sequence.push({ target, positions: hand_positions });
   sequence.shift();
   //console.log("player_id_map", player_id_map);
-console.log("sequence", sequence);
-return sequence;
-}
-
+  console.log("sequence", sequence);
+  return sequence;
+};
 
 export const dealSequenceToPositions = (
   startIndex: number,
@@ -201,19 +207,16 @@ export const dealSequenceToPositions = (
   return new Promise<void>((resolve) => {
     let targetArea = refs.playerHandRef.current;
 
-    if(target == 'opponent1'){
-       targetArea = refs.opponentOneHandRef.current;
-    }
-    else if(target == 'opponent2'){
+    if (target == "opponent1") {
+      targetArea = refs.opponentOneHandRef.current;
+    } else if (target == "opponent2") {
       targetArea = refs.opponentTwoHandRef.current;
-    }
-    else if(target == 'opponent3'){
+    } else if (target == "opponent3") {
       targetArea = refs.opponentThreeHandRef.current;
-    }
-    else if(target == 'player'){
+    } else if (target == "player") {
       targetArea = refs.playerHandRef.current;
     }
-      
+
     let delay = 0;
 
     positions.forEach((position, index) => {
@@ -231,7 +234,11 @@ export const dealSequenceToPositions = (
 
         cardToMove.pos_x = xOffset;
         cardToMove.pos_y = yOffset;
-        target == 'opponent2' ? cardToMove.rotation = 90 : target == 'opponent3' ? cardToMove.rotation = 90 : cardToMove.rotation = 0;
+        target == "opponent2"
+          ? (cardToMove.rotation = 90)
+          : target == "opponent3"
+          ? (cardToMove.rotation = 90)
+          : (cardToMove.rotation = 0);
         cardToMove.inSlot = true;
         cardToMove.slotPosition = { target, position };
 
@@ -243,4 +250,71 @@ export const dealSequenceToPositions = (
       delay += 300;
     });
   });
+};
+
+export const removeToken = () => {
+  sessionStorage.removeItem("accessToken");
+};
+
+export const getToken = () => {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) {
+    console.error("No token found in sessionStorage");
+    return null;
+  }
+  return token;
+};
+
+export const saveToken = (token: string) => {
+  sessionStorage.setItem("accessToken", token);
+};
+
+export async function ensureGuest() {
+  const token = getToken();
+
+  if (token) return;
+
+  const res = await fetch(`${baseUrl}/auth/guest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    console.error("Failed to ensure guest status");
+    return;
+  }
+
+  //const { updateUser } = useAppContext();
+  const data = await res.json();
+  saveToken(data.token);
+  console.log(data.user);
+  console.log("Guest token saved:", data.token);
+  return data.user;
+}
+
+export async function upgradeGuest(
+  username: string,
+  email: string,
+  password: string
+) {
+  const res = await fetch(`${baseUrl}/auth/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ username, email, password }),
+  });
+  const body = await res.json();
+  if (res.ok) {
+    saveToken(body.token); // replace token
+    // update UI to show registered state
+  } else {
+    // handle errors (username/email taken)
+  }
+}
+
+export const authHeaders = () => {
+  return {
+    Authorization: `Bearer ${getToken()}`,
+  };
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
-import { socket } from "@/socket";
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/data/contexts/AppContext";
 import { baseUrl } from "@/config/api";
+import { useSocket } from "@/data/contexts/SocketProvider";
 
 interface PlayNowModalProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ interface Player {
 }
 
 const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
+  const { socket } = useSocket();
   const { user } = useAppContext();
   const [searchTime, setSearchTime] = useState(0);
   const [matchFound, setMatchFound] = useState(false);
@@ -28,8 +29,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
   const [you, setYou] = useState<Player | null>(null);
   const [opponent, setOpponent] = useState<Player | null>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [startAnimation, setStartAnimation] = useState(false);
-  console.log(startAnimation);
+  //const [startAnimation, setStartAnimation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,20 +74,18 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
   const gameStartCallback = ({ gameCode }: { gameCode: string }) => {
     console.log("Game started:", gameCode);
     navigate(`/game/${gameCode}`);
-
-  }
+  };
 
   useEffect(() => {
-    socket.on("matchFound", matchFoundCallback);
+    socket?.on("matchFound", matchFoundCallback);
 
-    socket.on('gameStarted', gameStartCallback);
-
+    socket?.on("gameStarted", gameStartCallback);
 
     return () => {
-      socket.off("matchFound", matchFoundCallback);
-      socket.off('gameStarted', gameStartCallback);
+      socket?.off("matchFound", matchFoundCallback);
+      socket?.off("gameStarted", gameStartCallback);
     };
-  }, [user]);
+  }, [user, socket]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -102,7 +100,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
     }
 
     setIsStarting(true);
-    setStartAnimation(true);
+    //setStartAnimation(true);
 
     try {
       const response = await fetch(
@@ -122,12 +120,12 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
       } else {
         console.error("Failed to start the game");
         setIsStarting(false);
-        setStartAnimation(false);
+        //setStartAnimation(false);
       }
     } catch (error) {
       console.error("Error starting game:", error);
       setIsStarting(false);
-      setStartAnimation(false);
+      //setStartAnimation(false);
     }
   };
 

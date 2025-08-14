@@ -3,7 +3,7 @@ import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/data/contexts/AppContext";
 import { baseUrl } from "@/config/api";
 
 type SignUpStep = "email" | "verification" | "credentials";
@@ -12,9 +12,9 @@ const SignUp: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<SignUpStep>("email");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
- 
-  verificationCode
-  const {updateUser} = useAppContext();
+
+  verificationCode;
+  const { updateUser } = useAppContext();
 
   const navigate = useNavigate();
 
@@ -36,28 +36,29 @@ const SignUp: React.FC = () => {
     setCurrentStep("credentials");
   };
 
-  const handleCredentialsSubmit = async (username: string, password: string, setIsLoading:any) => {
+  const handleCredentialsSubmit = async (
+    username: string,
+    password: string,
+    setIsLoading: any
+  ) => {
     // Handle final signup
     console.log("Sign up complete", { email, username, password });
     try {
-      const response = await fetch(
-        `${baseUrl}/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password, email }),
-        }
-      );
+      const response = await fetch(`${baseUrl}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password, email }),
+      });
 
       const data = await response.json();
       if (response.status === 201) {
         // Successful registration
         console.log(data);
-        sessionStorage.setItem('accessToken', data.token);
+        sessionStorage.setItem("accessToken", data.token);
         updateUser(data);
-        navigate('/')
+        navigate("/");
       } else if (response.status === 400) {
         alert("Email, username, and password are required");
       }

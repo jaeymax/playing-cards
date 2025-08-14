@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 import { baseUrl } from "@/config/api";
+import { getToken, removeToken } from "@/utils/Functions";
 
 interface User {
   username: string;
@@ -57,8 +58,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    
+    const accessToken = getToken();
     
     if (accessToken && !user) {
       setIsLoading(true);
@@ -80,7 +80,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          sessionStorage.removeItem("accessToken"); // Clear invalid token
+          removeToken();
+          //sessionStorage.removeItem("accessToken"); // Clear invalid token
         })
         .finally(() => {
           setIsLoading(false);
