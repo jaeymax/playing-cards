@@ -3,6 +3,23 @@ import { baseUrl } from "@/config/api";
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
 
+import dealCardSound from "@/sounds/sound2.mp3";
+
+function playDealCardSound() {
+  const audio = new Audio(dealCardSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+interface CardRefs {
+  playerHandRef: React.RefObject<HTMLDivElement>;
+  opponentOneHandRef: React.RefObject<HTMLDivElement>;
+  opponentTwoHandRef: React.RefObject<HTMLDivElement>;
+  opponentThreeHandRef: React.RefObject<HTMLDivElement>;
+  deckRef: React.RefObject<HTMLDivElement>;
+}
+
 export const shuffleCards = async (
   cardsToShuffle: any[],
   setGameCards: SetGameCardsFunction,
@@ -10,8 +27,7 @@ export const shuffleCards = async (
   isShuffling: boolean,
   isDealing: boolean
 ) => {
-
-  if(isShuffling || isDealing) return; // Prevent multiple shuffles at once
+  if (isShuffling || isDealing) return; // Prevent multiple shuffles at once
   setIsShuffling(true);
 
   try {
@@ -27,9 +43,9 @@ export const shuffleCards = async (
       updatedCards.length
     );
 
-   await splitDeck(leftHalf, rightHalf, updatedCards, setGameCards);
-   await riffleCards(leftHalf, rightHalf, updatedCards, setGameCards);
-   await bridgeFinish(updatedCards, setGameCards);
+    await splitDeck(leftHalf, rightHalf, updatedCards, setGameCards);
+    await riffleCards(leftHalf, rightHalf, updatedCards, setGameCards);
+    await bridgeFinish(updatedCards, setGameCards);
   } catch (error) {
     console.error("Error shuffling cards:", error);
   } finally {
@@ -207,7 +223,7 @@ export const dealSequenceToPositions = (
   },
   setGameCards: SetGameCardsFunction
 ) => {
-   return new Promise<void>((resolve) => {
+  return new Promise<void>((resolve) => {
     let targetArea = refs.playerHandRef.current;
 
     if (target == "opponent1") {
@@ -244,15 +260,69 @@ export const dealSequenceToPositions = (
           : (cardToMove.rotation = 0);
         cardToMove.inSlot = true;
         cardToMove.slotPosition = { target, position };
-
+        playDealCardSound(); // Play sound for each dealt card
         setGameCards(updatedCards);
 
-        if (index === positions.length - 1)resolve();
+        if (index === positions.length - 1) resolve();
       }, delay);
 
       delay += 300;
     });
-   });
+  });
+};
+
+const moveDrawPileOffScreen = (cards: any[], setGameCards:(cards:any)=>void) => {
+  const cardsInDrawPile = cards.filter(
+    (card: any) => card.status === "in_drawpile"
+  );
+  cardsInDrawPile.forEach((card: any) => {
+    setGameCards((prevCards: any) => {
+      return prevCards.map((c:any) => {
+        if (c.id === card.id) {
+          return {
+            ...c,
+            pos_x: -1000,
+            pos_y: 0,
+            rotation: 0,
+            inSlot: false,
+            slotPosition: { target: "player", position: 0 },
+          };
+        }
+        return c;
+      });
+    });
+  });
+};
+
+export const dealCards = async (
+  cards: any[],
+  current_player_id: number,
+  refs: CardRefs,
+  setGameCards: (cards: any[]) => void,
+  isDealing: boolean,
+  isShuffling: boolean,
+  setIsDealing: (dealing: boolean) => void
+) => {
+  if (isDealing || isShuffling) return;
+  setIsDealing(true);
+
+  let cardIndex = 0;
+
+  for (const sequence of extractDealingSequence(cards, current_player_id)) {
+    await dealSequenceToPositions(
+      cardIndex,
+      sequence.target,
+      sequence.positions,
+      cards,
+      refs,
+      setGameCards
+    );
+    cardIndex += sequence.positions.length;
+  }
+
+  setIsDealing(false);
+
+  moveDrawPileOffScreen(cards, setGameCards);
 };
 
 export const removeToken = () => {

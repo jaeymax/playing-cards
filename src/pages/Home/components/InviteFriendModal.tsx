@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../../../components/Modal";
+import { useNavigate } from "react-router-dom";
 
 interface InviteFriendModalProps {
   isOpen: boolean;
@@ -19,12 +20,18 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
     numPlayers: 2,
   });
 
+
+  const navigate = useNavigate();
   const handleCreateGame = async () => {
     setIsCreatingGame(true);
+    const generatedCode = "12345";
     try {
       console.log("Game configuration:", gameConfig);
       // Implement game creation logic here
       await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
+      navigate(`/game/${generatedCode}`, {
+        state: { gameType: "playWithFriend" },
+      });
     } catch (error) {
       console.error("Failed to create game:", error);
     } finally {
@@ -39,14 +46,17 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
           Configure your game settings
         </div>
 
-        {/* Game Configuration Form */}
         <div className="space-y-6">
-          {/* Number of Hands */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 flex justify-between">
-              Number of Hands
-              <span className="text-blue-400">{gameConfig.numHands}</span>
-            </label>
+          {/* Number of Hands Slider */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium text-gray-300">
+                Number of Hands
+              </label>
+              <span className="text-sm font-medium text-blue-400">
+                {gameConfig.numHands}
+              </span>
+            </div>
             <input
               type="range"
               min={1}
@@ -58,12 +68,8 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
                   numHands: parseInt(e.target.value),
                 }))
               }
-              className="w-full bg-gray-700 rounded-lg appearance-none h-2 accent-blue-500"
+              className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
             />
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>1</span>
-              <span>50</span>
-            </div>
           </div>
 
           {/* Number of Players */}
@@ -71,22 +77,26 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
             <label className="text-sm font-medium text-gray-300">
               Number of Players
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex gap-2">
+              <div className="borde mx-auto flex gap-10">
+
               {[2, 3, 4].map((num) => (
                 <button
                   key={num}
                   onClick={() =>
                     setGameConfig((prev) => ({ ...prev, numPlayers: num }))
                   }
-                  className={`p-3 rounded-lg border ${
-                    gameConfig.numPlayers === num
-                      ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                      : "border-gray-700 hover:border-gray-600 text-gray-300"
-                  } transition-all`}
+                  className={`flex-  py- w-8 h-8 rounded-full text-sm font-medium transition-all duration-200 
+                    ${
+                      gameConfig.numPlayers === num
+                        ? "bg-blue-500 text-white shadow-l shadow-blue-500/20"
+                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    }`}
                 >
                   {num}
                 </button>
               ))}
+              </div>
             </div>
           </div>
 
@@ -103,29 +113,35 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
                     includeAces: !prev.includeAces,
                   }))
                 }
-                className={`p-3 rounded-lg border flex items-center justify-between ${
-                  gameConfig.includeAces
-                    ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-gray-700 hover:border-gray-600 text-gray-300"
-                } transition-all`}
+                className={`group relative px-4 py-3 rounded-lg border transition-all duration-200
+                  ${
+                    gameConfig.includeAces
+                      ? "border-blue-500/50 bg-blue-500/10"
+                      : "border-gray-700 hover:border-gray-600"
+                  }`}
               >
-                <span>Aces</span>
-                {gameConfig.includeAces && (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">A</span>
+                    <div className="flex flex-col text-left">
+                      <span
+                        className={`text-sm font-medium ${
+                          gameConfig.includeAces
+                            ? "text-blue-400"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        Aces
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Worth 1 point
+                      </span>
+                    </div>
+                  </div>
+  
+                </div>
               </button>
+
               <button
                 onClick={() =>
                   setGameConfig((prev) => ({
@@ -133,84 +149,50 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
                     includeSixes: !prev.includeSixes,
                   }))
                 }
-                className={`p-3 rounded-lg border flex items-center justify-between ${
-                  gameConfig.includeSixes
-                    ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-gray-700 hover:border-gray-600 text-gray-300"
-                } transition-all`}
+                className={`group relative px-4 py-3 rounded-lg border transition-all duration-200
+                  ${
+                    gameConfig.includeSixes
+                      ? "border-blue-500/50 bg-blue-500/10"
+                      : "border-gray-700 hover:border-gray-600"
+                  }`}
               >
-                <span>Sixes</span>
-                {gameConfig.includeSixes && (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">6</span>
+                    <div className="flex flex-col text-left">
+                      <span
+                        className={`text-sm font-medium ${
+                          gameConfig.includeSixes
+                            ? "text-blue-400"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        Sixes
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Worth 3 points
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
               </button>
             </div>
           </div>
-
-          {/* Match Type */}
-          {/* <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-300">
-              Match Type (Rated or Unrated)
-            </label>
-            <button
-              onClick={() =>
-                setGameConfig((prev) => ({ ...prev, isRated: !prev.isRated }))
-              }
-              className={`w-full p-3 rounded-lg border flex items-center justify-between ${
-                gameConfig.isRated
-                  ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                  : "border-gray-700 hover:border-gray-600 text-gray-300"
-              } transition-all`}
-            >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-                <span>{gameConfig.isRated ? "Rated" : "Unrated"}</span>
-              </div>
-              {gameConfig.isRated ? "" : ""}
-            </button>
-            <p className="text-center text-sm">
-              {gameConfig.isRated
-                ? "Rating will be affected"
-                : "Practice match"}
-            </p>
-          </div> */}
         </div>
 
         {/* Create Game Button */}
         <button
           onClick={handleCreateGame}
           disabled={isCreatingGame}
-          className="w-full px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 
-                   text-white font-medium rounded-lg transform transition disabled:opacity-70 disabled:cursor-not-allowed
-                   flex items-center justify-center gap-2"
+          className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
+                   rounded-lg font-medium transition-all duration-300 hover:from-blue-600 hover:to-indigo-600
+                   disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2
+                   shadow-l hadow-blue-500/25"
         >
           {isCreatingGame ? (
             <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span>Creating Game...</span>
             </>
           ) : (
@@ -234,6 +216,7 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
         </button>
       </div>
     </Modal>
+  
   );
 };
 

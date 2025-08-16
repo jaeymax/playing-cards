@@ -1,14 +1,11 @@
 import React from "react";
 import HeroSection from "./components/HeroSection";
 import NavBar from "@/components/NavBar";
-import ConnectionStatusIndicator from "@/components/ConnectionStatusIndicator";
-import { useAppContext } from "@/contexts/AppContext";
-
 const HomePage: React.FC = () => {
-  const { user } = useAppContext();
+
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-gray-900 text-gray-100 w-full">
       <NavBar />
       <div className="container mx-auto px-4 py-8 space-y-16">
         <HeroSection />
@@ -16,11 +13,11 @@ const HomePage: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-16">
           {/* About Section */}
           <section className="text-center space-y-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent text-white">
               About Us
             </h2>
             <p className="text-gray-300 leading-relaxed">
-              PlaySpa.com is a digital adaptation of the traditional Ghanaian
+              spagamezone.com is a digital adaptation of the traditional Ghanaian
               card game "Spa". Our mission is to bring this beloved game to
               players worldwide while preserving its authentic rules and
               competitive spirit. We try very hard to make the game simple and
@@ -30,7 +27,7 @@ const HomePage: React.FC = () => {
 
           {/* How to Play */}
           <section className="text-center space-y-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent text-white">
               How to Play
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
@@ -60,7 +57,7 @@ const HomePage: React.FC = () => {
 
           {/* Add Rules Section between How to Play and FAQ sections */}
           <section className="text-center space-y-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent text-white">
               Game Rules
             </h2>
             <div className="max-w-3xl mx-auto text-left space-y-6 bg-gray-800/50 rounded-xl p-8">
@@ -136,7 +133,7 @@ const HomePage: React.FC = () => {
 
           {/* FAQ Section */}
           <section className="text-center space-y-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-white text-transparent">
               Frequently Asked Questions
             </h2>
             <div className="grid gap-8 text-left">
@@ -190,31 +187,31 @@ const HomePage: React.FC = () => {
 
           {/* Contact Section */}
           <section className="text-center space-y-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-white text-transparent">
               Contact Us
             </h2>
-            <div className="flex justify-center gap-8">
+            <div className="flex flex-col justify-center gap-2">
               <a
-                href="mailto:support@playspa.com"
+                href="mailto:support@spagamezone.com"
                 className="text-gray-300 hover:text-blue-400 transition-colors"
               >
-                support@playspa.com
+                support@spagamezone.com
               </a>
               <a
                 href="https://twitter.com/playspagame"
                 className="text-gray-300 hover:text-blue-400 transition-colors"
               >
-                @playspagame
+                @spagamezone
               </a>
             </div>
           </section>
 
           {/* Copyright */}
           <div className="text-center text-gray-400 text-sm">
-            <p>© 2024 PlaySpa. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} SpaGameZone. All rights reserved.</p>
           </div>
 
-          {user && <ConnectionStatusIndicator />}
+         
         </div>
       </div>
     </div>

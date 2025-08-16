@@ -32,9 +32,11 @@ import GameDetailsPage from "./pages/GameDetails/GameDetailsPage";
 import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
 import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 import PlayTest from "./pages/PlayTest";
+import ConnectionStatusIndicator from "./components/ConnectionStatusIndicator";
+import GameModal from "./components/GameModal";
 
 function App() {
-  const { overlay } = useAppContext();
+  const { overlay, user } = useAppContext();
 
   return (
     <div
@@ -50,7 +52,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/game/:code" element={<PlayTest />} />
+          <Route path="/game/:code" element={<GameModal />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
@@ -83,6 +85,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       <Toaster />
+      {user && <ConnectionStatusIndicator />}
     </div>
   );
 }

@@ -44,7 +44,7 @@ export const SocketProvider: React.FC<{children: React.ReactNode }> = ({children
             console.log("Disconnected from server");
           };
       
-        
+
         newSocket.on("connect", onConnect);
         newSocket.on("disconnect",onDisconnect);
     

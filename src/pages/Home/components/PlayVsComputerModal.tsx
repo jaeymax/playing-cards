@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import Modal from "../../../components/Modal";
+import { useNavigate } from "react-router-dom";
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
 
 interface PlayVsComputerModalProps {
   isOpen: boolean;
@@ -45,14 +48,34 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
   const [selectedDifficulty, setSelectedDifficulty] =
     useState<string>("medium");
   const [showConfirmation, setShowConfirmation] = useState(false);
-
+  const navigate = useNavigate();
+  const { user } = useAppContext();
   const handleStartGame = () => {
     setShowConfirmation(true);
   };
 
-  const handleConfirmStart = () => {
+  const createBotGame = async () => {
+    console.log(`Creating game with bot`);
+    const response = await fetch(`${baseUrl}/games/create-bot`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({userId: user?.id}), 
+    });
+    const data = await response.json();
+    console.log("Game created:", data);
+    if (!response.ok) {
+      console.error('Failed to create game:', response.statusText);
+      return;
+    }
+  };
+
+  const handleConfirmStart = async () => {
     console.log(`Starting game with ${selectedDifficulty} difficulty`);
-    // Add your game start logic here
+    
+    await createBotGame();
+    navigate(`/game/computer`, { state: { gameType: "playVsComputer" } });
     onClose();
   };
 

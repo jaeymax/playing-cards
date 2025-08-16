@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { GoogleOAuthProvider} from "@react-oauth/google";
 import GoogleSigninCustom from "../Home/components/GoogleSigninCustom";
+import NavBar from "@/components/NavBar";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -76,14 +77,8 @@ const SignInPage = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-        {/* Header */}
-        {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-center md:justify-start">
-            <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
-          </div>
-        </div>
-      </header> */}
+      
+      <NavBar/>
 
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center px-4 py-12">
@@ -151,7 +146,7 @@ const SignInPage = () => {
                         type="email"
                         required
                         className="bg-gray-700 block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="wizard@nexuscards.com"
+                        placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -258,7 +253,7 @@ const SignInPage = () => {
 
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-400">
-                    New to Nexus Cards?{" "}
+                    New to SpaGameZone?{" "}
                     <button
                       type="button"
                       className="font-medium text-blue-400 hover:text-blue-300 focus:outline-none"
@@ -316,7 +311,7 @@ const SignInPage = () => {
                 href="#"
                 className="text-sm text-gray-400 hover:text-gray-300 block"
               >
-                About Nexus Cards
+                About SpaGameZone
               </a>
               <a
                 href="#"
@@ -332,7 +327,7 @@ const SignInPage = () => {
         <footer className="bg-gray-800 border-t border-gray-700">
           <div className="container mx-auto px-4 py-4">
             <p className="text-center text-gray-400 text-sm">
-              © {new Date().getFullYear()} Nexus Cards. All rights reserved.
+              © {new Date().getFullYear()} SpaGameZone. All rights reserved.
             </p>
           </div>
         </footer>

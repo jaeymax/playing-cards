@@ -73,7 +73,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
 
   const gameStartCallback = ({ gameCode }: { gameCode: string }) => {
     console.log("Game started:", gameCode);
-    navigate(`/game/${gameCode}`);
+    navigate(`/game/${gameCode}`, { state: { gameType: "playNow" } });
   };
 
   useEffect(() => {

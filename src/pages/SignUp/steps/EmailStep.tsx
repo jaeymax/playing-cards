@@ -2,6 +2,7 @@ import { baseUrl } from "@/config/api";
 import GoogleSignupCustom from "@/pages/Home/components/GoogleSignupCustom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface EmailStepProps {
   onSubmit: (email: string) => void;
@@ -103,7 +104,7 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
                 type="email"
                 required
                 className="bg-gray-700 block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="wizard@nexuscards.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -143,12 +144,12 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
           </button>
 
           <div className="text-center">
-            <a
-              href="/signin"
+            <Link
+              to="/signin"
               className="text-sm text-blue-400 hover:text-blue-300"
             >
               Already have an account? Sign in
-            </a>
+            </Link>
           </div>
         </form>
       </div>

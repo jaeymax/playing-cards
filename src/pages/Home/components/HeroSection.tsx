@@ -19,6 +19,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
   const [isPlayVsComputerModalOpen, setIsPlayVsComputerModalOpen] =
     useState(false);
 
+
   const handlePlayNowModalClicked = async () => {
     setIsPlayNowModalOpen(true);
     const authToken = getToken();
@@ -52,6 +53,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       });
   };
 
+
+
   useEffect(() => {
     socket?.on("queue_left", () => {
       console.log("queue left");
@@ -72,8 +75,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       {/* Left: Call to Action */}
       <div className="space-y-6">
-        <h1 className="text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-          Welcome to Spa
+        <h1 className="text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 text-white">
+          Welcome to SpaGameZone
         </h1>
         <p className="text-lg text-gray-300">
           Spa is a fast-paced Ghanaian card game. Win the final trick to take
@@ -88,13 +91,17 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
             Play Now
           </button>
           <button
-            onClick={() => setIsInviteModalOpen(true)}
+            onClick={() => {
+              setIsInviteModalOpen(true);
+            }}
             className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Invite Friend
           </button>
           <button
-            onClick={() => setIsPlayVsComputerModalOpen(true)}
+            onClick={() => {
+              setIsPlayVsComputerModalOpen(true);
+            }}
             className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play vs Computer

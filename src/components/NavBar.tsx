@@ -35,7 +35,7 @@ const NavBar: React.FC = () => {
   const { isLoading } = useAppContext();
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
-  (notificationCount)
+  notificationCount;
 
   const navigate = useNavigate();
 
@@ -263,9 +263,7 @@ const NavBar: React.FC = () => {
   const getGlobalChatMessages = async () => {
     try {
       setIsMessagesLoading(true);
-      const response = await fetch(
-        `${baseUrl}/messages/global`
-      );
+      const response = await fetch(`${baseUrl}/messages/global`);
       if (!response.ok) {
         throw new Error("Failed to fetch messages");
       }
@@ -379,49 +377,57 @@ const NavBar: React.FC = () => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="p- borde rounded-lg text-gray-400 hover:text-white md:hidden"
               >
-                {isMenuOpen ? (<svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>):(<svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>)}
-                
+                {isMenuOpen ? (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
               </button>
               <Link to="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 hidden sm:flex">
                   <img src="./cards.png" className="object-contain" alt="" />
+              </div>
+                <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
+                  <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
+                    spa
+                  </span>
+                  <span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
+                    game
+                  </span>
+                  <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent">
+                    zone
+                  </span>
                 </div>
-                <span className="text-2xl hidden sm:flex font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  playspa
-                </span>
               </Link>
             </div>
 
             {/* Middle section - for future nav items */}
             <div className="hidden lg:flex flex-1 justify-center items-center gap-8">
-              <Link
-                to="/"
-                className="text-gray-300 hover:text-white px-3 py-2"
-              >
+              <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
               </Link>
               <Link
@@ -530,7 +536,11 @@ const NavBar: React.FC = () => {
                     >
                       <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                          <img className="rounded-full" src={user?.image_url} alt="" />
+                          <img
+                            className="rounded-full"
+                            src={user?.image_url}
+                            alt=""
+                          />
                           {/* <span className="text-lg">
                             👤
                           </span> */}
@@ -687,12 +697,9 @@ const NavBar: React.FC = () => {
                 </div>
               )}
             </div>
-           
           </div>
         </div>
       </nav>
-
-
 
       {/* Mobile Sidebar */}
       {isMenuOpen && (

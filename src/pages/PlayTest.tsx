@@ -1,40 +1,14 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useRef, useState } from "react";
 import Card from "@/components/Card";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
-import {
-  extractDealingSequence,
-  shuffleCards,
-  dealSequenceToPositions,
-} from "@/utils/Functions";
-import Modal from "@/components/Modal";
+import {shuffleCards,dealCards} from "@/utils/Functions";
 import { useSocket } from "@/contexts/SocketProvider";
-
-const PlayerInfo = ({
-  name,
-  avatar,
-  points,
-  styles,
-}: {
-  name: string;
-  avatar: string;
-  points: number;
-  styles: string;
-}) => (
-  <div
-    className={`player-info absolute ${styles} mt- borde mb- w-fit mx-auto flex flex-col items-center`}
-  >
-    <Avatar className="w-12 h-12 avatar-image">
-      <AvatarImage src={avatar} />
-      <AvatarFallback>{name[0]}</AvatarFallback>
-    </Avatar>
-    <div className="text-center">
-      <div className="font-medium player-name">{name}</div>
-      <div className="text-sm font-semibold player-score">{points} pts</div>
-    </div>
-  </div>
-);
+import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
+import playedCardSound from "@/sounds/sound4.mp3";
+import WinnerModal from "@/components/WinnerModal";
+import PlayerInfo from "@/components/PlayerInfo";
+import GameControls from "@/components/GameControls";
 
 const PlayTest = () => {
   const { user } = useAppContext();
@@ -55,34 +29,6 @@ const PlayTest = () => {
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [me, setMe] = useState<any>(null);
   const [firstOpponent, setFirstOpponent] = useState<any>(null);
-  /* const [secondOpponent, setSecondOpponent] = useState<any>({
-    game_id: 274,
-    id: 377,
-    is_dealer: true,
-    position: 1,
-    score: 0,
-    status: "active",
-    user: {
-      id: 377,
-      username: "Witty",
-      image_url:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXcLBAnNaG9u_juSWT6vyOeW1Q3N3xh0QWA&s",
-    },
-  });
-  const [thirdOpponent, setThirdOpponent] = useState<any>({
-    game_id: 274,
-    id: 377,
-    is_dealer: true,
-    position: 1,
-    score: 0,
-    status: "active",
-    user: {
-      id: 377,
-      username: "Tony",
-      image_url:
-        "https://static.vecteezy.com/system/resources/previews/016/773/467/non_2x/gamer-esport-gaming-mascot-logo-design-illustration-vector.jpg",
-    },
-  });*/
   const [secondOpponent, setSecondOpponent] = useState<any>(null);
   const [thirdOpponent, setThirdOpponent] = useState<any>(null);
 
@@ -93,6 +39,20 @@ const PlayTest = () => {
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
 
   const navigate = useNavigate();
+
+  function playShuffleSound() {
+    const audio = new Audio(shuffleSound);
+    audio.play().catch((err) => {
+      console.error("Failed to play sound:", err);
+    });
+  }
+
+  function playPlayedCardSound() {
+    const audio = new Audio(playedCardSound);
+    audio.play().catch((err) => {
+      console.error("Failed to play sound:", err);
+    });
+  }
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -131,7 +91,6 @@ const PlayTest = () => {
     );
     setMe(myData);
     getOpponentsData(data.players);
-    //setGameCards(data.cards);
   };
 
   const getGameDataCallback = (data: any) => {
@@ -148,19 +107,27 @@ const PlayTest = () => {
     getOpponentsData(data.players);
   };
 
-  //console.log('gameData', game)
-  //console.log("Players:", players);
-  //console.log("Game Cards:", gameCards);
-
   const dealtCardsCallback = (cards: any) => {
     console.log("DealtCards", cards);
     const currentMe = meRef.current;
     setGameCards(cards);
-    // requestAnimationFrame(() => {
-    // requestAnimationFrame(() => {
-    dealCards(cards, currentMe.id);
-    // });
-    // });
+    dealCards(
+      cards,
+      currentMe.id,
+      {
+        playerHandRef,
+        opponentOneHandRef,
+        opponentTwoHandRef,
+        opponentThreeHandRef,
+        deckRef,
+      },
+      setGameCards,
+      isDealing,
+      isShuffling,
+      setIsDealing
+    );
+    setShowDealButton(false);
+    setShowShuffleButton(false);
   };
 
   const startNewHandCallback = (data: any) => {
@@ -177,11 +144,8 @@ const PlayTest = () => {
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
     setGameCards(cards);
-    // requestAnimationFrame(() => {
-    // requestAnimationFrame(() => {
+    playShuffleSound();
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
-    //});
-    //});
   };
 
   const meRef = useRef(me);
@@ -197,9 +161,14 @@ const PlayTest = () => {
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("dealtCards", dealtCardsCallback);
     socket?.on("shuffledDeck", shuffledDeckCallback);
-
-    //socket.on("playedCard", playedCardCallback);
-
+    socket?.on("connect", () => {
+      socket?.emit("join-room", code);
+    });
+    socket?.on("game-not-found", () => {
+      console.error("Game not found with code:", code);
+      alert("Game not found. Please check the code and try again.");
+      navigate("/");
+    });
     socket?.on("gameMessage", gameMessageCallback);
 
     return () => {
@@ -207,7 +176,6 @@ const PlayTest = () => {
       socket?.off("updatedGameData", getUpdatedGameData);
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
-      //socket.off("playedCard", playedCardCallback);
       socket?.off("gameMessage", gameMessageCallback);
     };
   }, []);
@@ -235,7 +203,6 @@ const PlayTest = () => {
   useEffect(() => {
     const handleBeforeUnload = (e: any) => {
       e.preventDefault();
-      // socket.emit("leaveGame", code);
       e.returnValue = "Are you sure you want to leave the game?";
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -257,39 +224,8 @@ const PlayTest = () => {
     return ref.current.querySelector(`[data-position="${position}"]`);
   };
 
-  const moveDrawPileOffScreen = (cards: any[]) => {
-    const cardsInDrawPile = cards.filter(
-      (card: any) => card.status === "in_drawpile"
-    );
-    //const deckRect = deckRef.current?.getBoundingClientRect();
-    cardsInDrawPile.forEach((card: any) => {
-      setGameCards((prevCards) => {
-        return prevCards.map((c) => {
-          if (c.id === card.id) {
-            // console.log("card", card);
-
-            return {
-              ...c,
-              pos_x: -1000,
-              pos_y: 0,
-              rotation: 0,
-              inSlot: false,
-              slotPosition: { target: "player", position: 0 },
-            };
-          }
-          return c;
-        });
-      });
-    });
-    //console.log("gameCards", cards);
-    //console.log("cardsInDrawPile", cardsInDrawPile);
-  };
-
   const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
-    //console.log("destSlot", destSlot);
-
     const slotRect = destSlot?.getBoundingClientRect();
-
     const deckRect = deckRef?.current?.getBoundingClientRect();
     const xOffset = slotRect?.left - (deckRect?.left || 0);
     const yOffset = slotRect?.top - (deckRect?.top || 0);
@@ -315,10 +251,7 @@ const PlayTest = () => {
         return c;
       });
     });
-    //card.style.setProperty('transform', `translate(${xOffset}px, ${yOffset}px)`);
   };
-
-  //console.log('gameCards', gameCards);
 
   const playedCardCallback = ({
     card_id,
@@ -337,7 +270,7 @@ const PlayTest = () => {
     console.log(
       `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
     );
-
+    playPlayedCardSound();
     if (player_id === me?.id) {
       const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
       playCardToSlot(card, destSlot, trick_number);
@@ -367,44 +300,12 @@ const PlayTest = () => {
     setMessage(message);
   };
 
-  const dealCards = async (cards: any[], current_player_id: number) => {
-    if (isDealing || isShuffling) return;
-    setIsDealing(true);
-
-    let cardIndex = 0;
-
-    for (const sequence of extractDealingSequence(cards, current_player_id)) {
-      await dealSequenceToPositions(
-        cardIndex,
-        sequence.target,
-        sequence.positions,
-        cards,
-        {
-          playerHandRef,
-          opponentOneHandRef,
-          opponentTwoHandRef,
-          opponentThreeHandRef,
-          deckRef,
-        },
-        setGameCards
-      );
-      cardIndex += sequence.positions.length;
-    }
-
-    setIsDealing(false);
-    setShowDealButton(false);
-    setShowShuffleButton(false);
-
-    moveDrawPileOffScreen(cards);
-  };
-
   return (
     <>
-      <div className="min-h-screen relative b-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-betwee">
+      <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
           name={firstOpponent?.user.username || "Opponent 1"}
           avatar={firstOpponent?.user.image_url || "path/to/avatar.jpg"}
-          //cards={playerCards.length}
           points={firstOpponent?.score}
           styles="left-1/2 -translate-x-1/2 top-1"
         />
@@ -412,7 +313,6 @@ const PlayTest = () => {
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
             avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
-            //cards={playerCards.length}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
@@ -421,36 +321,18 @@ const PlayTest = () => {
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
             avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
-            //cards={playerCards.length}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
           />
         )}
 
-        {showDealButton && showShuffleButton && (
-          <div className="flex hidde absolute w-fit gap-2 borde top-1/2 left-1/2 -translate-x-1/2 button-container z-[1000000000000]">
-            <button
-              id="deal-cards"
-              disabled={isDealing}
-              className="flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg 
-                  hover:from-purple-500 hover:to-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
-                  font-medium shadow-lg hover:shadow-xl"
-              onClick={handleDeal}
-            >
-              {isDealing ? "Dealing..." : "Deal"}
-            </button>
-            <button
-              id="shuffle"
-              disabled={isShuffling}
-              className="flex items-center gap- px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-lg 
-                  hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
-                  font-medium shadow-lg hover:shadow-xl"
-              onClick={handleShuffle}
-            >
-              {isShuffling ? "Shuffling..." : "Shuffle"}
-            </button>
-          </div>
-        )}
+        <GameControls
+          showButtons={showDealButton && showShuffleButton}
+          isDealing={isDealing}
+          isShuffling={isShuffling}
+          onDeal={handleDeal}
+          onShuffle={handleShuffle}
+        />
 
         {/* opponent area 1 */}
         <div
@@ -567,7 +449,7 @@ const PlayTest = () => {
         </div>
 
         {!gameEnded && (
-          <div className="bg-yellow-200/0 message-box text-center text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
+          <div className="bg-yellow-200/0 opacity-50 sm:opacity-100 message-box text-center text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
             {message}
           </div>
         )}
@@ -584,81 +466,21 @@ const PlayTest = () => {
         <PlayerInfo
           name={me?.user.username || "Player"}
           avatar={me?.user.image_url || "path/to/avatar.jpg"}
-          //cards={playerCards.length}
           points={me?.score}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
       </div>
 
-      {/* Game End Modal */}
-      <Modal
+      <WinnerModal
         isOpen={gameEnded}
         onClose={() => setGameEnded(false)}
-        title="Hand Complete!"
-      >
-        <div className="flex flex-col items-center space-y-6 py-8">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-1">
-            <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-              <img
-                src={winningPlayer?.user?.image_url}
-                alt=""
-                className="w-full h-full rounded-full object-cover"
-              />
-            </div>
-          </div>
-
-          <div className="text-center space-y-2">
-            <h3 className="text-2xl font-bold text-yellow-400">
-              {winningPlayer?.id === me?.id
-                ? "You"
-                : winningPlayer?.user.username}{" "}
-              Won!
-            </h3>
-            <div className="text-gray-400 sm:text-sm text-xs">
-              <p>Score: {winningPlayer?.points} points</p>
-              <p>
-                Previous Score: {winningPlayer?.score - winningPlayer?.points}
-              </p>
-              <p>Total Score: {winningPlayer?.score}</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setGameEnded(false);
-                socket?.emit("readyForNextHand", { code, winningPlayer });
-              }}
-              className="px-3 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-green-500 
-                hover:from-green-500 hover:to-green-400 text-white rounded-lg 
-                transition-all duration-300 flex items-center gap-2"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              <span className="text-xs sm:text-sm">Play Next Hand</span>
-            </button>
-
-            <button
-              onClick={() => navigate("/")}
-              className="px-3 sm:px-6 py-2 bg-gray-700 hover:bg-gray-600 
-                text-gray-300 rounded-lg transition-all duration-300"
-            >
-              <span className="text-xs sm:text-normal">Leave Game</span>
-            </button>
-          </div>
-        </div>
-      </Modal>
+        winningPlayer={winningPlayer}
+        onPlayNextHand={() => {
+          setGameEnded(false);
+          socket?.emit("readyForNextHand", { code, winningPlayer });
+        }}
+        onLeaveGame={() => navigate("/")}
+      />
     </>
   );
 };

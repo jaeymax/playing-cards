@@ -5,6 +5,7 @@ import CredentialsStep from "./steps/CredentialsStep";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
+import NavBar from "@/components/NavBar";
 
 type SignUpStep = "email" | "verification" | "credentials";
 
@@ -72,14 +73,7 @@ const SignUp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      {/* Header */}
-      {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-center md:justify-start">
-            <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
-          </div>
-        </div>
-      </header> */}
+      <NavBar />
 
       {/* Main Content */}
       <main className="flex-grow flex items-center justify-center px-4 py-12">
@@ -154,7 +148,7 @@ const SignUp: React.FC = () => {
       <footer className="bg-gray-800 border-t border-gray-700">
         <div className="container mx-auto px-4 py-4">
           <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} Cards. All rights reserved.
+            © {new Date().getFullYear()} SpaGameZone. All rights reserved.
           </p>
         </div>
       </footer>
