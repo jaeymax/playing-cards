@@ -271,13 +271,16 @@ export const dealSequenceToPositions = (
   });
 };
 
-const moveDrawPileOffScreen = (cards: any[], setGameCards:(cards:any)=>void) => {
+const moveDrawPileOffScreen = (
+  cards: any[],
+  setGameCards: (cards: any) => void
+) => {
   const cardsInDrawPile = cards.filter(
     (card: any) => card.status === "in_drawpile"
   );
   cardsInDrawPile.forEach((card: any) => {
     setGameCards((prevCards: any) => {
-      return prevCards.map((c:any) => {
+      return prevCards.map((c: any) => {
         if (c.id === card.id) {
           return {
             ...c,
@@ -359,7 +362,6 @@ export async function ensureGuest() {
     return;
   }
 
-  //const { updateUser } = useAppContext();
   const data = await res.json();
   saveToken(data.token);
   console.log(data.user);
@@ -379,8 +381,7 @@ export async function upgradeGuest(
   });
   const body = await res.json();
   if (res.ok) {
-    saveToken(body.token); // replace token
-    // update UI to show registered state
+    saveToken(body.token);
   } else {
     // handle errors (username/email taken)
   }
@@ -390,4 +391,127 @@ export const authHeaders = () => {
   return {
     Authorization: `Bearer ${getToken()}`,
   };
+};
+
+export const getSlotByPosition = (
+  position: number,
+  ref: React.RefObject<HTMLDivElement> | null
+) => {
+  if (!ref?.current) return null;
+  return ref.current.querySelector(`[data-position="${position}"]`);
+};
+
+export const playCardToSlot = (
+  card: any,
+  destSlot: Element | null,
+  trick_number: number,
+  deckRef: React.RefObject<HTMLDivElement>,
+  setGameCards: (cb: (prevCards: any[]) => any[]) => void
+) => {
+  const slotRect = destSlot?.getBoundingClientRect();
+  const deckRect = deckRef?.current?.getBoundingClientRect();
+  const xOffset = slotRect?.left - (deckRect?.left || 0);
+  const yOffset = slotRect?.top - (deckRect?.top || 0);
+
+  card.pos_x = xOffset;
+  card.pos_y = yOffset;
+  card.rotation = 0;
+  card.inSlot = true;
+  card.slotPosition = { target: "player", position: 0 };
+
+  setGameCards((prevCards) => {
+    return prevCards.map((c) => {
+      if (c.id === card.id) {
+        return {
+          ...c,
+          pos_x: xOffset,
+          status: "played",
+          pos_y: yOffset,
+          rotation: 0,
+          inSlot: true,
+          z_index: trick_number,
+          slotPosition: { target: "player", position: 0 },
+        };
+      }
+      return c;
+    });
+  });
+};
+
+interface PlayedCardArgs {
+  card_id: number;
+  player_id: number;
+  trick_number: number;
+  gameCards: any[];
+  game: any;
+  me: any;
+  firstOpponent: any;
+  secondOpponent: any;
+  thirdOpponent: any;
+  deckRef: React.RefObject<HTMLDivElement>;
+  playerPlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentOnePlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentTwoPlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentThreePlayAreaRef: React.RefObject<HTMLDivElement>;
+  setGameCards: (cb: (prevCards: any[]) => any[]) => void;
+  playSound: () => void;
+}
+
+export const handlePlayedCard = ({
+  card_id,
+  player_id,
+  trick_number,
+  gameCards,
+  game,
+  me,
+  firstOpponent,
+  secondOpponent,
+  thirdOpponent,
+  deckRef,
+  playerPlayAreaRef,
+  opponentOnePlayAreaRef,
+  opponentTwoPlayAreaRef,
+  opponentThreePlayAreaRef,
+  setGameCards,
+  playSound,
+}: PlayedCardArgs) => {
+  const card = gameCards.find((card: any) => card.id === card_id);
+  const player = game.players.find((player: any) => player.id === player_id);
+
+  console.log(
+    `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
+  );
+
+  playSound();
+
+  if (player_id === me?.id) {
+    const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+  } else if (player_id === firstOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentOnePlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+  } else if (player_id === secondOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentTwoPlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+  } else if (player_id === thirdOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentThreePlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+  }
+};
+
+export const handleGameMessage = (
+  message: string,
+  setMessage: (message: string) => void
+) => {
+  console.log("Game message:", message);
+  setMessage(message);
 };

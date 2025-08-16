@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import Card from "@/components/Card";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
-import {shuffleCards,dealCards} from "@/utils/Functions";
+import {
+  shuffleCards,
+  dealCards,
+  getSlotByPosition,
+  playCardToSlot,
+  handlePlayedCard,
+  handleGameMessage,
+} from "@/utils/Functions";
 import { useSocket } from "@/contexts/SocketProvider";
 import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
 import playedCardSound from "@/sounds/sound4.mp3";
@@ -219,40 +226,6 @@ const PlayTest = () => {
     socket?.emit("dealCards", code);
   };
 
-  const getSlotByPosition = (position: number, ref: any) => {
-    if (!ref.current) return null;
-    return ref.current.querySelector(`[data-position="${position}"]`);
-  };
-
-  const playCardToSlot = (card: any, destSlot: any, trick_number: number) => {
-    const slotRect = destSlot?.getBoundingClientRect();
-    const deckRect = deckRef?.current?.getBoundingClientRect();
-    const xOffset = slotRect?.left - (deckRect?.left || 0);
-    const yOffset = slotRect?.top - (deckRect?.top || 0);
-    card.pos_x = xOffset;
-    card.pos_y = yOffset;
-    card.rotation = 0;
-    card.inSlot = true;
-    card.slotPosition = { target: "player", position: 0 };
-    setGameCards((prevCards) => {
-      return prevCards.map((c) => {
-        if (c.id === card.id) {
-          return {
-            ...c,
-            pos_x: xOffset,
-            status: "played",
-            pos_y: yOffset,
-            rotation: 0,
-            inSlot: true,
-            z_index: trick_number,
-            slotPosition: { target: "player", position: 0 },
-          };
-        }
-        return c;
-      });
-    });
-  };
-
   const playedCardCallback = ({
     card_id,
     player_id,
@@ -262,42 +235,28 @@ const PlayTest = () => {
     player_id: number;
     trick_number: number;
   }) => {
-    console.log("Played card:", card_id, player_id, trick_number);
-    console.log("here...");
-    console.log("game", game);
-    const card = gameCards.find((card: any) => card.id === card_id);
-    const player = game.players.find((player: any) => player.id === player_id);
-    console.log(
-      `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
-    );
-    playPlayedCardSound();
-    if (player_id === me?.id) {
-      const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
-      playCardToSlot(card, destSlot, trick_number);
-    } else if (player_id === firstOpponent?.id) {
-      const destSlot = getSlotByPosition(
-        trick_number - 1,
-        opponentOnePlayAreaRef
-      );
-      playCardToSlot(card, destSlot, trick_number);
-    } else if (player_id === secondOpponent?.id) {
-      const destSlot = getSlotByPosition(
-        trick_number - 1,
-        opponentTwoPlayAreaRef
-      );
-      playCardToSlot(card, destSlot, trick_number);
-    } else if (player_id === thirdOpponent?.id) {
-      const destSlot = getSlotByPosition(
-        trick_number - 1,
-        opponentThreePlayAreaRef
-      );
-      playCardToSlot(card, destSlot, trick_number);
-    }
+    handlePlayedCard({
+      card_id,
+      player_id,
+      trick_number,
+      gameCards,
+      game,
+      me,
+      firstOpponent,
+      secondOpponent,
+      thirdOpponent,
+      deckRef,
+      playerPlayAreaRef,
+      opponentOnePlayAreaRef,
+      opponentTwoPlayAreaRef,
+      opponentThreePlayAreaRef,
+      setGameCards,
+      playSound: playPlayedCardSound,
+    });
   };
 
   const gameMessageCallback = (message: string) => {
-    console.log("Game message:", message);
-    setMessage(message);
+    handleGameMessage(message, setMessage);
   };
 
   return (
