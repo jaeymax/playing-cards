@@ -20,22 +20,22 @@ const GameControls = ({
       <button
         id="deal-cards"
         disabled={isDealing || isShuffling}
-        className="flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg 
-            hover:from-purple-500 hover:to-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
+        className="flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-full text-sm
+            hover:from-purple-500 hover:to-blue-400 transition-al duration-300 disabled:opacity-0 disabled:cursor-not-allowed 
             font-medium shadow-lg hover:shadow-xl"
         onClick={onDeal}
       >
-        {isDealing ? "Dealing..." : "Deal"}
+        Deal
       </button>
       <button
         id="shuffle"
         disabled={isShuffling || isDealing}
-        className="flex items-center gap- px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-lg 
-            hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
+        className="flex items-center gap- px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-full text-sm 
+            hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 disabled:opacity-0 disabled:cursor-not-allowed 
             font-medium shadow-lg hover:shadow-xl"
         onClick={onShuffle}
       >
-        {isShuffling ? "Shuffling..." : "Shuffle"}
+        Shuffle
       </button>
     </div>
   );

@@ -66,21 +66,24 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
       });
       const data = await response.json();
       console.log("Game created:", data);
-
       if (!response.ok) {
         console.error('Failed to create game:', response.statusText);
         return;
       }
+      return data;
     } catch (error) {
       console.error("Error creating game:", error);
+      return null;
     }
   };
 
   const handleConfirmStart = async () => {
     console.log(`Starting game with ${selectedDifficulty} difficulty`);
     
-    await createBotGame();
-    navigate(`/game/computer`, { state: { gameType: "playVsComputer" } });
+    const data = await createBotGame();
+    if(!data)return;
+    const gameCode = data.game.code;
+    navigate(`/game/${gameCode}`, { state: { gameType: "playVsComputer" } });
     onClose();
   };
 

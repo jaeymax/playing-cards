@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState} from "react";
 import { useParams } from "react-router-dom";
 import { useSocket } from "@/contexts/SocketProvider";
 import { useAppContext } from "@/contexts/AppContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Card from "@/components/Card";
-import {
-  extractDealingSequence,
-  shuffleCards,
-  dealSequenceToPositions,
-} from "@/utils/Functions";
+// import Card from "@/components/Card";
+// import {
+//   extractDealingSequence,
+//   shuffleCards,
+//   dealSequenceToPositions,
+// } from "@/utils/Functions";
 
 const ShareOverlay = ({
   gameCode,
@@ -264,34 +264,38 @@ const PlayWithFriend = () => {
       is_dealer: true,
     },
   ]);
-  const [maxPlayers, setMaxPlayers] = useState(4);
+  const [maxPlayers] = useState(4);
 
   // Game states (similar to PlayTest)
-  const [isDealing, setIsDealing] = useState(false);
-  const [isShuffling, setIsShuffling] = useState(false);
-  const [gameCards, setGameCards] = useState<any[]>([]);
-  const [game, setGame] = useState<any>(null);
-  const [me, setMe] = useState<any>(null);
-  const [firstOpponent, setFirstOpponent] = useState<any>(null);
-  const [secondOpponent, setSecondOpponent] = useState<any>(null);
-  const [thirdOpponent, setThirdOpponent] = useState<any>(null);
-  const [message, setMessage] = useState<string>("Waiting for players...");
+  // const [isDealing, setIsDealing] = useState(false);
+  // const [isShuffling, setIsShuffling] = useState(false);
+  // const [gameCards, setGameCards] = useState<any[]>([]);
+  // const [game, setGame] = useState<any>(null);
+  // const [me, setMe] = useState<any>(null);
+  const [firstOpponent] = useState<any>(null);
+  // const [secondOpponent, setSecondOpponent] = useState<any>(null);
+  // const [thirdOpponent, setThirdOpponent] = useState<any>(null);
+  const [message, ] = useState<string>("Waiting for players...");
+
 
   // Refs for card positions
-  const deckRef = useRef<HTMLDivElement>(null);
-  const playerHandRef = useRef<HTMLDivElement>(null);
-  const playerPlayAreaRef = useRef<HTMLDivElement>(null);
-  const opponentOneHandRef = useRef<HTMLDivElement>(null);
-  const opponentTwoHandRef = useRef<HTMLDivElement>(null);
-  const opponentThreeHandRef = useRef<HTMLDivElement>(null);
-  const opponentOnePlayAreaRef = useRef<HTMLDivElement>(null);
-  const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
-  const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
+  // const deckRef = useRef<HTMLDivElement>(null);
+  // const playerHandRef = useRef<HTMLDivElement>(null);
+  // const playerPlayAreaRef = useRef<HTMLDivElement>(null);
+  // const opponentOneHandRef = useRef<HTMLDivElement>(null);
+  // const opponentTwoHandRef = useRef<HTMLDivElement>(null);
+  // const opponentThreeHandRef = useRef<HTMLDivElement>(null);
+  // const opponentOnePlayAreaRef = useRef<HTMLDivElement>(null);
+  // const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
+  // const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
+
+  console.log(showParticipants);
+  
 
   const { code } = useParams();
   const { socket } = useSocket();
   const { user } = useAppContext();
-
+  
   // Simplified player simulation
   useEffect(() => {
     if (players.length >= maxPlayers) {

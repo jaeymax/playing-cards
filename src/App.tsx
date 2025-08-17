@@ -31,7 +31,6 @@ import RecentGamesPage from "./pages/RecentGames/RecentGamesPage";
 import GameDetailsPage from "./pages/GameDetails/GameDetailsPage";
 import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
 import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
-import PlayTest from "./pages/PlayNow";
 import ConnectionStatusIndicator from "./components/ConnectionStatusIndicator";
 import GameModal from "./components/GameModal";
 
