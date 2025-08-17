@@ -410,8 +410,8 @@ export const playCardToSlot = (
 ) => {
   const slotRect = destSlot?.getBoundingClientRect();
   const deckRect = deckRef?.current?.getBoundingClientRect();
-  const xOffset = slotRect?.left - (deckRect?.left || 0);
-  const yOffset = slotRect?.top - (deckRect?.top || 0);
+  const xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  const yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
 
   card.pos_x = xOffset;
   card.pos_y = yOffset;

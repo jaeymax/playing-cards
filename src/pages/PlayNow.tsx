@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import Card from "@/components/Card";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import {
   shuffleCards,
   dealCards,
-  getSlotByPosition,
-  playCardToSlot,
   handlePlayedCard,
   handleGameMessage,
 } from "@/utils/Functions";
@@ -16,6 +13,10 @@ import playedCardSound from "@/sounds/sound4.mp3";
 import WinnerModal from "@/components/WinnerModal";
 import PlayerInfo from "@/components/PlayerInfo";
 import GameControls from "@/components/GameControls";
+import OpponentArea from "@/components/OpponentArea";
+import DeckArea from "@/components/DeckArea";
+import PlayerArea from "@/components/PlayerArea";
+import GameMessage from "@/components/GameMessage";
 
 const PlayTest = () => {
   const { user } = useAppContext();
@@ -293,37 +294,23 @@ const PlayTest = () => {
           onShuffle={handleShuffle}
         />
 
-        {/* opponent area 1 */}
-        <div
-          id="opponentArea"
+        <OpponentArea
+          id="opponentArea1"
           ref={opponentOneHandRef}
           className="borde absolute left-1/2 -translate-x-1/2 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
-        >
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="card-slot" data-position={index}></div>
-          ))}
-        </div>
-        {/* opponent area 2 */}
-        <div
-          id="opponentArea"
-          ref={opponentTwoHandRef}
-          className="borde rotate-90 absolute left-0 top-1/3  mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
-        >
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="card-slot" data-position={index}></div>
-          ))}
-        </div>
+        />
 
-        {/* opponent area 3 */}
-        <div
-          id="opponentArea"
+        <OpponentArea
+          id="opponentArea2"
+          ref={opponentTwoHandRef}
+          className="borde rotate-90 absolute left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        />
+
+        <OpponentArea
+          id="opponentArea3"
           ref={opponentThreeHandRef}
-          className="borde absolute rotate-90 top-1/3  right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
-        >
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="card-slot" data-position={index}></div>
-          ))}
-        </div>
+          className="borde absolute rotate-90 top-1/3 right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        />
 
         <div className="borde z-[100000] w-ful absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
           <div
@@ -353,31 +340,9 @@ const PlayTest = () => {
                 ></div>
               ))}
             </div>
-            <div
-              className="flex deck hidde absolute  top-1/4 p-2 left-1/3 borde  border-blue-600"
-              ref={deckRef}
-            >
-              {[...gameCards].reverse().map((card) => (
-                <Card
-                  key={card.card.card_id}
-                  imageUrl={card.card.image_url}
-                  id={card.card.card_id}
-                  game_code={game?.code}
-                  game_card_id={card.id}
-                  rank={card.card.rank}
-                  suit={card.card.suit}
-                  card_player_id={card.player_id}
-                  current_player_id={me?.id}
-                  status={card.status}
-                  transform={`translate(${card.pos_x}px, ${
-                    card.pos_y
-                  }px) rotate(${card.rotation + 0}deg)`}
-                  zIndex={card.z_index}
-                  inSlot={card.inSlot}
-                  slotPosition={card.slotPosition}
-                />
-              ))}
-            </div>
+
+            <DeckArea ref={deckRef} gameCards={gameCards} game={game} me={me} />
+
             <div
               className="opponent-three-play-area flex borde border-black w-ful"
               ref={opponentThreePlayAreaRef}
@@ -407,21 +372,14 @@ const PlayTest = () => {
           </div>
         </div>
 
-        {!gameEnded && (
-          <div className="bg-yellow-200/0 opacity-50 sm:opacity-100 message-box text-center text-gray-300 mx-auto max-w-md w-full p-4 rounded-m text-xs absolute  bottom-32 sm:bottom-52 left-1/2 -translate-x-1/2">
-            {message}
-          </div>
-        )}
+        <GameMessage message={message} gameEnded ={gameEnded} />
 
-        <div
+        <PlayerArea
           id="playerArea"
-          className="container   absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
           ref={playerHandRef}
-        >
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="card-slot" data-position={index}></div>
-          ))}
-        </div>
+          className="container absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
+        />
+
         <PlayerInfo
           name={me?.user.username || "Player"}
           avatar={me?.user.image_url || "path/to/avatar.jpg"}

@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import PlayTest from "@/pages/PlayTest";
+import PlayNow from "@/pages/PlayNow";
 import PlayVsComputer from "@/pages/PlayVsComputer";
 import PlayWithFriend from "@/pages/PlayWithFriend";
 
@@ -12,13 +12,13 @@ const GameModal = () => {
   const renderGame = () => {
     switch (gameType) {
       case "playNow":
-        return <PlayTest />;
+        return <PlayNow />;
       case "playWithFriend":
         return <PlayWithFriend />;
       case "playVsComputer":
         return <PlayVsComputer />;
       default:
-        return <PlayTest />; // Fallback to PlayTest if no gameType specified
+        return <PlayNow />; // Fallback to PlayNow if no gameType specified
     }
   };
 

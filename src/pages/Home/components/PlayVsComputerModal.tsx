@@ -56,18 +56,23 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
 
   const createBotGame = async () => {
     console.log(`Creating game with bot`);
-    const response = await fetch(`${baseUrl}/games/create-bot`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({userId: user?.id}), 
-    });
-    const data = await response.json();
-    console.log("Game created:", data);
-    if (!response.ok) {
-      console.error('Failed to create game:', response.statusText);
-      return;
+    try{
+      const response = await fetch(`${baseUrl}/games/create-bot`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({userId: user?.id}), 
+      });
+      const data = await response.json();
+      console.log("Game created:", data);
+
+      if (!response.ok) {
+        console.error('Failed to create game:', response.statusText);
+        return;
+      }
+    } catch (error) {
+      console.error("Error creating game:", error);
     }
   };
 
