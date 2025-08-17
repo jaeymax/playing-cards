@@ -3,6 +3,8 @@ import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
+import { get } from "http";
+import { ensureGuest, getToken } from "@/utils/Functions";
 
 interface PlayVsComputerModalProps {
   isOpen: boolean;
@@ -49,12 +51,23 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
     useState<string>("medium");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const navigate = useNavigate();
+  const { updateUser } = useAppContext();
   const { user } = useAppContext();
   const handleStartGame = () => {
     setShowConfirmation(true);
   };
 
   const createBotGame = async () => {
+
+    const authToken = getToken();
+    let guest = null;
+    if (!authToken) {
+      const user = await ensureGuest();
+      if(user){
+        updateUser(user);
+        guest = user;
+      }
+    }
     console.log(`Creating game with bot`);
     try{
       const response = await fetch(`${baseUrl}/games/create-bot`, {
@@ -62,7 +75,7 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({userId: user?.id}), 
+        body: JSON.stringify({ userId: user?.id || guest?.id }),
       });
       const data = await response.json();
       console.log("Game created:", data);
