@@ -18,6 +18,7 @@ import DeckArea from "@/components/DeckArea";
 import GameMessage from "@/components/GameMessage";
 import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
+import GameOverModal from "@/components/GameOverModal";
 
 const PlayVsComputer = () => {
   const { code } = useParams();
@@ -60,6 +61,7 @@ const PlayVsComputer = () => {
   const [showShuffleButton, setShowShuffleButton] = useState(false);
   const [message, setMessage] = useState<string>("Your turn! Click to play");
   const [gameEnded, setGameEnded] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
 
   const opponentOneHandRef = useRef<HTMLDivElement>(null);
@@ -111,11 +113,11 @@ const PlayVsComputer = () => {
     getOpponentsData(data.players);
   };
 
-  const dealtCardsCallback = (cards: any) => {
+  const dealtCardsCallback = async (cards: any) => {
     console.log("DealtCards", cards);
     const currentMe = meRef.current;
     setGameCards(cards);
-    dealCards(
+    await dealCards(
       cards,
       currentMe.id,
       {
@@ -132,6 +134,10 @@ const PlayVsComputer = () => {
     );
     setShowDealButton(false);
     setShowShuffleButton(false);
+    // setGame((prev:any) => ({
+    //   ...prev,
+    //   status:"in_progress"
+    // }));
   };
 
   const shuffledDeckCallback = (cards: any) => {
@@ -170,6 +176,7 @@ const PlayVsComputer = () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
       socket?.off("gameMessage", gameMessageCallback);
+      socket?.emit("leave-room", code);
     };
   }, []);
 
@@ -217,19 +224,48 @@ const PlayVsComputer = () => {
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
+    const dealer = data.players.find((player: any) => player.is_dealer);
+    if (dealer.user.username.startsWith("Bot")) {
+      console.log("Bot is the dealer");
+      handleShuffle();
+      setTimeout(() => {
+        handleDeal();
+      }, 5000);
+    }
   };
+
+  const gameOverCallback = (winnerData:any) => {
+    console.log("Game over");
+    setGameOver(true);
+    setWinningPlayer(winnerData.winner);
+    console.log("Winner data:", winnerData);
+  }
+
+  const rematchCallback = (data: any) => {
+    console.log("Hand rematch:", data);
+    setWinningPlayer(null);
+    setPlayers(data.players);
+    getMyData(data.players);
+    getOpponentsData(data.players);
+    setGame(data);
+    setGameCards(data.cards);
+  }
 
   useEffect(() => {
     if (game) {
       socket?.on("playedCard", playedCardCallback);
       socket?.on("gameEnded", gameEndedCallback);
       socket?.on("startNewHand", startNewHandCallback);
+      socket?.on("gameOver", gameOverCallback);
+      socket?.on("rematch", rematchCallback);
     }
 
     return () => {
       socket?.off("playedCard", playedCardCallback);
       socket?.off("gameEnded", gameEndedCallback);
       socket?.off("startNewHand", startNewHandCallback);
+      socket?.off("gameOver", gameOverCallback);
+      socket?.off("rematch", rematchCallback);
     };
   }, [game, gameCards]);
 
@@ -241,8 +277,117 @@ const PlayVsComputer = () => {
         (player: any) => player.position === game?.current_player_position
       );
       setMessage(`${player?.user.username}'s turn`);
+      // bot logic can be added here if needed
+
+      computerPlay(game);
     }
   }, [game]);
+
+  const getCardById = (cardId: number, cards: any[]) => {
+    return cards.find((card) => card.id === cardId);
+  };
+
+  const computerPlay = (game: any) => {
+    const botCards = game.cards.filter(
+      (card: any) => card.player_id === firstOpponent?.id
+    );
+    const botHand = botCards.filter((card: any) => card.status === "in_hand");
+    if (!botHand.length) {
+      return;
+    }
+    setMessage("Bot is thinking...");
+    let currentLeadingSuit = null;
+
+    console.log('current_trick', game.current_trick);
+
+    if (game.current_trick) {
+      currentLeadingSuit = game.current_trick.leading_suit;
+    }
+
+    let randomCard = null;
+    if (!currentLeadingSuit) {
+      randomCard = botHand[Math.floor(Math.random() * botHand.length)];
+
+      // const leaderPosition = game.current_trick?.leader_position;
+
+      // if (leaderPosition === firstOpponent?.position) {
+      //   randomCard = botHand[Math.floor(Math.random() * botHand.length)];
+      // } else {
+      //   console.log("Bot is not the leader, playing a random card");
+      // }
+
+    } 
+    else {
+      const validCards = botHand.filter(
+        (card: any) => card.card.suit === currentLeadingSuit
+      );
+      if (validCards.length === 1) {
+        randomCard = validCards[0];
+      } else if (validCards.length > 1) {
+        const sortedCards = validCards.sort(
+          (a: any, b: any) => a.card.value - b.card.value
+        );
+        const leadingCard = getCardById(
+          game.current_trick.cards[0].id,
+          game.cards
+        );
+        console.log("Leading Card:", leadingCard);
+        if (
+          leadingCard.card.value >
+          sortedCards[sortedCards.length - 1].card.value
+        ) {
+          randomCard = sortedCards[0];
+        } else {
+          let optimalCardIndex = 0;
+          while (optimalCardIndex < sortedCards.length) {
+            if(sortedCards[optimalCardIndex].card.value > leadingCard.card.value) {
+
+              randomCard = sortedCards[optimalCardIndex];
+              break;
+            }
+            optimalCardIndex++;
+          }
+        }
+        console.log("Sorted valid cards:", sortedCards);
+      } else {
+        const sortedCards = botHand.sort(
+          (a: any, b: any) => a.card.value - b.card.value
+        );
+        randomCard = sortedCards[0];
+      }
+    }
+
+    if (botHand.length === 5 && !firstOpponent?.is_dealer) {
+      setTimeout(() => {
+        socket?.emit("playCard", {
+          card_id: randomCard?.id,
+          game_code: code,
+          player_id: firstOpponent?.id,
+        });
+        setMessage("Bot played a card");
+      }, 5000);
+      return;
+    }
+
+    console.log("current_trick", game.current_trick);
+    console.log("Bot cards:", botCards);
+    socket?.emit("playCard", {
+      card_id: randomCard?.id,
+      game_code: code,
+      player_id: firstOpponent?.id,
+    });
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "Are you sure you want to leave the game?";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   const handleShuffle = () => {
     socket?.emit("shuffleDeck", code);
@@ -381,16 +526,33 @@ const PlayVsComputer = () => {
         />
       </div>
 
-      <WinnerModal
-        isOpen={gameEnded}
-        onClose={() => setGameEnded(false)}
-        winningPlayer={winningPlayer}
-        onPlayNextHand={() => {
-          setGameEnded(false);
-          socket?.emit("readyForNextHand", { code, winningPlayer });
-        }}
-        onLeaveGame={() => navigate("/")}
-      />
+      {gameEnded && (
+        <WinnerModal
+          isOpen={gameEnded}
+          onClose={() => setGameEnded(false)}
+          winningPlayer={winningPlayer}
+          currentPlayer={me}
+          onPlayNextHand={() => {
+            setGameEnded(false);
+            socket?.emit("readyForNextHand", { code, winningPlayer });
+          }}
+          onLeaveGame={() => navigate("/")}
+        />
+      )}
+
+      {gameOver && (
+        <GameOverModal
+          isOpen={gameOver}
+          onClose={() => setGameOver(false)}
+          winningPlayer={winningPlayer}
+          currentPlayer={me}
+          onRematch={() => {
+            setGameOver(false);
+            socket?.emit("rematch", { code, winningPlayer });
+          }}
+          onLeaveGame={() => navigate("/")}
+        />
+      )}
     </>
   );
 };

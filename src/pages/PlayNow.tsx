@@ -17,6 +17,7 @@ import OpponentArea from "@/components/OpponentArea";
 import DeckArea from "@/components/DeckArea";
 import PlayerArea from "@/components/PlayerArea";
 import GameMessage from "@/components/GameMessage";
+import GameOverModal from "@/components/GameOverModal";
 
 const PlayTest = () => {
   const { user } = useAppContext();
@@ -44,6 +45,7 @@ const PlayTest = () => {
   const [showDealButton, setShowDealButton] = useState(false);
   const [showShuffleButton, setShowShuffleButton] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
 
   const navigate = useNavigate();
@@ -185,6 +187,7 @@ const PlayTest = () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
       socket?.off("gameMessage", gameMessageCallback);
+      socket?.emit("leave-room", code);
     };
   }, []);
 
@@ -194,17 +197,40 @@ const PlayTest = () => {
     setWinningPlayer(data.winner);
   };
 
+  const gameOverCallback = (winnerData:any) => {
+    console.log("Game over");
+    setGameOver(true);
+    setWinningPlayer(winnerData.winner);
+    console.log("Winner data:", winnerData);
+  }
+
+  const rematchCallback = (data: any) => {
+    console.log("Hand rematch:", data);
+    setGameOver(false);
+    setWinningPlayer(null);
+    setPlayers(data.players);
+    getMyData(data.players);
+    getOpponentsData(data.players);
+    setGame(data);
+    setGameCards(data.cards);
+  }
+
   useEffect(() => {
     if (game) {
       socket?.on("playedCard", playedCardCallback);
       socket?.on("gameEnded", gameEndedCallback);
       socket?.on("startNewHand", startNewHandCallback);
+      socket?.on("gameOver", gameOverCallback);
+      socket?.on("rematch", rematchCallback);
+
     }
 
     return () => {
       socket?.off("playedCard", playedCardCallback);
       socket?.off("gameEnded", gameEndedCallback);
       socket?.off("startNewHand", startNewHandCallback);
+      socket?.off("gameOver", gameOverCallback);
+      socket?.off("rematch", rematchCallback);
     };
   }, [game, gameCards]);
 
@@ -392,12 +418,27 @@ const PlayTest = () => {
         isOpen={gameEnded}
         onClose={() => setGameEnded(false)}
         winningPlayer={winningPlayer}
+        currentPlayer={me}
         onPlayNextHand={() => {
           setGameEnded(false);
           socket?.emit("readyForNextHand", { code, winningPlayer });
         }}
         onLeaveGame={() => navigate("/")}
       />
+
+      {gameOver && (
+              <GameOverModal
+                isOpen={gameOver}
+                onClose={() => setGameOver(false)}
+                winningPlayer={winningPlayer}
+                currentPlayer={me}
+                onRematch={() => {
+                  setGameOver(false);
+                  socket?.emit("rematch", { code, winningPlayer });
+                }}
+                onLeaveGame={() => navigate("/")}
+              />
+            )}
     </>
   );
 };

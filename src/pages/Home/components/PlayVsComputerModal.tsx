@@ -3,7 +3,6 @@ import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
-import { get } from "http";
 import { ensureGuest, getToken } from "@/utils/Functions";
 
 interface PlayVsComputerModalProps {
