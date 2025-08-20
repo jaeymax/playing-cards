@@ -169,6 +169,12 @@ body {
   top: 0;
   transition: all 0.4s;
   border-radius: 8px;
+  transform-origin: bottom right;
+}
+
+.deck{
+  width: 60px;
+  height: 80px;
 }
 
 .card-slot {
@@ -242,6 +248,15 @@ div.player-play-area > div:not(:first-child){
   margin-top:-65px;
 }
 
+div.opponent-two-play-area > div:not(:first-child){
+  
+  margin-left:-56px
+}
+
+div.opponent-three-play-area > div:not(:first-child){
+  margin-left: -56px;
+}
+
 div.opponent-one-play-area > div:not(:first-child){
   /*background-color: rgba(0, 0, 0);*/
   margin-top:-65px;
@@ -269,6 +284,11 @@ div.opponent-one-play-area > div:not(:first-child){
     width: 30px;
     height: 40px;
     /* border-radius: 8px; */
+  }
+
+  .deck{
+    width: 30px;
+    height: 40px;
   }
 
   .card-slot {
@@ -306,6 +326,14 @@ div.opponent-one-play-area > div:not(:first-child){
 
   div.player-play-area > div:not(:first-child){
     margin-top:-30px;
+  }
+  
+  div.opponent-two-play-area > div:not(:first-child){
+    margin-left:-32px
+  }
+  
+  div.opponent-three-play-area > div:not(:first-child){
+    margin-left: -32px;
   }
 
   div.opponent-one-play-area > div:not(:first-child){

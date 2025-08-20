@@ -78,10 +78,10 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
       });
       const data = await response.json();
       console.log("Game created:", data);
-      if (!response.ok) {
-        console.error('Failed to create game:', response.statusText);
-        return;
-      }
+        if (!response.ok) {
+          console.error('Failed to create game:', response.statusText);
+          return;
+        }
       return data;
     } catch (error) {
       console.error("Error creating game:", error);

@@ -18,7 +18,7 @@ const GameModal = () => {
       case "playVsComputer":
         return <PlayVsComputer />;
       default:
-        return <PlayNow />; // Fallback to PlayNow if no gameType specified
+        return <PlayWithFriend />; // Fallback to PlayNow if no gameType specified
     }
   };
 

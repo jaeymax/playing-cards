@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
+import { ensureGuest, getToken } from "@/utils/Functions";
 
 interface InviteFriendModalProps {
   isOpen: boolean;
@@ -13,23 +16,48 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
 }) => {
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [gameConfig, setGameConfig] = useState({
-    numHands: 10,
+    winPoints: 10,
     includeAces: true,
     includeSixes: false,
     isRated: true,
     numPlayers: 2,
   });
 
+  const {user, updateUser} = useAppContext();
+
 
   const navigate = useNavigate();
   const handleCreateGame = async () => {
-    setIsCreatingGame(true);
+    const authToken = getToken();
+    let guest = null;
+    if (!authToken) {
+      const user = await ensureGuest();
+      if(user){
+        updateUser(user);
+        guest = user;
+      }
+    }
     const generatedCode = "12345";
     try {
       console.log("Game configuration:", gameConfig);
-      // Implement game creation logic here
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      navigate(`/game/${generatedCode}`, {
+      setIsCreatingGame(true);
+      const response = await fetch(`${baseUrl}/games/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...gameConfig, userId: user?.id || guest?.id }),
+      }); 
+
+
+      const data = await response.json();
+
+      console.log('game data', data)
+      if (!response.ok) {
+        console.error('Failed to create game:', response.statusText);
+        return;
+      }
+      navigate(`/game/${data.game.code}`, {
         state: { gameType: "playWithFriend" },
       });
     } catch (error) {
@@ -51,21 +79,21 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
           <div className="space-y-3">
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm font-medium text-gray-300">
-                Number of Hands
+                Number of Win points
               </label>
               <span className="text-sm font-medium text-blue-400">
-                {gameConfig.numHands}
+                {gameConfig.winPoints}
               </span>
             </div>
             <input
               type="range"
               min={1}
               max={50}
-              value={gameConfig.numHands}
+              value={gameConfig.winPoints}
               onChange={(e) =>
                 setGameConfig((prev) => ({
                   ...prev,
-                  numHands: parseInt(e.target.value),
+                  winPoints: parseInt(e.target.value),
                 }))
               }
               className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"

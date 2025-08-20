@@ -1,4 +1,6 @@
 import { baseUrl } from "@/config/api";
+import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
+import playedCardSound from "@/sounds/sound4.mp3";
 
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
@@ -7,6 +9,20 @@ import dealCardSound from "@/sounds/sound2.mp3";
 
 function playDealCardSound() {
   const audio = new Audio(dealCardSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+export function playShuffleSound() {
+  const audio = new Audio(shuffleSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+export function playPlayedCardSound() {
+  const audio = new Audio(playedCardSound);
   audio.play().catch((err) => {
     console.error("Failed to play sound:", err);
   });
@@ -159,52 +175,52 @@ export const bridgeFinish = (
   });
 };
 
+const getTarget = (player_id:number, current_player_id:any, first_opponent_id:any, second_opponent_id:any, third_opponent_id:number)=>{
+  if(player_id == current_player_id)return 'player'
+  else if(player_id == first_opponent_id)return 'opponent1'
+  else if(player_id == second_opponent_id)return 'opponent2'
+  else if(player_id == third_opponent_id)return 'opponent3'
+}
+
 export const extractDealingSequence = (
   cards: any[],
-  current_player_id: number
+  current_player_id: number,
+  first_opponent_id:number,
+  second_opponent_id:number,
+  third_opponent_id: number
 ) => {
+  
+  console.log(current_player_id, first_opponent_id, second_opponent_id, third_opponent_id)
+
   const player_ids_and_card_hand_postions = cards
     .filter((card) => card.status == "in_hand")
     .map((card) => {
       return { player_id: card.player_id, hand_position: card.hand_position };
     });
-  const opponents = ["opponent1", "opponent2", "opponent3"];
-  let opponent_index = 0;
-  const sequence: any[] = [];
-  const player_id_map = new Map();
-  let hand_positions = [];
-  let target = "";
-  for (let id_and_hand_position of player_ids_and_card_hand_postions) {
-    const { player_id, hand_position } = id_and_hand_position;
-    if (player_id_map.has(player_id)) {
-      if (target == player_id_map.get(player_id)) {
-        hand_positions.push(hand_position);
-      } else {
-        sequence.push({ target, positions: hand_positions });
-        hand_positions = [];
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
+
+    const sequence: any[] = [];
+   //console.log('ids_and_cards', player_ids_and_card_hand_postions)
+
+    let positions = []
+    let index = 0;
+
+    while(index + 1 < player_ids_and_card_hand_postions.length){
+      const {player_id, hand_position} = player_ids_and_card_hand_postions[index];
+      positions.push(hand_position);
+
+      if(player_ids_and_card_hand_postions[index].player_id != player_ids_and_card_hand_postions[index+1].player_id){
+         const target = getTarget(player_id, current_player_id, first_opponent_id, second_opponent_id, third_opponent_id);
+         sequence.push({target, positions})
+         positions = []
       }
-    } else {
-      sequence.push({ target, positions: hand_positions });
-      hand_positions = [];
-      target = "";
-      if (player_id == current_player_id) {
-        console.log("current_player_id", current_player_id);
-        player_id_map.set(player_id, "player");
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
-      } else {
-        player_id_map.set(player_id, opponents[opponent_index]);
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
-        opponent_index++;
-      }
+
+      index++;
     }
-  }
-  sequence.push({ target, positions: hand_positions });
-  sequence.shift();
-  //console.log("player_id_map", player_id_map);
+  
+    positions.push(player_ids_and_card_hand_postions[index].hand_position);
+    const target = getTarget(player_ids_and_card_hand_postions[index].player_id, current_player_id, first_opponent_id, second_opponent_id, third_opponent_id);
+    sequence.push({target, positions})
+  
   console.log("sequence", sequence);
   return sequence;
 };
@@ -248,8 +264,24 @@ export const dealSequenceToPositions = (
         if (!refs.deckRef.current) return;
         const deckRect = refs.deckRef.current.getBoundingClientRect();
 
-        const xOffset = slotRect?.left - deckRect.left;
-        const yOffset = slotRect?.top - deckRect.top;
+        let xOffset = slotRect?.left - deckRect.left;
+        let yOffset = slotRect?.top - deckRect.top;
+
+        if(target == 'player'){
+          xOffset = slotRect?.left - deckRect.left;
+           yOffset = slotRect?.top - deckRect.top;
+        }
+        else if(target == 'opponent1'){
+          xOffset = slotRect?.left - deckRect.left;
+           yOffset = slotRect?.top - deckRect.top;
+        }
+        else if(target === 'opponent2'){
+          xOffset = slotRect?.left - deckRect.right;
+           yOffset = slotRect?.bottom - deckRect.bottom;
+        }else{
+          xOffset = slotRect?.left - deckRect.right;
+           yOffset = slotRect?.bottom - deckRect.bottom;
+        }
 
         cardToMove.pos_x = xOffset;
         cardToMove.pos_y = yOffset;
@@ -300,6 +332,9 @@ const moveDrawPileOffScreen = (
 export const dealCards = async (
   cards: any[],
   current_player_id: number,
+  first_opponent_id:number,
+  second_opponent_id:number,
+  third_opponent_id:number,
   refs: CardRefs,
   setGameCards: (cards: any[]) => void,
   isDealing: boolean,
@@ -311,7 +346,7 @@ export const dealCards = async (
 
   let cardIndex = 0;
 
-  for (const sequence of extractDealingSequence(cards, current_player_id)) {
+  for (const sequence of extractDealingSequence(cards, current_player_id, first_opponent_id, second_opponent_id, third_opponent_id)) {
     await dealSequenceToPositions(
       cardIndex,
       sequence.target,
@@ -406,18 +441,54 @@ export const playCardToSlot = (
   destSlot: Element | null,
   trick_number: number,
   deckRef: React.RefObject<HTMLDivElement>,
-  setGameCards: (cb: (prevCards: any[]) => any[]) => void
+  setGameCards: (cb: (prevCards: any[]) => any[]) => void,
+  opponent_number:number
 ) => {
   const slotRect = destSlot?.getBoundingClientRect();
   const deckRect = deckRef?.current?.getBoundingClientRect();
-  const xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
-  const yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+
+  if(opponent_number == 0){
+     xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+     yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  }
+  else if(opponent_number == 1){
+     xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+     yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  }
+  else if(opponent_number == 2){
+    xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+    yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+  }
+  else{
+    xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+    yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+  }
 
   card.pos_x = xOffset;
   card.pos_y = yOffset;
   card.rotation = 0;
   card.inSlot = true;
   card.slotPosition = { target: "player", position: 0 };
+
+  let rotation = 0;
+
+  switch(opponent_number){
+    case 0:
+      rotation = 0;
+      break;
+    case 1:
+      rotation = 0;
+      break;
+    case 2: 
+      rotation = 90;
+      break;
+    case 3:
+      rotation = 90;
+      break;
+
+  }
 
   setGameCards((prevCards) => {
     return prevCards.map((c) => {
@@ -427,7 +498,7 @@ export const playCardToSlot = (
           pos_x: xOffset,
           status: "played",
           pos_y: yOffset,
-          rotation: 0,
+          rotation: rotation,
           inSlot: true,
           z_index: trick_number,
           slotPosition: { target: "player", position: 0 },
@@ -486,25 +557,25 @@ export const handlePlayedCard = ({
 
   if (player_id === me?.id) {
     const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
-    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 0);
   } else if (player_id === firstOpponent?.id) {
     const destSlot = getSlotByPosition(
       trick_number - 1,
       opponentOnePlayAreaRef
     );
-    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 1);
   } else if (player_id === secondOpponent?.id) {
     const destSlot = getSlotByPosition(
       trick_number - 1,
       opponentTwoPlayAreaRef
     );
-    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 2);
   } else if (player_id === thirdOpponent?.id) {
     const destSlot = getSlotByPosition(
       trick_number - 1,
       opponentThreePlayAreaRef
     );
-    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 3);
   }
 };
 

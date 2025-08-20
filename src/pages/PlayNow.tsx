@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import {
@@ -6,10 +6,10 @@ import {
   dealCards,
   handlePlayedCard,
   handleGameMessage,
+  playShuffleSound,
+  playPlayedCardSound,
 } from "@/utils/Functions";
 import { useSocket } from "@/contexts/SocketProvider";
-import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
-import playedCardSound from "@/sounds/sound4.mp3";
 import WinnerModal from "@/components/WinnerModal";
 import PlayerInfo from "@/components/PlayerInfo";
 import GameControls from "@/components/GameControls";
@@ -50,19 +50,6 @@ const PlayTest = () => {
 
   const navigate = useNavigate();
 
-  function playShuffleSound() {
-    const audio = new Audio(shuffleSound);
-    audio.play().catch((err) => {
-      console.error("Failed to play sound:", err);
-    });
-  }
-
-  function playPlayedCardSound() {
-    const audio = new Audio(playedCardSound);
-    audio.play().catch((err) => {
-      console.error("Failed to play sound:", err);
-    });
-  }
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -117,13 +104,15 @@ const PlayTest = () => {
     getOpponentsData(data.players);
   };
 
-  const dealtCardsCallback = (cards: any) => {
+  const dealtCardsCallback = useCallback((cards: any) => {
     console.log("DealtCards", cards);
-    const currentMe = meRef.current;
     setGameCards(cards);
     dealCards(
       cards,
-      currentMe.id,
+      me?.id,
+      firstOpponent?.id,
+      secondOpponent?.id,
+      thirdOpponent?.id,
       {
         playerHandRef,
         opponentOneHandRef,
@@ -138,7 +127,7 @@ const PlayTest = () => {
     );
     setShowDealButton(false);
     setShowShuffleButton(false);
-  };
+  }, [me, firstOpponent, secondOpponent, thirdOpponent]);
 
   const startNewHandCallback = (data: any) => {
     console.log("Start new hand:", data);
@@ -158,38 +147,65 @@ const PlayTest = () => {
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
   };
 
-  const meRef = useRef(me);
   useEffect(() => {
-    meRef.current = me;
-  }, [me]);
-
-  useEffect(() => {
-    console.log("Game code:", code);
+    console.log(socket)
     socket?.emit("getGameData", code);
 
     socket?.on("gameData", getGameDataCallback);
     socket?.on("updatedGameData", getUpdatedGameData);
-    socket?.on("dealtCards", dealtCardsCallback);
-    socket?.on("shuffledDeck", shuffledDeckCallback);
-    socket?.on("connect", () => {
-      socket?.emit("join-room", code);
-    });
-    socket?.on("game-not-found", () => {
-      console.error("Game not found with code:", code);
-      alert("Game not found. Please check the code and try again.");
-      navigate("/");
-    });
+    socket?.on("connect", handleConnect);
+    socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
       socket?.off("updatedGameData", getUpdatedGameData);
+      socket?.off("gameMessage", gameMessageCallback);
+    //  socket?.emit("leave-room", code);
+    };
+  }, [socket, user])
+
+  useEffect(()=>{
+    socket?.on("dealtCards", dealtCardsCallback);
+    socket?.on("shuffledDeck", shuffledDeckCallback);
+
+    return ()=>{
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
-      socket?.off("gameMessage", gameMessageCallback);
-      socket?.emit("leave-room", code);
+    }
+
+  },[socket, me, firstOpponent, secondOpponent, thirdOpponent])
+
+  useEffect(() => {
+    if (game) {
+      socket?.on("playedCard", playedCardCallback);
+      socket?.on("gameEnded", gameEndedCallback);
+      socket?.on("startNewHand", startNewHandCallback);
+      socket?.on("gameOver", gameOverCallback);
+      socket?.on("rematch", rematchCallback);
+
+    }
+
+    return () => {
+      socket?.off("playedCard", playedCardCallback);
+      socket?.off("gameEnded", gameEndedCallback);
+      socket?.off("startNewHand", startNewHandCallback);
+      socket?.off("gameOver", gameOverCallback);
+      socket?.off("rematch", rematchCallback);
+    };
+  }, [socket, game, gameCards]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "Are you sure you want to leave the game?";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
+
 
   const gameEndedCallback = (data: any) => {
     console.log("gameEnded", data);
@@ -215,35 +231,6 @@ const PlayTest = () => {
     setGameCards(data.cards);
   }
 
-  useEffect(() => {
-    if (game) {
-      socket?.on("playedCard", playedCardCallback);
-      socket?.on("gameEnded", gameEndedCallback);
-      socket?.on("startNewHand", startNewHandCallback);
-      socket?.on("gameOver", gameOverCallback);
-      socket?.on("rematch", rematchCallback);
-
-    }
-
-    return () => {
-      socket?.off("playedCard", playedCardCallback);
-      socket?.off("gameEnded", gameEndedCallback);
-      socket?.off("startNewHand", startNewHandCallback);
-      socket?.off("gameOver", gameOverCallback);
-      socket?.off("rematch", rematchCallback);
-    };
-  }, [game, gameCards]);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e: any) => {
-      e.preventDefault();
-      e.returnValue = "Are you sure you want to leave the game?";
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
 
   const handleShuffle = () => {
     socket?.emit("shuffleDeck", code);
@@ -284,6 +271,16 @@ const PlayTest = () => {
 
   const gameMessageCallback = (message: string) => {
     handleGameMessage(message, setMessage);
+  };
+
+  const handleConnect = () => {
+    socket?.emit("join-room", code);
+  };
+
+  const handleGameNotFound = () => {
+    console.error("Game not found with code:", code);
+    alert("Game not found. Please check the code and try again.");
+    navigate("/");
   };
 
   return (
