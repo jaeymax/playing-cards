@@ -356,7 +356,7 @@ const PlayWithFriend = () => {
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
             avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
-            points={thirdOpponent?.score}
+            points={secondOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
         )}
@@ -389,7 +389,7 @@ const PlayWithFriend = () => {
         <OpponentArea
           id="opponentArea2"
           ref={opponentTwoHandRef}
-          className="borde border-red-500 rotate-90 absolute -left-4 sm:left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+          className="borde border-red-500 rotate-90 absolute -left-2 sm:left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
         />
 
         <OpponentArea

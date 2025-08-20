@@ -37,7 +37,7 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
         guest = user;
       }
     }
-    const generatedCode = "12345";
+   
     try {
       console.log("Game configuration:", gameConfig);
       setIsCreatingGame(true);
