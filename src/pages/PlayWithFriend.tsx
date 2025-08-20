@@ -369,13 +369,16 @@ const PlayWithFriend = () => {
           />
         )}
 
-        <GameControls
+      {
+        !showShareOverlay && !showParticipants && (<GameControls
           showButtons={showDealButton && showShuffleButton}
           isDealing={isDealing}
           isShuffling={isShuffling}
           onDeal={handleDeal}
           onShuffle={handleShuffle}
-        />
+        />)
+      }
+        
 
         <OpponentArea
           id="opponentArea1"
