@@ -49,6 +49,7 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
   const [selectedDifficulty, setSelectedDifficulty] =
     useState<string>("medium");
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [loading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { updateUser } = useAppContext();
   const { user } = useAppContext();
@@ -57,18 +58,17 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
   };
 
   const createBotGame = async () => {
-
     const authToken = getToken();
     let guest = null;
     if (!authToken) {
       const user = await ensureGuest();
-      if(user){
+      if (user) {
         updateUser(user);
         guest = user;
       }
     }
     console.log(`Creating game with bot`);
-    try{
+    try {
       const response = await fetch(`${baseUrl}/games/create-bot`, {
         method: "POST",
         headers: {
@@ -78,10 +78,11 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
       });
       const data = await response.json();
       console.log("Game created:", data);
-        if (!response.ok) {
-          console.error('Failed to create game:', response.statusText);
-          return;
-        }
+      if (!response.ok) {
+        console.error("Failed to create game:", response.statusText);
+        return;
+      }
+
       return data;
     } catch (error) {
       console.error("Error creating game:", error);
@@ -91,9 +92,10 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
 
   const handleConfirmStart = async () => {
     console.log(`Starting game with ${selectedDifficulty} difficulty`);
-    
+    setIsLoading(true);
     const data = await createBotGame();
-    if(!data)return;
+    setIsLoading(false);
+    if (!data) return;
     const gameCode = data.game.code;
     navigate(`/game/${gameCode}`, { state: { gameType: "playVsComputer" } });
     onClose();
@@ -101,7 +103,12 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Play vs Computer">
-      {!showConfirmation ? (
+      {loading ? (
+        <div className="py-10 text-center space-y-6">
+          <div className="w-16 h-16 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-lg font-medium text-white">Starting game...</p>
+        </div>
+      ) : !showConfirmation ? (
         <div className="space-y-6 py-4">
           <p className="text-gray-300 text-center">
             Select difficulty level to start the game

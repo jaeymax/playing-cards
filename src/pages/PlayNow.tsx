@@ -8,6 +8,8 @@ import {
   handleGameMessage,
   playShuffleSound,
   playPlayedCardSound,
+  getPlayerIds,
+  reconcileCards,
 } from "@/utils/Functions";
 import { useSocket } from "@/contexts/SocketProvider";
 import WinnerModal from "@/components/WinnerModal";
@@ -64,9 +66,10 @@ const PlayTest = () => {
 
   const { code } = useParams();
 
-  const getMyData = (data: any[]) => {
+  const getMyData = (data: any[], cards:any[]) => {
+    const showGameButtons = cards.every((card:any)=>card.status == 'in_deck');
     const myData = data.find((player) => player.user.id === user?.id);
-    if (myData.is_dealer) {
+    if (myData.is_dealer &&  showGameButtons) {
       setShowDealButton(true);
       setShowShuffleButton(true);
     }
@@ -99,8 +102,27 @@ const PlayTest = () => {
       card.pos_x = card.pos_x * i;
       card.pos_y = card.pos_y * i;
     });
-    setGameCards(data.cards);
-    getMyData(data.players);
+
+    const {meId, firstOpponentId, secondOpponentId, thirdOpponentId} = getPlayerIds(data.players, user);
+    reconcileCards(
+            data.cards,
+            setGameCards,
+            meId,
+            firstOpponentId,
+            secondOpponentId,
+            thirdOpponentId,
+            deckRef,
+            playerHandRef,
+            opponentOneHandRef,
+            opponentTwoHandRef,
+            opponentThreeHandRef,
+            playerPlayAreaRef,
+            opponentOnePlayAreaRef,
+            opponentTwoPlayAreaRef,
+            opponentThreePlayAreaRef
+          );
+    //setGameCards(data.cards);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
   };
 
@@ -134,7 +156,7 @@ const PlayTest = () => {
     setGameEnded(false);
     setWinningPlayer(null);
     setPlayers(data.players);
-    getMyData(data.players);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
@@ -148,22 +170,25 @@ const PlayTest = () => {
   };
 
   useEffect(() => {
-    console.log(socket)
-    socket?.emit("getGameData", code);
-
-    socket?.on("gameData", getGameDataCallback);
-    socket?.on("updatedGameData", getUpdatedGameData);
-    socket?.on("connect", handleConnect);
-    socket?.on("game-not-found", handleGameNotFound);
-    socket?.on("gameMessage", gameMessageCallback);
-
+    if(user){
+      socket?.on("connect", handleConnect);
+      socket?.on("gameData", getGameDataCallback);
+      socket?.on("updatedGameData", getUpdatedGameData);
+      socket?.on("game-not-found", handleGameNotFound);
+      socket?.on("gameMessage", gameMessageCallback);
+  
+      if (socket?.connected) {
+        handleConnect();
+      }
+  
+    };
     return () => {
       socket?.off("gameData", getGameDataCallback);
       socket?.off("updatedGameData", getUpdatedGameData);
       socket?.off("gameMessage", gameMessageCallback);
     //  socket?.emit("leave-room", code);
-    };
-  }, [socket, user])
+    }
+  }, [user])
 
   useEffect(()=>{
     socket?.on("dealtCards", dealtCardsCallback);
@@ -225,7 +250,7 @@ const PlayTest = () => {
     setGameOver(false);
     setWinningPlayer(null);
     setPlayers(data.players);
-    getMyData(data.players);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
@@ -274,7 +299,9 @@ const PlayTest = () => {
   };
 
   const handleConnect = () => {
+    console.log('handling connect')
     socket?.emit("join-room", code);
+    socket?.emit("getGameData", code);
   };
 
   const handleGameNotFound = () => {

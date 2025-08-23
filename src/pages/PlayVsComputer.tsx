@@ -7,6 +7,8 @@ import {
   handlePlayedCard,
   playShuffleSound,
   playPlayedCardSound,
+  reconcileCards,
+  getPlayerIds,
 } from "@/utils/Functions";
 import bot from "@/assets/robot3.png";
 import PlayerInfo from "@/components/PlayerInfo";
@@ -34,7 +36,6 @@ const PlayVsComputer = () => {
 
   const navigate = useNavigate();
 
-
   const [firstOpponent, setFirstOpponent] = useState<any>(null);
   const [secondOpponent, setSecondOpponent] = useState<any>(null);
   const [thirdOpponent, setThirdOpponent] = useState<any>(null);
@@ -55,50 +56,82 @@ const PlayVsComputer = () => {
   const playerHandRef = useRef<HTMLDivElement>(null);
   const playerPlayAreaRef = useRef<HTMLDivElement>(null);
 
-  const getOpponentsData = useCallback((data: any[]) => {
-    const opponents = data.filter((player) => player.user.id !== user?.id);
-    if (opponents.length > 0) setFirstOpponent(opponents[0]);
-    if (opponents.length > 1) setSecondOpponent(opponents[1]);
-    if (opponents.length > 2) setThirdOpponent(opponents[2]);
-  },[user]);
+  const getOpponentsData = useCallback(
+    (data: any[]) => {
+      const opponents = data.filter((player) => player.user.id !== user?.id);
+      if (opponents.length > 0) setFirstOpponent(opponents[0]);
+      if (opponents.length > 1) setSecondOpponent(opponents[1]);
+      if (opponents.length > 2) setThirdOpponent(opponents[2]);
+    },
+    [user]
+  );
 
-  const getUpdatedGameData = useCallback((data: any) => {
-    console.log("Updated game data received:", data);
-    setGame(data);
-    const myData = data.players.find(
-      (player: any) => player.user.id === user?.id
-    );
-    setMe(myData);
-    getOpponentsData(data.players);
-  }, [user]);
+  const getUpdatedGameData = useCallback(
+    (data: any) => {
+      console.log("Updated game data received:", data);
+      setGame(data);
+      const myData = data.players.find(
+        (player: any) => player.user.id === user?.id
+      );
+      setMe(myData);
+      getOpponentsData(data.players);
+    },
+    [user]
+  );
 
-  const getMyData = useCallback((data: any[]) => {
-    const myData = data.find((player) => player.user.id === user?.id);
-    if (myData?.is_dealer) {
-      setShowDealButton(true);
-      setShowShuffleButton(true);
-    }
-    setMe(myData);
-  },[user]);
+  const getMyData = useCallback(
+    (data: any[], cards:any[]) => {
+      const myData = data.find((player) => player.user.id === user?.id);
+      const showGameButtons = cards.every((card:any)=>card.status == 'in_deck');
+      if (myData?.is_dealer && showGameButtons) {
+        setShowDealButton(true);
+        setShowShuffleButton(true);
+      }
+      setMe(myData);
+    },
+    [user]
+  );
 
-  const getGameDataCallback = useCallback((data: any) => {
-    console.log("Game data received:", data);
-    setGame(data);
+  const getGameDataCallback = useCallback(
+    (data: any) => {
+      console.log("Game data received:", data);
+      setGame(data);
 
-    setPlayers(data.players);
-    data.cards.forEach((card: any, i: number) => {
-      card.pos_x = card.pos_x * i;
-      card.pos_y = card.pos_y * i;
-    });
-    setGameCards(data.cards);
-    getMyData(data.players);
-    getOpponentsData(data.players);
-  },[user]);
+      setPlayers(data.players);
+      data.cards.forEach((card: any, i: number) => {
+        card.pos_x = card.pos_x * i;
+        card.pos_y = card.pos_y * i;
+      });
+
+
+      const {meId, firstOpponentId, secondOpponentId, thirdOpponentId} = getPlayerIds(data.players, user);
+      reconcileCards(
+        data.cards,
+        setGameCards,
+        meId,
+        firstOpponentId,
+        secondOpponentId,
+        thirdOpponentId,
+        deckRef,
+        playerHandRef,
+        opponentOneHandRef,
+        opponentTwoHandRef,
+        opponentThreeHandRef,
+        playerPlayAreaRef,
+        opponentOnePlayAreaRef,
+        opponentTwoPlayAreaRef,
+        opponentThreePlayAreaRef
+      );
+      getMyData(data.players, data.cards);
+      getOpponentsData(data.players);
+    },
+    [user, me, firstOpponent, secondOpponent, thirdOpponent]
+  );
 
   const dealtCardsCallback = useCallback(
     (cards: any) => {
       console.log("DealtCards", cards);
-      setGameCards(cards);
+      //setGameCards(cards);
       dealCards(
         cards,
         me?.id,
@@ -134,16 +167,160 @@ const PlayVsComputer = () => {
     handleGameMessage(message, setMessage);
   };
 
-  useEffect(() => {
+  // useEffect(()=>{
+  //   if(me && game){
+  //     console.log('reconciling game state')
+  //     console.log(gameCards);
 
-    if(user){
-      socket?.emit("join-room", code);
-      socket?.emit("getGameData", code);
+  //     if(gameCards.some((card:any)=>card.status == 'in_hand' || card.status == 'played')){
+  //         setShowDealButton(false);
+  //         setShowShuffleButton(false);
+  //     }
+
+  //     gameCards.forEach((card:any)=>{
+  //        if(card.status == 'played'){
+  //         const slot_position = card.trick_number - 1;
+  //         if(card.player_id == me?.id){
+  //          const targetArea = playerPlayAreaRef.current;
+  //          const slot = targetArea?.children[slot_position];
+  //          const slotRect = slot?.getBoundingClientRect();
+  //          const deckRect = deckRef?.current?.getBoundingClientRect();
+  //          let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  //          let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  //          card.x_pos = xOffset;
+  //          card.y_pos = yOffset;
+  //          card.rotation = 0;
+  //          setGameCards((prevCards:any)=>{
+  //             return prevCards.map((c:any)=>{
+  //               if(c?.id == card?.id){
+  //                return {
+  //                  ...c,
+  //                  pos_x:xOffset,
+  //                  pos_y:yOffset,
+  //                  z_index:card.trick_number
+  //                }
+  //               }
+  //               return c;
+  //             })
+  //          })
+  //         }
+  //         else if(card.player_id == firstOpponent?.id){
+  //           const targetArea = opponentOnePlayAreaRef.current;
+  //           const slot = targetArea?.children[5 - slot_position - 1];
+  //           const slotRect = slot?.getBoundingClientRect();
+  //           const deckRect = deckRef?.current?.getBoundingClientRect();
+  //           let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  //           let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  //           card.x_pos = xOffset;
+  //           card.y_pos = yOffset;
+  //           card.rotation = 0;
+  //           setGameCards((prevCards:any)=>{
+  //             return prevCards.map((c:any)=>{
+  //               if(c?.id == card?.id){
+  //                return {
+  //                  ...c,
+  //                  pos_x:xOffset,
+  //                  pos_y:yOffset,
+  //                  z_index:card.trick_number
+  //                }
+  //               }
+  //               return c;
+  //             })
+  //          })
+  //         }
+  //        }
+  //        else if(card.status == 'in_hand'){
+  //            const hand_position = card.hand_position;
+  //            if(card.player_id == me?.id){
+  //             const targetArea = playerHandRef.current;
+  //             const slot = targetArea?.children[hand_position];
+  //             const slotRect = slot?.getBoundingClientRect();
+  //             const deckRect = deckRef?.current?.getBoundingClientRect();
+  //             let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  //             let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  //             card.x_pos = xOffset;
+  //             card.y_pos = yOffset;
+  //             card.rotation = 0;
+  //             setGameCards((prevCards:any)=>{
+  //                return prevCards.map((c:any)=>{
+  //                  if(c?.id == card?.id){
+  //                   return {
+  //                     ...c,
+  //                     pos_x:xOffset,
+  //                     pos_y:yOffset
+  //                   }
+  //                  }
+  //                  return c;
+  //                })
+  //             })
+  //            }
+  //            else if(card.player_id == firstOpponent?.id){
+  //             const targetArea = opponentOneHandRef.current;
+  //             const slot = targetArea?.children[hand_position];
+  //             const slotRect = slot?.getBoundingClientRect();
+  //             const deckRect = deckRef?.current?.getBoundingClientRect();
+  //             let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  //             let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  //             card.x_pos = xOffset;
+  //             card.y_pos = yOffset;
+  //             card.rotation = 0;
+  //             setGameCards((prevCards:any)=>{
+  //                return prevCards.map((c:any)=>{
+  //                  if(c?.id == card?.id){
+  //                   return {
+  //                     ...c,
+  //                     pos_x:xOffset,
+  //                     pos_y:yOffset
+  //                   }
+  //                  }
+  //                  return c;
+  //                })
+  //             })
+  //            }else if(card.player_id == secondOpponent?.id){
+
+  //            }else if(card.player_id == thirdOpponent?.id){
+
+  //            }
+  //        }
+  //        else if(card.status == 'in_drawpile'){
+  //         setGameCards((prevCards:any)=>{
+  //           return prevCards.map((c:any)=>{
+  //             if(c?.id == card?.id){
+  //              return {
+  //                ...c,
+  //                pos_x:-1000,
+
+  //              }
+  //             }
+  //             return c;
+  //           })
+  //        })
+  //        }
+  //        else if(card.status == 'in_deck'){
+
+  //        }
+  //     })
+  //   }
+  // },[me?.id, firstOpponent?.id, secondOpponent?.id, thirdOpponent?.id])
+
+  // useEffect(()=>{
+
+  //   if(gameCards)console.log('gamecards changed', gameCards)
+  // }, [gameCards])
+
+  useEffect(() => {
+    if (user) {
+      //socket?.emit("join-room", code);
+      //socket?.emit("getGameData", code);
+      socket?.on("connect", handleConnect);
       socket?.on("gameData", getGameDataCallback);
       socket?.on("updatedGameData", getUpdatedGameData);
-      socket?.on("connect", handleConnect);
       socket?.on("game-not-found", handleGameNotFound);
       socket?.on("gameMessage", gameMessageCallback);
+
+      if (socket?.connected) {
+        handleConnect();
+      }
     }
 
     return () => {
@@ -152,9 +329,9 @@ const PlayVsComputer = () => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("game-not-found", handleGameNotFound);
       socket?.off("connect", handleConnect);
-      socket?.emit("leave-room", code);
+      //socket?.emit("leave-room", code);
     };
-  }, [socket, user]);
+  }, [user]);
 
   useEffect(() => {
     socket?.on("dealtCards", dealtCardsCallback);
@@ -164,7 +341,7 @@ const PlayVsComputer = () => {
       socket?.off("dealtCards", dealtCardsCallback);
       socket?.off("shuffledDeck", shuffledDeckCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [me, firstOpponent, secondOpponent, thirdOpponent]);
 
   useEffect(() => {
     if (game) {
@@ -182,7 +359,7 @@ const PlayVsComputer = () => {
       socket?.off("gameOver", gameOverCallback);
       socket?.off("rematch", rematchCallback);
     };
-  }, [socket, gameCards, game]);
+  }, [gameCards, game]);
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -242,24 +419,38 @@ const PlayVsComputer = () => {
     });
   };
 
-  const startNewHandCallback = useCallback((data: any) => {
+  const startNewHandCallback = async (data: any) => {
     console.log("Start new hand:", data);
     setGameEnded(false);
     setWinningPlayer(null);
     setPlayers(data.players);
-    getMyData(data.players);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
     const dealer = data.players.find((player: any) => player.is_dealer);
-    if (dealer.user.username.startsWith("Bot")) {
-      console.log("Bot is the dealer");
-      handleShuffle();
+    if (dealer.user.is_bot) {
+      console.log(`${firstOpponent?.user?.username} is the dealer`);
+      let shuffleTimes = Math.floor(Math.random() * 3) + 1;
+      console.log("shuffle times", shuffleTimes);
+
+      const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+      async function shuffleLoop(shuffleTimes: number) {
+        while (shuffleTimes > 0) {
+          handleShuffle(); // your shuffle logic
+          shuffleTimes--;
+
+          await sleep(5000); // pause 5 seconds before next shuffle
+        }
+      }
+      await shuffleLoop(shuffleTimes);
+      // handleShuffle();
       setTimeout(() => {
         handleDeal();
-      }, 5000);
+      }, 1000);
     }
-  }, []);
+  };
 
   const gameOverCallback = useCallback((winnerData: any) => {
     console.log("Game over");
@@ -268,15 +459,18 @@ const PlayVsComputer = () => {
     console.log("Winner data:", winnerData);
   }, []);
 
-  const rematchCallback = useCallback((data: any) => {
-    console.log("Hand rematch:", data);
-    setWinningPlayer(null);
-    setPlayers(data.players);
-    getMyData(data.players);
-    getOpponentsData(data.players);
-    setGame(data);
-    setGameCards(data.cards);
-  }, []);
+  const rematchCallback = useCallback(
+    (data: any) => {
+      console.log("Hand rematch:", data);
+      setWinningPlayer(null);
+      setPlayers(data.players);
+      getMyData(data.players, data.cards);
+      getOpponentsData(data.players);
+      setGame(data);
+      setGameCards(data.cards);
+    },
+    [user]
+  );
 
   const getCardById = (cardId: number, cards: any[]) => {
     return cards.find((card) => card.id === cardId);
@@ -290,7 +484,7 @@ const PlayVsComputer = () => {
     if (!botHand.length) {
       return;
     }
-    setMessage("Bot is thinking...");
+    setMessage(`Computer is thinking...`);
     let currentLeadingSuit = null;
 
     console.log("current_trick", game.current_trick);
@@ -350,7 +544,7 @@ const PlayVsComputer = () => {
           game_code: code,
           player_id: firstOpponent?.id,
         });
-        setMessage("Bot played a card");
+        // setMessage(`${firstOpponent.user.username} played a card`);
       }, 5000);
       return;
     }
@@ -373,7 +567,9 @@ const PlayVsComputer = () => {
   };
 
   const handleConnect = () => {
+    console.log("here...");
     socket?.emit("join-room", code);
+    socket?.emit("getGameData", code);
   };
 
   const handleGameNotFound = () => {
@@ -386,7 +582,7 @@ const PlayVsComputer = () => {
     <>
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
-          name={firstOpponent?.user.username || "Opponent 1"}
+          name={"Computer"}
           avatar={bot}
           points={firstOpponent?.score}
           styles="left-1/2 -translate-x-1/2 top-1"

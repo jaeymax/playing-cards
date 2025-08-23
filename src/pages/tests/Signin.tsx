@@ -54,7 +54,7 @@ const SignInPage = () => {
       if (response.status === 200) {
         // Successful login
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         sessionStorage.setItem("accessToken", data.token);
         updateUser(data);
         // Here you might want to store the token in localStorage or context

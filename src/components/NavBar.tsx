@@ -301,7 +301,7 @@ const NavBar: React.FC = () => {
     }
   };
 
-  console.log(messages);
+  //console.log(messages);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

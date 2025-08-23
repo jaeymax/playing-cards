@@ -12,12 +12,12 @@ import DeckArea from "@/components/DeckArea";
 import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
-import { dealCards, ensureGuest, getToken, handleGameMessage, handlePlayedCard, playPlayedCardSound, playShuffleSound, shuffleCards } from "@/utils/Functions";
+import { dealCards, ensureGuest, getPlayerIds, getToken, handleGameMessage, handlePlayedCard, playPlayedCardSound, playShuffleSound, reconcileCards, shuffleCards } from "@/utils/Functions";
 
 
 const PlayWithFriend = () => {
   const [showShareOverlay, setShowShareOverlay] = useState(false);
-  const [showParticipants, setShowParticipants] = useState(true);
+  const [showParticipants, setShowParticipants] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [firstOpponent, setFirstOpponent] = useState<any>(null);
@@ -118,12 +118,17 @@ const PlayWithFriend = () => {
 
 
   useEffect(() => {
-      socket?.emit("getGameData", code);
-      socket?.on("gameData", getGameDataCallback);
-      socket?.on("updatedGameData", getUpdatedGameData);
-      socket?.on("connect", handleConnect);
-      socket?.on("game-not-found", handleGameNotFound);
-      socket?.on("gameMessage", gameMessageCallback);
+     if(user){
+       socket?.on("connect", handleConnect);
+       socket?.on("gameData", getGameDataCallback);
+       socket?.on("updatedGameData", getUpdatedGameData);
+       socket?.on("game-not-found", handleGameNotFound);
+       socket?.on("gameMessage", gameMessageCallback);
+  
+       if(socket?.connected){
+         handleConnect();
+       }
+     }
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
@@ -133,24 +138,24 @@ const PlayWithFriend = () => {
       socket?.off('game-not-found', handleGameNotFound);
      // socket?.emit("leave-room", code);
     };
-  }, [socket, user, code])
+  }, [user, code])
   
   useEffect(()=>{
     if(user){
       socket?.emit('playerJoin', {userId:user.id, gameCode:code});
     }
 
-  },[user, socket])
+  },[user])
 
   useEffect(()=>{
      console.log('players',players)
      if(players.length >= maxPlayers){
-
-     
         setShowParticipants(false);
         setShowShareOverlay(false);
         setGameStarted(true);
    
+     }else if(players.length > 0){
+      setShowParticipants(true);
      }
   },[players, maxPlayers])
 
@@ -165,9 +170,11 @@ const PlayWithFriend = () => {
     };
   }, []);
 
-  const getMyData = (data: any[]) => {
+  const getMyData = (data: any[], cards:[]) => {
     const myData = data.find((player) => player.user.id === user?.id);
-    if (myData?.is_dealer) {
+   const showGameButtons = cards.every((card:any)=>card.status == 'in_deck');
+  
+    if (myData?.is_dealer && showGameButtons) {
       setShowDealButton(true);
       setShowShuffleButton(true);
     }
@@ -201,8 +208,26 @@ const PlayWithFriend = () => {
       card.pos_x = card.pos_x * i;
       card.pos_y = card.pos_y * i;
     });
-    setGameCards(data.cards);
-    getMyData(data.players);
+     const {meId, firstOpponentId, secondOpponentId, thirdOpponentId} = getPlayerIds(data.players, user);
+          reconcileCards(
+            data.cards,
+            setGameCards,
+            meId,
+            firstOpponentId,
+            secondOpponentId,
+            thirdOpponentId,
+            deckRef,
+            playerHandRef,
+            opponentOneHandRef,
+            opponentTwoHandRef,
+            opponentThreeHandRef,
+            playerPlayAreaRef,
+            opponentOnePlayAreaRef,
+            opponentTwoPlayAreaRef,
+            opponentThreePlayAreaRef
+          );
+    //setGameCards(data.cards);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
   };
 
@@ -257,7 +282,7 @@ const PlayWithFriend = () => {
     setGameOver(false);
     setWinningPlayer(null);
     setPlayers(data.players);
-    getMyData(data.players);
+    getMyData(data.players, data.cards);
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
@@ -297,7 +322,7 @@ const PlayWithFriend = () => {
       setGameEnded(false);
       setWinningPlayer(null);
       setPlayers(data.players);
-      getMyData(data.players);
+      getMyData(data.players, data.cards);
       getOpponentsData(data.players);
       setGame(data);
       setGameCards(data.cards);
@@ -323,6 +348,7 @@ const PlayWithFriend = () => {
 
   const handleConnect = ()=>{
     socket?.emit("join-room", code);
+    socket?.emit("getGameData", code);
   }
 
   const handleGameNotFound = ()=>{
@@ -341,7 +367,7 @@ const PlayWithFriend = () => {
           />
         )}
 
-        {showParticipants && (
+        {showParticipants && game && players.length > 0 &&  (
           <ParticipantsModal players={players} maxPlayers={maxPlayers} currentPlayer={me} />
         )}
 
@@ -389,13 +415,13 @@ const PlayWithFriend = () => {
         <OpponentArea
           id="opponentArea2"
           ref={opponentTwoHandRef}
-          className="borde border-red-500 rotate-90 absolute -left-2 sm:left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+          className="borde border-red-500 rotate-90 absolute -left-0 sm:left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
         />
 
         <OpponentArea
           id="opponentArea3"
           ref={opponentThreeHandRef}
-          className="borde border-green-500 absolute rotate-90 top-1/3 -right-4 sm:right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+          className="borde border-green-500 absolute rotate-90 top-1/3 -right-0 sm:right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
         />
 
         <div className="borde z-[100000] w-ful absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
