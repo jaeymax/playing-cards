@@ -25,14 +25,14 @@ const HomePage: React.FC = () => {
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             <TopPlayers />
-            <OnlineFriends />
-          </div>
+          {/*  <OnlineFriends /> */}
+           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-6 space-y-8">
-            <TournamentBanner />
+            {/* <TournamentBanner /> */}
             <RecentGames />
-            <RecentActivities />
+            {/* <RecentActivities /> */}
           </div>
 
           {/* Right Sidebar */}
