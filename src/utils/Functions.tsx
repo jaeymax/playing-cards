@@ -802,3 +802,34 @@ export const reconcileCards = (
 
   setGameCards(newCardsState);
 };
+
+interface Division {
+  name: string;
+  min: number;
+  max: number;
+  emoji: string;
+  color: string; // hex or Tailwind class
+}
+
+const divisions: Division[] = [
+  { name: "Rookie", min: 0, max: 1199, emoji: "🃏", color: "#9CA3AF" }, // gray
+  { name: "Contender", min: 1200, max: 1399, emoji: "⚔️", color: "#6B7280" }, 
+  { name: "Hotshot", min: 1400, max: 1599, emoji: "🔥", color: "#F97316" },
+  { name: "Pro Player", min: 1600, max: 1799, emoji: "🏆", color: "#FACC15" }, // gold
+  { name: "Card Shark", min: 1800, max: 1999, emoji: "🦈", color: "#10B981" },
+  { name: "Master Card Player", min: 2000, max: 2199, emoji: "👑", color: "#3B82F6" },
+  { name: "Grandmaster", min: 2200, max: 2399, emoji: "🌟", color: "#8B5CF6" },
+  { name: "Legend", min: 2400, max: Infinity, emoji: "🐉", color: "#EF4444" },
+];
+
+export function getDivision(rating: number) {
+  const division = divisions.find((d) => rating >= d.min && rating <= d.max);
+  if (!division) {
+    return {
+      name: "Unranked",
+      emoji: "❔",
+      color: "#6B7280",
+    };
+  }
+  return division;
+}
