@@ -20,9 +20,9 @@ const ProfilePage: React.FC = () => {
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "matches", label: "Match History" },
-    { id: "statistics", label: "Statistics" },
+    // { id: "statistics", label: "Statistics" },
     { id: "achievements", label: "Achievements" },
-    { id: "settings", label: "Settings" },
+    // { id: "settings", label: "Settings" },
   ];
 
 

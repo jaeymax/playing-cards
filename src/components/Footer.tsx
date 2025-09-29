@@ -8,8 +8,8 @@ const Footer: React.FC = () => {
       title: "About",
       links: [
         { label: "About Us", href: "/about" },
-        { label: "Team", href: "/about#team" },
-        { label: "Careers", href: "/careers" },
+        // { label: "Team", href: "/about#team" },
+        // { label: "Careers", href: "/careers" },
       ],
     },
     {
@@ -28,14 +28,14 @@ const Footer: React.FC = () => {
         { label: "Cookie Policy", href: "/cookies" },
       ],
     },
-    {
-      title: "Social",
-      links: [
-        { label: "Twitter", href: "#", icon: "twitter" },
-        { label: "Discord", href: "#", icon: "discord" },
-        { label: "GitHub", href: "#", icon: "github" },
-      ],
-    },
+    // {
+    //   title: "Social",
+    //   links: [
+    //     { label: "Twitter", href: "#", icon: "twitter" },
+    //     { label: "Discord", href: "#", icon: "discord" },
+    //     { label: "GitHub", href: "#", icon: "github" },
+    //   ],
+    // },
   ];
 
   return (
@@ -63,13 +63,13 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="text-gray-400 mb-4 md:mb-0">
-            © {new Date().getFullYear()} Nexus Cards. All rights reserved.
+            © {new Date().getFullYear()} SparGame. All rights reserved.
           </div>
           <div className="flex space-x-6">
-            <button className="text-gray-400 hover:text-white">
+            {/* <button className="text-gray-400 hover:text-white">
               Dark Mode
-            </button>
-            <button className="text-gray-400 hover:text-white">Language</button>
+            </button> */}
+            {/* <button className="text-gray-400 hover:text-white">Language</button> */}
           </div>
         </div>
       </div>

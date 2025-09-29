@@ -413,13 +413,13 @@ const NavBar: React.FC = () => {
               </div>
                 <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
                   <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
-                    spa
+                    spar
                   </span>
                   <span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
                     game
                   </span>
                   <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent">
-                    zone
+                    
                   </span>
                 </div>
               </Link>
@@ -569,8 +569,8 @@ const NavBar: React.FC = () => {
                     {/* Dropdown Menu */}
                     {isProfileOpen && (
                       <div className="absolute z-20 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5">
-                        <a
-                          href="/profile"
+                        <Link
+                          to="/profile"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
                           <svg
@@ -587,7 +587,7 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           View Profile
-                        </a>
+                        </Link>
                         <a
                           href="/avatar"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"

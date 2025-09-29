@@ -76,7 +76,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       {/* Left: Call to Action */}
       <div className="space-y-6">
         <h1 className="text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 text-white">
-          Welcome to SpaGameZone
+          Welcome to SparGame
         </h1>
         <p className="text-lg text-gray-300">
           Spa is a fast-paced Ghanaian card game. Win the final trick to take

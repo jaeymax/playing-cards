@@ -57,6 +57,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log("User in context:", user);
+
   useEffect(() => {
     const accessToken = getToken();
     

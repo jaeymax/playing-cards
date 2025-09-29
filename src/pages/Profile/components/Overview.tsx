@@ -92,7 +92,7 @@ const Overview: React.FC = () => {
       </div>
 
       {/* Favorite Cards */}
-      <div className="lg:col-span-2">
+      {/* <div className="lg:col-span-2">
         <h3 className="text-lg font-bold text-white mb-4">Favorite Cards</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {favoriteCards.map((card, index) => (
@@ -112,7 +112,7 @@ const Overview: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -809,17 +809,18 @@ interface Division {
   max: number;
   emoji: string;
   color: string; // hex or Tailwind class
+  badgeClasses: string;
 }
 
 const divisions: Division[] = [
-  { name: "Rookie", min: 0, max: 1199, emoji: "🃏", color: "#9CA3AF" }, // gray
-  { name: "Contender", min: 1200, max: 1399, emoji: "⚔️", color: "#6B7280" }, 
-  { name: "Hotshot", min: 1400, max: 1599, emoji: "🔥", color: "#F97316" },
-  { name: "Pro Player", min: 1600, max: 1799, emoji: "🏆", color: "#FACC15" }, // gold
-  { name: "Card Shark", min: 1800, max: 1999, emoji: "🦈", color: "#10B981" },
-  { name: "Master Card Player", min: 2000, max: 2199, emoji: "👑", color: "#3B82F6" },
-  { name: "Grandmaster", min: 2200, max: 2399, emoji: "🌟", color: "#8B5CF6" },
-  { name: "Legend", min: 2400, max: Infinity, emoji: "🐉", color: "#EF4444" },
+  { name: "Rookie", min: 0, max: 1199, emoji: "🃏", color: "#9CA3AF", badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full" }, // gray
+  { name: "Contender", min: 1200, max: 1399, emoji: "⚔️", color: "#6B7280", badgeClasses: "px-3 py-1 text-sm bg-green-500/10 text-green-400 rounded-full" }, 
+  { name: "Strategist", min: 1400, max: 1599, emoji: "🔥", color: "#F97316", badgeClasses: "px-3 py-1 text-sm bg-cyan-500/10 text-cyan-400 rounded-full" },
+  { name: "Pro Player", min: 1600, max: 1799, emoji: "🏆", color: "#FACC15", badgeClasses: "px-3 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full" }, // blue
+  { name: "Card Wizard", min: 1800, max: 1999, emoji: "🦈", color: "#10B981", badgeClasses: "px-3 py-1 text-sm bg-purple-500/10 text-purple-400 rounded-full" },
+  { name: "Card Master", min: 2000, max: 2199, emoji: "👑", color: "#3B82F6", badgeClasses: "px-3 py-1 text-sm bg-yellow-500/10 text-yellow-400 rounded-full" },
+  { name: "Card Veteran", min: 2200, max: 2399, emoji: "🌟", color: "#8B5CF6", badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-400 rounded-full" },
+  { name: "Card Legend", min: 2400, max: Infinity, emoji: "🐉", color: "#EF4444", badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-500 rounded-full" },
 ];
 
 export function getDivision(rating: number) {
@@ -829,6 +830,7 @@ export function getDivision(rating: number) {
       name: "Unranked",
       emoji: "❔",
       color: "#6B7280",
+      badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full"
     };
   }
   return division;

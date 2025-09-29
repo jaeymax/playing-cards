@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import TopPlayers from "./components/TopPlayers";
 import RecentGames from "./components/RecentGames";
 import Announcements from "./components/Announcements";
+import Footer from "@/components/Footer";
 const HomePage: React.FC = () => {
 
 
@@ -30,12 +31,13 @@ const HomePage: React.FC = () => {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3">
-            <Announcements />
+            {/* <Announcements /> */}
           </div>
         </div>
 
         
       </div>
+      <Footer />
     </div>
   );
 };
