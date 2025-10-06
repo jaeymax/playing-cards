@@ -9,49 +9,74 @@ const RecentGames: React.FC = () => {
   const { user } = useAppContext();
   const [recentGames, setRecentGames] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const getRecentMatches = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${baseUrl}/matchhistory/recent`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
+      });
+      if (!response.ok) {
+        throw new Error(
+          response.status === 500
+            ? "Network error. Please check your internet connection."
+            : response.status === 403
+            ? "Please log in to view your recent matches"
+            : "Failed to fetch games"
+        );
+      }
+      const data = await response.json();
+      setRecentGames(data);
+    } catch (error: any) {
+      console.error("Error fetching recent matches:", error);
+      setError(error.message || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getRecentMatches = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${baseUrl}/matchhistory/recent`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...authHeaders(),
-          },
-        });
-        const data = await response.json();
-        setRecentGames(data);
-      } catch (error) {
-        console.error("Error fetching recent matches:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     getRecentMatches();
   }, []);
 
-  const recentGamesMapped = recentGames.length > 0 ? recentGames.map((game) => {
-    let gameObj = {
-      id: 0,
-      player1: { name: "", score: 0 },
-      player2: { name: "", score: 0 },
-      result: "",
-      time: "",
-      type: "",
-      endedAt: game.ended_at,
-    };
+  const recentGamesMapped =
+    recentGames.length > 0
+      ? recentGames.map((game) => {
+          let gameObj = {
+            id: 0,
+            player1: { name: "", score: 0 },
+            player2: { name: "", score: 0 },
+            result: "",
+            time: "",
+            type: "",
+            endedAt: game.ended_at,
+          };
 
-    gameObj.result = game.winnerId === user?.id ? "win" : "loss";
-    gameObj.player1.name = game.players[0].username;
-    gameObj.player1.score = game.players[0].score;
-    gameObj.player2.name = game.players[1].username;
-    gameObj.player2.score = game.players[1].score;
-    gameObj.type = game?.isRanked ? "Ranked" : "Casual";
-    gameObj.id = game.id;
-    return gameObj;
-  }) : [];
+          gameObj.result = game.winnerId === user?.id ? "win" : "loss";
+          gameObj.player1.name = "You";
+          gameObj.player1.score =
+            game.players[0].username === user?.username
+              ? game.players[0].score
+              : game.players[1].score;
+          gameObj.player2.name =
+            game.players[0].username === user?.username
+              ? game.players[1].username
+              : game.players[0].username;
+          gameObj.player2.score =
+            game.players[0].username === user?.username
+              ? game.players[1].score
+              : game.players[0].score;
+          gameObj.type = game?.isRanked ? "Ranked" : "Casual";
+          gameObj.id = game.id;
+          return gameObj;
+        })
+      : [];
 
   const GameSkeleton = () => (
     <div className="p-4 animate-pulse">
@@ -85,19 +110,33 @@ const RecentGames: React.FC = () => {
             <GameSkeleton />
             <GameSkeleton />
           </>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-400 mb-4">{error}</p>
+            {error.includes("log in") ? (
+              <Link
+                to="/signin"
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors inline-block"
+              >
+                Login
+              </Link>
+            ) : error.includes("Network error") ? (
+              <button
+                onClick={getRecentMatches}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+              >
+                Retry
+              </button>
+            ) : null}
+          </div>
         ) : recentGamesMapped.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">No recent games to display</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Play a game to see your match history
-            </p>
+            <p className="text-gray-400 font-semibold">No recent games to display</p>
+            <p className="text-gray-500 mt-2">Play a game to see your match history</p>
           </div>
         ) : (
           recentGamesMapped.map((game) => (
-            <div
-              key={game.id}
-              className="p-4 hover:bg-gray-750 transition-colors"
-            >
+            <div key={game.id} className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <div
@@ -127,9 +166,9 @@ const RecentGames: React.FC = () => {
                     })}
                   </span>
                 </div>
-                <button className="text-blue-400 hover:text-blue-300 text-sm">
+                {/* <button className="text-blue-400 hover:text-blue-300 text-sm">
                   Details
-                </button>
+                </button> */}
               </div>
             </div>
           ))

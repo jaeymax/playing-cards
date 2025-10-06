@@ -13,12 +13,12 @@ const faqCategories = {
     icon: "🎮",
     questions: [
       {
-        q: "What is Nexus Cards?",
-        a: "Nexus Cards is a strategic online card game where players compete in matches using custom-built decks. Players can participate in casual games, ranked matches, and tournaments.",
+        q: "What is SparPlay?",
+        a: "SparPlay is a strategic online card game where players compete in matches using custom-built decks. Players can participate in casual games, ranked matches, and tournaments.",
       },
       {
         q: "Is the game free to play?",
-        a: "Yes! Nexus Cards is completely free to play. Players can earn cards through gameplay and complete daily quests for rewards.",
+        a: "Yes! SparPlay is completely free to play. Players can earn cards through gameplay and complete daily quests for rewards.",
       },
     ],
   },

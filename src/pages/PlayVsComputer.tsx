@@ -167,151 +167,9 @@ const PlayVsComputer = () => {
     handleGameMessage(message, setMessage);
   };
 
-  // useEffect(()=>{
-  //   if(me && game){
-  //     console.log('reconciling game state')
-  //     console.log(gameCards);
-
-  //     if(gameCards.some((card:any)=>card.status == 'in_hand' || card.status == 'played')){
-  //         setShowDealButton(false);
-  //         setShowShuffleButton(false);
-  //     }
-
-  //     gameCards.forEach((card:any)=>{
-  //        if(card.status == 'played'){
-  //         const slot_position = card.trick_number - 1;
-  //         if(card.player_id == me?.id){
-  //          const targetArea = playerPlayAreaRef.current;
-  //          const slot = targetArea?.children[slot_position];
-  //          const slotRect = slot?.getBoundingClientRect();
-  //          const deckRect = deckRef?.current?.getBoundingClientRect();
-  //          let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
-  //          let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
-  //          card.x_pos = xOffset;
-  //          card.y_pos = yOffset;
-  //          card.rotation = 0;
-  //          setGameCards((prevCards:any)=>{
-  //             return prevCards.map((c:any)=>{
-  //               if(c?.id == card?.id){
-  //                return {
-  //                  ...c,
-  //                  pos_x:xOffset,
-  //                  pos_y:yOffset,
-  //                  z_index:card.trick_number
-  //                }
-  //               }
-  //               return c;
-  //             })
-  //          })
-  //         }
-  //         else if(card.player_id == firstOpponent?.id){
-  //           const targetArea = opponentOnePlayAreaRef.current;
-  //           const slot = targetArea?.children[5 - slot_position - 1];
-  //           const slotRect = slot?.getBoundingClientRect();
-  //           const deckRect = deckRef?.current?.getBoundingClientRect();
-  //           let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
-  //           let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
-  //           card.x_pos = xOffset;
-  //           card.y_pos = yOffset;
-  //           card.rotation = 0;
-  //           setGameCards((prevCards:any)=>{
-  //             return prevCards.map((c:any)=>{
-  //               if(c?.id == card?.id){
-  //                return {
-  //                  ...c,
-  //                  pos_x:xOffset,
-  //                  pos_y:yOffset,
-  //                  z_index:card.trick_number
-  //                }
-  //               }
-  //               return c;
-  //             })
-  //          })
-  //         }
-  //        }
-  //        else if(card.status == 'in_hand'){
-  //            const hand_position = card.hand_position;
-  //            if(card.player_id == me?.id){
-  //             const targetArea = playerHandRef.current;
-  //             const slot = targetArea?.children[hand_position];
-  //             const slotRect = slot?.getBoundingClientRect();
-  //             const deckRect = deckRef?.current?.getBoundingClientRect();
-  //             let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
-  //             let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
-  //             card.x_pos = xOffset;
-  //             card.y_pos = yOffset;
-  //             card.rotation = 0;
-  //             setGameCards((prevCards:any)=>{
-  //                return prevCards.map((c:any)=>{
-  //                  if(c?.id == card?.id){
-  //                   return {
-  //                     ...c,
-  //                     pos_x:xOffset,
-  //                     pos_y:yOffset
-  //                   }
-  //                  }
-  //                  return c;
-  //                })
-  //             })
-  //            }
-  //            else if(card.player_id == firstOpponent?.id){
-  //             const targetArea = opponentOneHandRef.current;
-  //             const slot = targetArea?.children[hand_position];
-  //             const slotRect = slot?.getBoundingClientRect();
-  //             const deckRect = deckRef?.current?.getBoundingClientRect();
-  //             let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
-  //             let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
-  //             card.x_pos = xOffset;
-  //             card.y_pos = yOffset;
-  //             card.rotation = 0;
-  //             setGameCards((prevCards:any)=>{
-  //                return prevCards.map((c:any)=>{
-  //                  if(c?.id == card?.id){
-  //                   return {
-  //                     ...c,
-  //                     pos_x:xOffset,
-  //                     pos_y:yOffset
-  //                   }
-  //                  }
-  //                  return c;
-  //                })
-  //             })
-  //            }else if(card.player_id == secondOpponent?.id){
-
-  //            }else if(card.player_id == thirdOpponent?.id){
-
-  //            }
-  //        }
-  //        else if(card.status == 'in_drawpile'){
-  //         setGameCards((prevCards:any)=>{
-  //           return prevCards.map((c:any)=>{
-  //             if(c?.id == card?.id){
-  //              return {
-  //                ...c,
-  //                pos_x:-1000,
-
-  //              }
-  //             }
-  //             return c;
-  //           })
-  //        })
-  //        }
-  //        else if(card.status == 'in_deck'){
-
-  //        }
-  //     })
-  //   }
-  // },[me?.id, firstOpponent?.id, secondOpponent?.id, thirdOpponent?.id])
-
-  // useEffect(()=>{
-
-  //   if(gameCards)console.log('gamecards changed', gameCards)
-  // }, [gameCards])
-
   useEffect(() => {
-    if (user) {
-      //socket?.emit("join-room", code);
-      //socket?.emit("getGameData", code);
+      if(!user) return;
+
       socket?.on("connect", handleConnect);
       socket?.on("gameData", getGameDataCallback);
       socket?.on("updatedGameData", getUpdatedGameData);
@@ -319,9 +177,10 @@ const PlayVsComputer = () => {
       socket?.on("gameMessage", gameMessageCallback);
 
       if (socket?.connected) {
+        //console.log('socket connected, running reconcile');
         handleConnect();
       }
-    }
+   
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
@@ -331,7 +190,7 @@ const PlayVsComputer = () => {
       socket?.off("connect", handleConnect);
       //socket?.emit("leave-room", code);
     };
-  }, [user]);
+  }, [user, socket]);
 
   useEffect(() => {
     socket?.on("dealtCards", dealtCardsCallback);
@@ -701,8 +560,8 @@ const PlayVsComputer = () => {
 
         <PlayerInfo
           name={me?.user.username || "Player"}
-          avatar={me?.user.image_url || "path/to/avatar.jpg"}
-          points={me?.score}
+          avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+          points={me?.score || 0}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
       </div>

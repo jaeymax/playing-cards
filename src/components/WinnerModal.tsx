@@ -18,18 +18,19 @@ const WinnerModal = ({
   onLeaveGame,
 }: WinnerModalProps) => {
 
-
+  (onClose)
   
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Hand ${winningPlayer?.hand_number} Complete!`}>
+    <Modal isOpen={isOpen} onClose={()=>{}} title={`Hand ${winningPlayer?.hand_number} Complete!`}>
       <div className="flex flex-col items-center space-y-6 py-8">
         <div className="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-1">
           <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-            <img
+            {winningPlayer?.user?.image_url? ( <img
               src={winningPlayer?.user?.image_url}
               alt=""
               className="w-full h-full rounded-full object-cover"
-            />
+            />) : ( <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt="" className="w-full h-full object-cover rounded-full" />)}
+           
           </div>
         </div>
 
@@ -38,7 +39,7 @@ const WinnerModal = ({
             {winningPlayer?.id === currentPlayer?.id
               ? "You"
               : winningPlayer?.user.username}{" "}
-            {`Won Hand ${winningPlayer?.hand_number}!`}
+            {`Won!`}
           </h3>
           <div className="text-gray-400 sm:text-sm text-xs">
             <p>Score: {winningPlayer?.points} points</p>

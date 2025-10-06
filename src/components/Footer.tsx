@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 // import { SlSocialInstagram } from "react-icons/sl";
 // import { TiSocialFacebookCircular, TiSocialYoutube } from "react-icons/ti";
 
@@ -25,7 +26,7 @@ const Footer: React.FC = () => {
       links: [
         { label: "Terms of Service", href: "/terms-of-service" },
         { label: "Privacy Policy", href: "/privacy-policy" },
-        { label: "Cookie Policy", href: "/cookies" },
+        // { label: "Cookie Policy", href: "/cookies" },
       ],
     },
     // {
@@ -44,16 +45,18 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {footerLinks.map((section, index) => (
             <div key={index}>
-              <h3 className="text-white font-semibold mb-4">{section.title}</h3>
-              <ul className="space-y-2">
+              <h3 className="text-white font-semibold mb-1 text-sm md:text-base">
+                {section.title}
+              </h3>
+              <ul className="space-y-1">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a
-                      href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors"
+                    <Link
+                      to={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-xs md:text-sm"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -62,14 +65,16 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-gray-400 mb-4 md:mb-0">
-            © {new Date().getFullYear()} SparGame. All rights reserved.
+          <div className="text-gray-400 mb-4 md:mb-0 text-xs md:text-sm">
+            © {new Date().getFullYear()} SparPlay. All rights reserved.
           </div>
           <div className="flex space-x-6">
-            {/* <button className="text-gray-400 hover:text-white">
+            <button className="text-gray-400 hover:text-white text-xs md:text-sm">
               Dark Mode
-            </button> */}
-            {/* <button className="text-gray-400 hover:text-white">Language</button> */}
+            </button>
+            <button className="text-gray-400 hover:text-white text-xs md:text-sm">
+              Language
+            </button>
           </div>
         </div>
       </div>

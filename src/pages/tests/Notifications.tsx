@@ -1,3 +1,4 @@
+import NavBar from '@/components/NavBar';
 import  { useState } from 'react';
 
 const NotificationsPage = () => {
@@ -103,7 +104,7 @@ const NotificationsPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Header */}
-      <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
+      {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
@@ -128,7 +129,8 @@ const NotificationsPage = () => {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
+      <NavBar/>
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-6">

@@ -75,8 +75,8 @@ const AboutPage: React.FC = () => {
       <div className="relative overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900">
         <div className="container mx-auto px-4 py-16 lg:py-24">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              About Nexus Cards
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-50 bg-clip-text text-transparent">
+              About SparPlay
             </h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               Experience the next generation of online card gaming with our

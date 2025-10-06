@@ -7,7 +7,7 @@ const TermsOfService: React.FC = () => {
     {
       id: "introduction",
       title: "Introduction",
-      content: `Welcome to Nexus Cards. By accessing our service, you agree to these terms. Please read them carefully.`,
+      content: `Welcome to SparPlay. By accessing our service, you agree to these terms. Please read them carefully.`,
     },
     {
       id: "account",

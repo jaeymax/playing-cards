@@ -3,7 +3,7 @@ import HeroSection from "./components/HeroSection";
 import NavBar from "@/components/NavBar";
 import TopPlayers from "./components/TopPlayers";
 import RecentGames from "./components/RecentGames";
-import Announcements from "./components/Announcements";
+//import Announcements from "./components/Announcements";
 import Footer from "@/components/Footer";
 const HomePage: React.FC = () => {
 

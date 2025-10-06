@@ -170,7 +170,9 @@ const PlayTest = () => {
   };
 
   useEffect(() => {
-    if(user){
+      if(!user) return;
+
+
       socket?.on("connect", handleConnect);
       socket?.on("gameData", getGameDataCallback);
       socket?.on("updatedGameData", getUpdatedGameData);
@@ -181,14 +183,16 @@ const PlayTest = () => {
         handleConnect();
       }
   
-    };
+    
     return () => {
       socket?.off("gameData", getGameDataCallback);
       socket?.off("updatedGameData", getUpdatedGameData);
       socket?.off("gameMessage", gameMessageCallback);
+      socket?.off("game-not-found", handleGameNotFound);
+      socket?.off("connect", handleConnect);
     //  socket?.emit("leave-room", code);
     }
-  }, [user])
+  }, [user, socket])
 
   useEffect(()=>{
     socket?.on("dealtCards", dealtCardsCallback);
@@ -315,22 +319,22 @@ const PlayTest = () => {
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
           name={firstOpponent?.user.username || "Opponent 1"}
-          avatar={firstOpponent?.user.image_url || "path/to/avatar.jpg"}
+          avatar={firstOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
           points={firstOpponent?.score}
           styles="left-1/2 -translate-x-1/2 top-1"
         />
         {secondOpponent && (
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
-            avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
-            points={thirdOpponent?.score}
+            avatar={secondOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+            points={secondOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
         )}
         {thirdOpponent && (
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
-            avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
+            avatar={thirdOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
           />
@@ -433,7 +437,7 @@ const PlayTest = () => {
 
         <PlayerInfo
           name={me?.user.username || "Player"}
-          avatar={me?.user.image_url || "path/to/avatar.jpg"}
+          avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
           points={me?.score}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />

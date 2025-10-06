@@ -61,7 +61,7 @@ const Card: React.FC<Card> = ({
 
   return (
     <div
-      className="card"
+      className={`card ${canView(current_player_id, card_player_id, status) ? 'player-card': 'opponent-card'}`}
       style={{ transform: transform, zIndex: zIndex }}
       onClick={handleCardClick}
     >

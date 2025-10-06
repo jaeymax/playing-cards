@@ -3,8 +3,8 @@ import { io, Socket } from "socket.io-client";
 import { useAppContext } from "./AppContext";
 
 const sockerUrl = import.meta.env.VITE_ENV === "development"
-  ? "http://192.168.43.218:5000"
-  : "https://playing-cards-api.onrender.com";
+  ? "ws://192.168.43.218:5000"
+  : "wss://playing-cards-api.onrender.com";
 
 
 interface SocketContextValue {

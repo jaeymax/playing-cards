@@ -31,13 +31,18 @@ const ParticipantsModal = ({
                   key={`player-${player.id}`}
                   className="flex items-center gap-3 p-2 rounded-lg bg-black/20 border border-white/5"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[0px]">
                     <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                      <img
+                      {player?.user?.image_url? ( <img
                         src={player?.user?.image_url}
                         alt=""
                         className="w-full h-full rounded-full object-cover"
-                      />
+                      />) : (<img
+                        src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+                        alt=""
+                        className="w-full h-full rounded-full object-cover"
+                      />)}
+                      
                     </div>
                   </div>
                   <div className="flex-1">

@@ -413,10 +413,10 @@ const NavBar: React.FC = () => {
               </div>
                 <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
                   <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
-                    spar
+                    Spar
                   </span>
                   <span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
-                    game
+                    play
                   </span>
                   <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent">
                     
@@ -534,16 +534,21 @@ const NavBar: React.FC = () => {
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
                       className="flex items-center space-x-3 focus:outline-none"
                     >
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[0px]">
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                          <img
+                          {user?.image_url ? (
+                            <img
+                              className="rounded-full"
+                              src={user?.image_url}
+                              alt=""
+                            />
+                          ) : (
+                            <img
                             className="rounded-full"
-                            src={user?.image_url}
+                            src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
                             alt=""
                           />
-                          {/* <span className="text-lg">
-                            👤
-                          </span> */}
+                          )}
                         </div>
                       </div>
                       {/* <span className="hidden md:block text-white">

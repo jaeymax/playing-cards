@@ -394,20 +394,20 @@ export const dealCards = async (
 };
 
 export const removeToken = () => {
-  sessionStorage.removeItem("accessToken");
+  localStorage.removeItem("accessToken");
 };
 
 export const getToken = () => {
-  const token = sessionStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken");
   if (!token) {
-    console.error("No token found in sessionStorage");
+    console.error("No token found in localStorage");
     return null;
   }
   return token;
 };
 
 export const saveToken = (token: string) => {
-  sessionStorage.setItem("accessToken", token);
+  localStorage.setItem("accessToken", token);
 };
 
 export async function ensureGuest() {

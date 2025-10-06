@@ -34,6 +34,17 @@ import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 import ConnectionStatusIndicator from "./components/ConnectionStatusIndicator";
 import GameModal from "./components/GameModal";
 
+
+//Import Mixpanel SDK
+import mixpanel from "mixpanel-browser";
+
+// Create an instance of the Mixpanel object, your token is already added to this snippet
+mixpanel.init(import.meta.env.VITE_APP_MIXPANEL_TOKEN, {
+  autocapture: false,
+  record_sessions_percent: 100,
+})
+
+
 function App() {
   const { overlay, user } = useAppContext();
 

@@ -14,7 +14,7 @@ const PlayerArea = React.forwardRef<
   return (
     <div id={id} ref={ref} className={className}>
       {[...Array(numSlots)].map((_, index) => (
-        <div key={index} className="card-slot" data-position={index}></div>
+        <div key={index} className="card-slot player-slot" data-position={index}></div>
       ))}
     </div>
   );

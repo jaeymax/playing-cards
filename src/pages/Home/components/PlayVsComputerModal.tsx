@@ -3,7 +3,7 @@ import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
-import { ensureGuest, getToken } from "@/utils/Functions";
+import { authHeaders, ensureGuest, getToken } from "@/utils/Functions";
 
 interface PlayVsComputerModalProps {
   isOpen: boolean;
@@ -73,6 +73,7 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...authHeaders(),
         },
         body: JSON.stringify({ userId: user?.id || guest?.id }),
       });

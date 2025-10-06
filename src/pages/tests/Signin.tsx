@@ -5,6 +5,7 @@ import { baseUrl } from "@/config/api";
 import { GoogleOAuthProvider} from "@react-oauth/google";
 import GoogleSigninCustom from "../Home/components/GoogleSigninCustom";
 import NavBar from "@/components/NavBar";
+import { saveToken } from "@/utils/Functions";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ const SignInPage = () => {
         // Successful login
         const data = await response.json();
         //console.log(data);
-        sessionStorage.setItem("accessToken", data.token);
+        saveToken(data.token);
         updateUser(data);
         // Here you might want to store the token in localStorage or context
         navigate("/");
@@ -253,7 +254,7 @@ const SignInPage = () => {
 
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-400">
-                    New to SpaGameZone?{" "}
+                    New to SparPlay?{" "}
                     <button
                       type="button"
                       className="font-medium text-blue-400 hover:text-blue-300 focus:outline-none"
@@ -311,7 +312,7 @@ const SignInPage = () => {
                 href="#"
                 className="text-sm text-gray-400 hover:text-gray-300 block"
               >
-                About SpaGameZone
+                About SparPlay
               </a>
               <a
                 href="#"
@@ -327,7 +328,7 @@ const SignInPage = () => {
         <footer className="bg-gray-800 border-t border-gray-700">
           <div className="container mx-auto px-4 py-4">
             <p className="text-center text-gray-400 text-sm">
-              © {new Date().getFullYear()} SpaGameZone. All rights reserved.
+              © {new Date().getFullYear()} SparPlay. All rights reserved.
             </p>
           </div>
         </footer>

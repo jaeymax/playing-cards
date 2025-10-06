@@ -18,18 +18,19 @@ const GameOverModal = ({
   onLeaveGame,
 }: GameOverModalProps) => {
 
-
+  (onClose)
   
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Game Over!">
+    <Modal isOpen={isOpen} onClose={()=>{}} title="Game Over!">
       <div className="flex flex-col items-center space-y-6 py-8">
         <div className="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-1">
           <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-            <img
+          {winningPlayer?.user?.image_url? ( <img
               src={winningPlayer?.user?.image_url}
               alt=""
               className="w-full h-full rounded-full object-cover"
-            />
+            />) : ( <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt="" className="w-full h-full object-cover rounded-full" />)}
+           
           </div>
         </div>
 

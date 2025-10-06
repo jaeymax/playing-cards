@@ -118,7 +118,8 @@ const PlayWithFriend = () => {
 
 
   useEffect(() => {
-     if(user){
+       if(!user) return;
+     
        socket?.on("connect", handleConnect);
        socket?.on("gameData", getGameDataCallback);
        socket?.on("updatedGameData", getUpdatedGameData);
@@ -128,7 +129,7 @@ const PlayWithFriend = () => {
        if(socket?.connected){
          handleConnect();
        }
-     }
+     
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
@@ -138,14 +139,14 @@ const PlayWithFriend = () => {
       socket?.off('game-not-found', handleGameNotFound);
      // socket?.emit("leave-room", code);
     };
-  }, [user, code])
+  }, [user, code, socket])
   
   useEffect(()=>{
     if(user){
       socket?.emit('playerJoin', {userId:user.id, gameCode:code});
     }
 
-  },[user])
+  },[user, socket])
 
   useEffect(()=>{
      console.log('players',players)
@@ -373,7 +374,7 @@ const PlayWithFriend = () => {
 
         <PlayerInfo
           name={firstOpponent?.user.username || "Waiting..."}
-          avatar={firstOpponent?.user.image_url || ""}
+          avatar={firstOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
           points={firstOpponent?.score || 0}
           styles="left-1/2 -translate-x-1/2 top-1"
         />
@@ -381,7 +382,7 @@ const PlayWithFriend = () => {
         {secondOpponent && (
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
-            avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
+            avatar={secondOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
             points={secondOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
@@ -389,7 +390,7 @@ const PlayWithFriend = () => {
         {thirdOpponent && (
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
-            avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
+            avatar={thirdOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
           />
@@ -494,8 +495,8 @@ const PlayWithFriend = () => {
 
         <PlayerInfo
           name={me?.user.username || "Player"}
-          avatar={me?.user.image_url || "path/to/avatar.jpg"}
-          points={me?.score}
+          avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+          points={me?.score || 0}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
       </div>

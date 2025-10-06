@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
 import NavBar from "@/components/NavBar";
+import { saveToken } from "@/utils/Functions";
 
 type SignUpStep = "email" | "verification" | "credentials";
 
@@ -57,7 +58,7 @@ const SignUp: React.FC = () => {
       if (response.status === 201) {
         // Successful registration
         console.log(data);
-        sessionStorage.setItem("accessToken", data.token);
+        saveToken(data.token);
         updateUser(data);
         navigate("/");
       } else if (response.status === 400) {
