@@ -5,6 +5,7 @@ interface Player {
   username: string;
   rating: number;
   image_url: string | null;
+  rank: number;
 }
 
 const TopPlayers: React.FC = () => {
@@ -79,7 +80,7 @@ const TopPlayers: React.FC = () => {
                     : "bg-gray-700"
                 }`}
               >
-                {index + 1}
+                {player.rank}
               </div>
               <div className="w-8 h-8 bg-gray-700/30 rounded-full flex items-center justify-center">
                 {player.image_url ? (

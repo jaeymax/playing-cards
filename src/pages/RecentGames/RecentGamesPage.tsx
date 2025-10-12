@@ -260,11 +260,11 @@ const RecentGamesPage: React.FC = () => {
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <div
+                      {/* <div
                         className={`w-2 h-2 rounded-full ${
                           game.result === "win" ? "bg-green-500" : "bg-red-500"
                         }`}
-                      />
+                      /> */}
                       <span className="text-xs font-medium px-2 py-1 rounded bg-gray-700 text-gray-300">
                         {game.type}
                       </span>

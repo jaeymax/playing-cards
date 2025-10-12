@@ -32,6 +32,7 @@ const RecentGames: React.FC = () => {
         );
       }
       const data = await response.json();
+      console.log("recent games", data);
       setRecentGames(data);
     } catch (error: any) {
       console.error("Error fetching recent matches:", error);
@@ -72,7 +73,7 @@ const RecentGames: React.FC = () => {
             game.players[0].username === user?.username
               ? game.players[1].score
               : game.players[0].score;
-          gameObj.type = game?.isRanked ? "Ranked" : "Casual";
+          gameObj.type = game?.is_rated ? "Ranked" : "Casual";
           gameObj.id = game.id;
           return gameObj;
         })
@@ -139,11 +140,11 @@ const RecentGames: React.FC = () => {
             <div key={game.id} className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <div
+                  {/* <div
                     className={`w-2 h-2 rounded-full ${
                       game.result === "win" ? "bg-green-500" : "bg-red-500"
                     }`}
-                  />
+                  /> */}
                   <span className="text-xs font-medium px-2 py-1 rounded bg-gray-700 text-gray-300">
                     {game.type}
                   </span>
@@ -175,12 +176,13 @@ const RecentGames: React.FC = () => {
         )}
       </div>
       <div className="p-3 border-t border-gray-700">
-        <Link
+        {recentGamesMapped.length && ( <Link
           to="/recent-games"
           className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
         >
           View Match History
-        </Link>
+        </Link>)}
+       
       </div>
     </div>
   );

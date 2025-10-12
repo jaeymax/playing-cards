@@ -31,7 +31,7 @@ const MatchHistory: React.FC = () => {
     <div className="space-y-6">
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto">
-        {["all", "ranked", "casual", "tournament"].map((type) => (
+        {["all", "ranked", "casual"].map((type) => (
           <button
             key={type}
             onClick={() => setFilter(type as any)}

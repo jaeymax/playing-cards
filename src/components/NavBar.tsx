@@ -20,7 +20,7 @@ const NavBar: React.FC = () => {
   //const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  //const [isDarkMode, setIsDarkMode] = useState(true);
   const [notificationCount] = useState(3);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -596,7 +596,7 @@ const NavBar: React.FC = () => {
                           </svg>
                           View Profile
                         </Link>
-                        <a
+                        {/* <a
                           href="/avatar"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -614,8 +614,8 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           Edit Avatar
-                        </a>
-                        <a
+                        </a> */}
+                        {/* <a
                           href="/settings"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -639,8 +639,8 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           Settings
-                        </a>
-                        <button
+                        </a> */}
+                        {/* <button
                           onClick={() => setIsDarkMode(!isDarkMode)}
                           className="w-full flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -662,7 +662,7 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           {isDarkMode ? "Light Mode" : "Dark Mode"}
-                        </button>
+                        </button> */}
                         <div className="border-t border-gray-700">
                           <button
                             onClick={handleLogout}

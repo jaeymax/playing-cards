@@ -98,9 +98,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   </tr>
                 ))
               : players.map((player: any, index: number) => (
-                  <tr key={player.rank} className="hover:bg-gray-750">
+                  <tr key={index} className="hover:bg-gray-750">
                     <td className="pl-6 borde py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                      #{index + 1}
+                      #{player.rank}
                     </td>
                     <td className="px-1 py-4 whitespace-nowrap">
                       <div className="flex items-center">

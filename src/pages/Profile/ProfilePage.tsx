@@ -5,6 +5,7 @@ import MatchHistory from "./components/MatchHistory";
 import Statistics from "./components/Statistics";
 import Achievements from "./components/Achievements";
 import ProfileSettings from "./components/ProfileSettings";
+import NavBar from "@/components/NavBar";
 
 
 type ProfileTab =
@@ -21,13 +22,14 @@ const ProfilePage: React.FC = () => {
     { id: "overview", label: "Overview" },
     { id: "matches", label: "Match History" },
     // { id: "statistics", label: "Statistics" },
-    { id: "achievements", label: "Achievements" },
+    // { id: "achievements", label: "Achievements" },
     // { id: "settings", label: "Settings" },
   ];
 
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <NavBar />
       <ProfileHeader />
 
       <div className="max-w-2xl w-full borde mx-auto px-4 py-8 ">
