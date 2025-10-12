@@ -1,3 +1,4 @@
+import NavBar from "@/components/NavBar";
 import React from "react";
 
 const AboutPage: React.FC = () => {
@@ -62,15 +63,17 @@ const AboutPage: React.FC = () => {
     },
   ];
 
-  const stats = [
-    { label: "Active Players", value: "50K+" },
-    { label: "Daily Matches", value: "100K+" },
-    { label: "Tournaments Hosted", value: "1000+" },
-    { label: "Total Prize Pool", value: "₽500K+" },
-  ];
+  // const stats = [
+  //   { label: "Active Players", value: "50K+" },
+  //   { label: "Daily Matches", value: "100K+" },
+  //   { label: "Tournaments Hosted", value: "1000+" },
+  //   { label: "Total Prize Pool", value: "₽500K+" },
+  // ];
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <NavBar/>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900">
         <div className="container mx-auto px-4 py-16 lg:py-24">
@@ -108,7 +111,7 @@ const AboutPage: React.FC = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="bg-gray-800 border-y border-gray-700">
+      {/* <div className="bg-gray-800 border-y border-gray-700">
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -121,7 +124,7 @@ const AboutPage: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Mission Statement */}
       <div className="container mx-auto px-4 py-16">
@@ -132,9 +135,9 @@ const AboutPage: React.FC = () => {
             platform where players can showcase their skills, compete in
             tournaments, and become part of a thriving global community.
           </p>
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105">
+          {/* <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105">
             Join Our Community
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -147,7 +150,7 @@ const AboutPage: React.FC = () => {
               Have questions or feedback? We'd love to hear from you.
             </p>
             <div className="flex justify-center space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white">
+              {/* <a href="#" className="text-gray-400 hover:text-white">
                 <span className="sr-only">Twitter</span>
                 <svg
                   className="h-6 w-6"
@@ -180,7 +183,7 @@ const AboutPage: React.FC = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
@@ -189,4 +192,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export  default AboutPage;

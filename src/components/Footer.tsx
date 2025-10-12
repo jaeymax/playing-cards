@@ -68,14 +68,14 @@ const Footer: React.FC = () => {
           <div className="text-gray-400 mb-4 md:mb-0 text-xs md:text-sm">
             © {new Date().getFullYear()} SparPlay. All rights reserved.
           </div>
-          <div className="flex space-x-6">
+          {/* <div className="flex space-x-6">
             <button className="text-gray-400 hover:text-white text-xs md:text-sm">
               Dark Mode
             </button>
             <button className="text-gray-400 hover:text-white text-xs md:text-sm">
               Language
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

@@ -20,7 +20,7 @@ const LeaderboardPage: React.FC = () => {
       />
 
       <div className="containe max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <TopThree currentFilter={currentFilter} />
+        {/* <TopThree currentFilter={currentFilter} /> */}
         <LeaderboardTable
           currentFilter={currentFilter}
           searchQuery={searchQuery}

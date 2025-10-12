@@ -23,7 +23,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, isVisible, onClose }) => {
     ? "translate-x-0 opacity-100"
     : "translate-x-full opacity-0";
   const typeClasses =
-    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+    type === "success" ? "bg-blue-500 text-white" : "bg-red-500 text-white";
 
   return (
     <div className={`${baseClasses} ${slideClasses} ${typeClasses}`}>

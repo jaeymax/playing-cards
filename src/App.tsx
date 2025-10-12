@@ -37,6 +37,7 @@ import GameModal from "./components/GameModal";
 
 //Import Mixpanel SDK
 import mixpanel from "mixpanel-browser";
+//import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
 mixpanel.init(import.meta.env.VITE_APP_MIXPANEL_TOKEN, {

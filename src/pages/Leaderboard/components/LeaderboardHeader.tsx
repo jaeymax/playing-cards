@@ -1,3 +1,4 @@
+import NavBar from "@/components/NavBar";
 import React from "react";
 
 interface LeaderboardHeaderProps {
@@ -13,19 +14,23 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   searchQuery,
   onSearchChange,
 }) => {
-  const filters = [
-    { id: "global", label: "All Time" },
-    { id: "monthly", label: "This Month" },
-    { id: "weekly", label: "This Week" },
-  ];
+  // const filters = [
+  //   { id: "global", label: "All Time" },
+  //   { id: "monthly", label: "This Month" },
+  //   { id: "weekly", label: "This Week" },
+  // ];
+
+  onFilterChange(currentFilter)
+  onSearchChange(searchQuery);
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700">
+    <div className="bg-gray800 border- border-ray-700">
+      <NavBar/>
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
           <div className="flex flex-col lg:flex-row items-center gap-6">
             <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-            <div className="flex bg-gray-700 rounded-lg p-1">
+            {/* <div className="flex bg-gray-700 rounded-lg p-1">
               {filters.map((filter) => (
                 <button
                   key={filter.id}
@@ -39,10 +44,10 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                   {filter.label}
                 </button>
               ))}
-            </div>
+            </div> */}
           </div>
 
-          <div className="relative w-full lg:w-64">
+          {/* <div className="relative w-full lg:w-64">
             <input
               type="text"
               value={searchQuery}
@@ -63,7 +68,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

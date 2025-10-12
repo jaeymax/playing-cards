@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Toast from "@/components/Toast";
 
 const ProfileHeader: React.FC = () => {
-  const { user } = useAppContext();
+  const { user, updateUser } = useAppContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -37,6 +37,22 @@ const ProfileHeader: React.FC = () => {
     }
   }, [file]);
 
+  const getUserProfile = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/users/me`, {
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile");
+      }
+      const data = await response.json();
+      console.log("Fetched user profile:", data);
+      updateUser(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ message, type, isVisible: true });
   };
@@ -64,6 +80,7 @@ const ProfileHeader: React.FC = () => {
       const result = await resonse.json();
       console.log("Upload result:", result);
       showToast("Image uploaded successfully!", "success");
+      await getUserProfile();
     } catch (error) {
       console.error("Upload failed:", error);
       showToast("Failed to upload image", "error");
@@ -187,7 +204,7 @@ const ProfileHeader: React.FC = () => {
             {/* Quick Stats */}
             <div className="flex gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">#42</div>
+                <div className="text-2xl font-bold text-white">#{user?.rank}</div>
                 <div className="text-sm text-gray-400">Global Rank</div>
               </div>
               <div className="text-center">

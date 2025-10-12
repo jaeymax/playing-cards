@@ -10,6 +10,8 @@ import {
   ChevronUp,
   Users,
 } from "lucide-react";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 
 const RulesPage = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(
@@ -21,7 +23,7 @@ const RulesPage = () => {
       {
         title: "Game Overview",
         content:
-          "Spa is a traditional Ghanaian/African trick-taking card game without trumps. The goal is to win the final trick by playing the highest-ranked card of the leading suit.",
+          "Spar is a traditional Ghanaian/African trick-taking card game without trumps. The goal is to win the final trick by playing the highest-ranked card of the leading suit.",
         icon: <Play className="w-6 h-6 text-blue-400" />,
       },
       {
@@ -83,21 +85,36 @@ const RulesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <NavBar/>
       {/* Hero Section */}
-      <div className="bg-gray-800 border-b border-gray-700">
+      {/* <div className="bg-gray-800 border-b border-gray-700">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl font-bold mb-6">Spa Card Game Rules</h1>
+            <h1 className="text-3xl font-bold mb-6">Spar Card Game Rules</h1>
             <p className="text-xl text-gray-300">
-              Learn how to play Spa, a traditional Ghanaian trick-taking card
+              Learn how to play Spar, a traditional Ghanaian trick-taking card
+              game
+            </p>
+          </div>
+        </div>
+      </div> */}
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12 borde">
+
+      <div className="">
+        <div className="container mx-auto px-4 borde pb-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-2xl md:text-3xl font-bold mb-6">Spar Card Game Rules</h1>
+            <p className="text-sm  md:text-xl text-gray-300">
+              Learn how to play Spar, a traditional Ghanaian trick-taking card
               game
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+
         <div className="max-w-3xl mx-auto">
           {/* Quick Navigation */}
           <div className="flex flex-col md:flex-row gap-4 mb-12">
@@ -170,7 +187,7 @@ const RulesPage = () => {
           </div>
 
           {/* Video Tutorial Section */}
-          <div className="max-w-3xl mx-auto mt-12">
+          {/* <div className="max-w-3xl mx-auto mt-12">
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 text-center">
               <h2 className="text-xl font-bold mb-4">Video Tutorials</h2>
               <div className="aspect-w-16 aspect-h-9 bg-gray-700 rounded-lg overflow-hidden mb-4">
@@ -186,10 +203,10 @@ const RulesPage = () => {
                 Watch Tutorials
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Additional Resources */}
-          <div className="max-w-3xl mx-auto mt-12">
+          {/* <div className="max-w-3xl mx-auto mt-12">
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 text-center">
               <h2 className="text-xl font-bold mb-4">Ready to Play?</h2>
               <p className="text-gray-300 mb-6">
@@ -200,9 +217,10 @@ const RulesPage = () => {
                 Start Practice Game
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };

@@ -45,6 +45,11 @@ const Card: React.FC<Card> = ({
     return card_player_id === current_player_id && status === "in_hand";
   };
 
+  const inDeck = (status: string) => {
+    const v = ['in_drawpile', 'in_deck'];
+    return v.includes(status);
+  };
+
   const handleCardClick = () => {
     if (card_player_id == current_player_id) {
       console.log(`${rank} of ${suit} clicked`);
@@ -61,7 +66,7 @@ const Card: React.FC<Card> = ({
 
   return (
     <div
-      className={`card ${canView(current_player_id, card_player_id, status) ? 'player-card': 'opponent-card'}`}
+      className={`card ${canView(current_player_id, card_player_id, status) ? 'player-card': 'opponent-card'} ${inDeck(status)? "in-deck":""}`}
       style={{ transform: transform, zIndex: zIndex }}
       onClick={handleCardClick}
     >

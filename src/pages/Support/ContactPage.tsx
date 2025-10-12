@@ -1,4 +1,7 @@
+import Footer from "@/components/Footer";
+import NavBar from "@/components/NavBar";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +35,8 @@ const ContactPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <div className="bg-gray-800 border-b border-gray-700">
+      <NavBar/>
+      <div className="bg-gray-border-b border-gray700">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-2xl font-bold text-white">Contact Support</h1>
           <p className="text-gray-400 mt-2">
@@ -217,8 +221,8 @@ const ContactPage: React.FC = () => {
               <h3 className="text-lg font-bold text-white mb-4">Quick Help</h3>
               <ul className="space-y-3">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/faq"
                     className="text-blue-400 hover:text-blue-300 flex items-center"
                   >
                     <svg
@@ -235,11 +239,11 @@ const ContactPage: React.FC = () => {
                       />
                     </svg>
                     FAQs
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/rules"
                     className="text-blue-400 hover:text-blue-300 flex items-center"
                   >
                     <svg
@@ -256,9 +260,9 @@ const ContactPage: React.FC = () => {
                       />
                     </svg>
                     Game Rules
-                  </a>
+                  </Link>
                 </li>
-                <li>
+                {/* <li>
                   <a
                     href="#"
                     className="text-blue-400 hover:text-blue-300 flex items-center"
@@ -278,7 +282,7 @@ const ContactPage: React.FC = () => {
                     </svg>
                     Quick Start Guide
                   </a>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -318,13 +322,14 @@ const ContactPage: React.FC = () => {
                       d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
                     />
                   </svg>
-                  <span className="text-gray-300">Discord Community</span>
+                  <span className="text-gray-300">Whatsapp Community</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };

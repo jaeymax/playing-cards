@@ -4,7 +4,7 @@ import { useAppContext } from "./AppContext";
 
 const sockerUrl = import.meta.env.VITE_ENV === "development"
   ? "ws://192.168.43.218:5000"
-  : "wss://playing-cards-api.onrender.com";
+  : "wss://api.sparplay.com";
 
 
 interface SocketContextValue {
