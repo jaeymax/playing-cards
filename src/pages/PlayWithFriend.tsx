@@ -13,6 +13,8 @@ import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
 import { dealCards, ensureGuest, getPlayerIds, getToken, handleGameMessage, handlePlayedCard, playPlayedCardSound, playShuffleSound, reconcileCards, shuffleCards } from "@/utils/Functions";
+import { analytics, logEvent } from "@/firebase/config";
+import ScoresTable from "@/components/ScoresTable";
 
 
 const PlayWithFriend = () => {
@@ -266,6 +268,7 @@ const PlayWithFriend = () => {
 
   const gameEndedCallback = (data: any) => {
     console.log("gameEnded", data);
+    logEvent(analytics, 'hand_ended', { winningPlayer: data.winner.user.username, winningPosition: data.winner.position });
     setGameEnded(true);
     setWinningPlayer(data.winner);
   };
@@ -273,6 +276,7 @@ const PlayWithFriend = () => {
   
   const gameOverCallback = (winnerData:any) => {
     console.log("Game over");
+    logEvent(analytics, 'game_ended', { winningPlayer: winnerData.winner.user.username, winningPosition: winnerData.winner.position });
     setGameOver(true);
     setWinningPlayer(winnerData.winner);
     console.log("Winner data:", winnerData);
@@ -280,6 +284,7 @@ const PlayWithFriend = () => {
 
   const rematchCallback = (data: any) => {
     console.log("Hand rematch:", data);
+    logEvent(analytics, 'rematch_started', { players: data.players });
     setGameOver(false);
     setWinningPlayer(null);
     setPlayers(data.players);
@@ -320,6 +325,7 @@ const PlayWithFriend = () => {
 
     const startNewHandCallback = (data: any) => {
       console.log("Start new hand:", data);
+      logEvent(analytics, 'new_hand_started', { handNumber: data.hand_number });
       setGameEnded(false);
       setWinningPlayer(null);
       setPlayers(data.players);
@@ -492,6 +498,8 @@ const PlayWithFriend = () => {
           ref={playerHandRef}
           className="container borde border-yellow-500 absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
         />
+
+        <ScoresTable players={players} />
 
         <PlayerInfo
           name={me?.user.username || "Player"}

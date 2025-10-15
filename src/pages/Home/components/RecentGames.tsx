@@ -176,7 +176,7 @@ const RecentGames: React.FC = () => {
         )}
       </div>
       <div className="p-3 border-t border-gray-700">
-        {recentGamesMapped.length && ( <Link
+        {recentGamesMapped.length > 0 && ( <Link
           to="/recent-games"
           className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
         >

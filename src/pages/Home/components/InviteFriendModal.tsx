@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 import { ensureGuest, getToken } from "@/utils/Functions";
+import { analytics, logEvent } from "@/firebase/config";
 
 interface InviteFriendModalProps {
   isOpen: boolean;
@@ -57,6 +58,8 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
         console.error('Failed to create game:', response.statusText);
         return;
       }
+
+      logEvent(analytics, 'invited_friend', { numPlayers: gameConfig.numPlayers, winPoints: gameConfig.winPoints, includeAces: gameConfig.includeAces, includeSixes: gameConfig.includeSixes, isRated: gameConfig.isRated });
       navigate(`/game/${data.game.code}`, {
         state: { gameType: "playWithFriend" },
       });

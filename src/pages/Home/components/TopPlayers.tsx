@@ -85,12 +85,12 @@ const TopPlayers: React.FC = () => {
               <div className="w-8 h-8 bg-gray-700/30 rounded-full flex items-center justify-center">
                 {player.image_url ? (
                   <img
-                    className="object-contain rounded-full"
+                    className="object-cover w-full h-full rounded-full"
                     src={player.image_url}
                     alt={player.username}
                   />
                 ) : (
-                  <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt={player.username} className="object-contain rounded-full" />
+                  <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt={player.username} className="object-cover w-full h-full rounded-full" />
                 )}
               </div>
               <div className="flex-1">

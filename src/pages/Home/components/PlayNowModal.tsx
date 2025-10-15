@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
 import { useSocket } from "@/contexts/SocketProvider";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/firebase/config";
 
 interface PlayNowModalProps {
   isOpen: boolean;
@@ -75,6 +77,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
 
   const gameStartCallback = ({ gameCode }: { gameCode: string }) => {
     console.log("Game started:", gameCode);
+    logEvent(analytics, 'start_match_game', { method: 'play_now' });
     navigate(`/game/${gameCode}`, { state: { gameType: "playNow" } });
   };
 

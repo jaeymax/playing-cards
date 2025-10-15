@@ -8,6 +8,7 @@ import React, {
 
 import { baseUrl } from "@/config/api";
 import { getToken, removeToken } from "@/utils/Functions";
+import mixpanel from "mixpanel-browser";
 
 interface User {
   username: string;
@@ -80,6 +81,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
          
           
           setUser(userData);
+          mixpanel.identify(userData.id);
+          mixpanel.people.set({
+            $email: userData.email, // only if you have it
+            $created: new Date(userData.created_at), // only if you have it
+            username: userData.username,
+            games_played: userData.games_played,
+      
+          });
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);

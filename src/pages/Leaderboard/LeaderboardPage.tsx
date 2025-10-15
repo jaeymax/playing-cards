@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import LeaderboardTable from "./components/LeaderboardTable";
 import LeaderboardHeader from "./components/LeaderboardHeader";
-import TopThree from "./components/TopThree";
+//import TopThree from "./components/TopThree";
 
 type LeaderboardFilter = "global" | "monthly" | "weekly";
 

@@ -107,13 +107,13 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                         <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center text-lg">
                           {player.image_url ? (
                             <img
-                              className="rounded-full w-full h-full object-contain"
+                              className="rounded-full w-full h-full object-cover"
                               src={player.image_url}
                               alt={player.username}
                             />
                           ) : (
                             <img
-                              className="rounded-full"
+                              className="rounded-full w-full h-full object-cover"
                               src={
                                 "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
                               }

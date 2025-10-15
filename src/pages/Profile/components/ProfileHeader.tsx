@@ -107,7 +107,7 @@ const ProfileHeader: React.FC = () => {
                     <img
                       src={user.image_url}
                       alt="User Avatar"
-                      className="rounded-full w-full h-full"
+                      className="rounded-full w-full h-full object-cover"
                     />
                   ) : (
                     // <div className="flex flex-col items-center justify-center w-full h-full text-sm text-gray-400 text-center p-2">
@@ -130,7 +130,7 @@ const ProfileHeader: React.FC = () => {
                     <img
                     src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
                     alt="User Avatar"
-                    className="rounded-full w-full h-full"
+                    className="rounded-full w-full h-full object-cover"
                   />
                   )}
                 </div>

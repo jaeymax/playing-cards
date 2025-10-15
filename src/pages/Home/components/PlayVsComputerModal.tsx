@@ -3,7 +3,8 @@ import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
-import { authHeaders, ensureGuest, getToken } from "@/utils/Functions";
+import { authHeaders, ensureGuest, getToken } from "@/utils/Functions";;
+import { analytics, logEvent } from "@/firebase/config";
 
 interface PlayVsComputerModalProps {
   isOpen: boolean;
@@ -83,6 +84,8 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
         console.error("Failed to create game:", response.statusText);
         return;
       }
+      
+      logEvent(analytics, 'start_bot_game', { difficulty: selectedDifficulty });
 
       return data;
     } catch (error) {

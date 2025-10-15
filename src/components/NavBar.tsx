@@ -541,16 +541,16 @@ const NavBar: React.FC = () => {
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
                           {user?.image_url ? (
                             <img
-                              className="rounded-full"
+                              className="rounded-full w-full h-full object-cover"
                               src={user?.image_url}
                               alt=""
                             />
                           ) : (
                             <img
-                            className="rounded-full"
-                            src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
-                            alt=""
-                          />
+                              className="rounded-full w-full h-full object-cover"
+                              src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+                              alt=""
+                            />
                           )}
                         </div>
                       </div>

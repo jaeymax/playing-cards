@@ -21,6 +21,8 @@ import GameMessage from "@/components/GameMessage";
 import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
+import { analytics, logEvent } from "@/firebase/config";
+import ScoresTable from "@/components/ScoresTable";
 
 const PlayVsComputer = () => {
   const { code } = useParams();
@@ -56,6 +58,10 @@ const PlayVsComputer = () => {
   const playerHandRef = useRef<HTMLDivElement>(null);
   const playerPlayAreaRef = useRef<HTMLDivElement>(null);
 
+  const getPlayerByPosition = (player_position: number) => {
+    return players.find((player) => player.position === player_position);
+  };
+
   const getOpponentsData = useCallback(
     (data: any[]) => {
       const opponents = data.filter((player) => player.user.id !== user?.id);
@@ -80,9 +86,11 @@ const PlayVsComputer = () => {
   );
 
   const getMyData = useCallback(
-    (data: any[], cards:any[]) => {
+    (data: any[], cards: any[]) => {
       const myData = data.find((player) => player.user.id === user?.id);
-      const showGameButtons = cards.every((card:any)=>card.status == 'in_deck');
+      const showGameButtons = cards.every(
+        (card: any) => card.status == "in_deck"
+      );
       if (myData?.is_dealer && showGameButtons) {
         setShowDealButton(true);
         setShowShuffleButton(true);
@@ -103,8 +111,8 @@ const PlayVsComputer = () => {
         card.pos_y = card.pos_y * i;
       });
 
-
-      const {meId, firstOpponentId, secondOpponentId, thirdOpponentId} = getPlayerIds(data.players, user);
+      const { meId, firstOpponentId, secondOpponentId, thirdOpponentId } =
+        getPlayerIds(data.players, user);
       reconcileCards(
         data.cards,
         setGameCards,
@@ -168,19 +176,18 @@ const PlayVsComputer = () => {
   };
 
   useEffect(() => {
-      if(!user) return;
+    if (!user) return;
 
-      socket?.on("connect", handleConnect);
-      socket?.on("gameData", getGameDataCallback);
-      socket?.on("updatedGameData", getUpdatedGameData);
-      socket?.on("game-not-found", handleGameNotFound);
-      socket?.on("gameMessage", gameMessageCallback);
+    socket?.on("connect", handleConnect);
+    socket?.on("gameData", getGameDataCallback);
+    socket?.on("updatedGameData", getUpdatedGameData);
+    socket?.on("game-not-found", handleGameNotFound);
+    socket?.on("gameMessage", gameMessageCallback);
 
-      if (socket?.connected) {
-        //console.log('socket connected, running reconcile');
-        handleConnect();
-      }
-   
+    if (socket?.connected) {
+      //console.log('socket connected, running reconcile');
+      handleConnect();
+    }
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
@@ -245,6 +252,10 @@ const PlayVsComputer = () => {
 
   const gameEndedCallback = useCallback((data: any) => {
     console.log("gameEnded", data);
+    logEvent(analytics, "hand_ended", {
+      winningPlayer: data.winner.user.username,
+      winningPosition: data.winner.position,
+    });
     setGameEnded(true);
     setWinningPlayer(data.winner);
   }, []);
@@ -280,6 +291,7 @@ const PlayVsComputer = () => {
 
   const startNewHandCallback = async (data: any) => {
     console.log("Start new hand:", data);
+    logEvent(analytics, "new_hand_started", { handNumber: data.hand_number });
     setGameEnded(false);
     setWinningPlayer(null);
     setPlayers(data.players);
@@ -313,6 +325,10 @@ const PlayVsComputer = () => {
 
   const gameOverCallback = useCallback((winnerData: any) => {
     console.log("Game over");
+    logEvent(analytics, "game_ended", {
+      winningPlayer: winnerData.winner.user.username,
+      winningPosition: winnerData.winner.position,
+    });
     setGameOver(true);
     setWinningPlayer(winnerData.winner);
     console.log("Winner data:", winnerData);
@@ -327,6 +343,7 @@ const PlayVsComputer = () => {
       getOpponentsData(data.players);
       setGame(data);
       setGameCards(data.cards);
+      logEvent(analytics, "rematch_started", { players: data.players });
     },
     [user]
   );
@@ -558,9 +575,53 @@ const PlayVsComputer = () => {
           className="container absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
         />
 
+        <ScoresTable players={players} />
+
+        <div className="absolute bottom-0 right-0 max-w-[150px] m-2 text-right">
+          {game?.current_trick ? (
+            <span className="text-xs text-white break-words">
+              {getPlayerByPosition(game?.current_trick.leader_position)?.user
+                ?.is_bot
+                ? "Computer"
+                : getPlayerByPosition(game?.current_trick.leader_position)?.user
+                    ?.id === user?.id
+                ? "You are"
+                : `${
+                    getPlayerByPosition(game?.current_trick.leader_position)
+                      ?.user?.username
+                  } is`}{" "}
+              leading with{" "}
+              <span className="text-xs whitespace-nowrap">
+                {game.current_trick.cards.length > 0 ? (
+                  <>
+                    {game.current_trick.cards[0]?.card?.rank} of{" "}
+                    {game.current_trick.leading_suit}
+                  </>
+                ) : (
+                  game.completed_tricks[
+                    game.completed_tricks.length - 1
+                  ]?.cards.find(
+                    (card: any) =>
+                      card.player_position ===
+                      game.current_trick.leader_position
+                  )?.card?.rank +
+                  " of " +
+                  game.completed_tricks[game.completed_tricks.length - 1]
+                    ?.leading_suit
+                )}
+              </span>
+            </span>
+          ) : (
+            <span className="text-xs text-white">No leading suit</span>
+          )}
+        </div>
+
         <PlayerInfo
           name={me?.user.username || "Player"}
-          avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+          avatar={
+            me?.user.image_url ||
+            "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+          }
           points={me?.score || 0}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
