@@ -12,10 +12,31 @@ import DeckArea from "@/components/DeckArea";
 import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
-import { dealCards, ensureGuest, getPlayerIds, getToken, handleGameMessage, handlePlayedCard, playPlayedCardSound, playShuffleSound, reconcileCards, shuffleCards } from "@/utils/Functions";
+import {
+  dealCards,
+  ensureGuest,
+  getPlayerIds,
+  getToken,
+  handleGameMessage,
+  handlePlayedCard,
+  playPlayedCardSound,
+  playShuffleSound,
+  reconcileCards,
+  shuffleCards,
+} from "@/utils/Functions";
 import { analytics, logEvent } from "@/firebase/config";
 import ScoresTable from "@/components/ScoresTable";
+import GameChat from "@/components/GameChat";
+import ChatNotification from "@/components/ChatNotification";
+import { baseUrl } from "@/config/api";
 
+interface Message {
+  user_id: number | undefined;
+  username: string | undefined;
+  avatar: string | undefined;
+  message: string;
+  timestamp: string;
+}
 
 const PlayWithFriend = () => {
   const [showShareOverlay, setShowShareOverlay] = useState(false);
@@ -36,6 +57,10 @@ const PlayWithFriend = () => {
   const [gameOver, setGameOver] = useState(false);
   const [message, setMessage] = useState<string>("Waiting for players...");
   const [gameStarted, setGameStarted] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [notification, setNotification] = useState<Message | null>(null);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -63,8 +88,8 @@ const PlayWithFriend = () => {
       );
       setMessage(`${player?.user.username}'s turn`);
     }
-    
-    if(game){
+
+    if (game) {
       setMaxPlayers(game?.player_count);
     }
   }, [game]);
@@ -86,81 +111,94 @@ const PlayWithFriend = () => {
     };
   }, [socket, gameCards, game]);
 
-
-  useEffect( ()=>{
+  useEffect(() => {
     const authToken = getToken();
-    const getGuestCredentials = async() =>{
-        const user = await ensureGuest();
-        if(user){
-          updateUser(user);
-        }
+    const getGuestCredentials = async () => {
+      const user = await ensureGuest();
+      if (user) {
+        updateUser(user);
+      }
+    };
+
+    if (!authToken) getGuestCredentials();
+  }, []);
+
+  useEffect(() => {
+    if (game) {
+      const isHost = me?.user?.id == game?.created_by;
+      console.log("is host", isHost);
+      setShowShareOverlay(isHost);
     }
+  }, [me, game]);
 
-    if(!authToken)getGuestCredentials();
-  },[])
-
-   useEffect(()=>{
-        if(game){
-          const isHost = me?.user?.id == game?.created_by;
-          console.log('is host', isHost);
-          setShowShareOverlay(isHost);
-        }
-   },[me, game])
-
-
-   useEffect(()=>{
+  useEffect(() => {
     socket?.on("dealtCards", dealtCardsCallback);
     socket?.on("shuffledDeck", shuffledDeckCallback);
 
-     return ()=>{
+    return () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
-     }
-   },[socket, me, firstOpponent, secondOpponent, thirdOpponent])
-
+    };
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent]);
 
   useEffect(() => {
-       if(!user) return;
-     
-       socket?.on("connect", handleConnect);
-       socket?.on("gameData", getGameDataCallback);
-       socket?.on("updatedGameData", getUpdatedGameData);
-       socket?.on("game-not-found", handleGameNotFound);
-       socket?.on("gameMessage", gameMessageCallback);
-  
-       if(socket?.connected){
-         handleConnect();
-       }
-     
+    if (!user) return;
+
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/messages/games/${code}`);
+        if (!response.ok) throw new Error("Failed to fetch messages");
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
+
+    socket?.on("connect", handleConnect);
+    socket?.on("gameData", getGameDataCallback);
+    socket?.on("updatedGameData", getUpdatedGameData);
+    socket?.on("game-not-found", handleGameNotFound);
+    socket?.on("gameMessage", gameMessageCallback);
+    socket?.on("chatMessage", (message: Message) => {
+      if (!showChat) {
+        setUnreadCount((prev) => prev + 1);
+        setNotification(message);
+      }
+      setMessages((prev) => [...prev, message]);
+    });
+
+    if (socket?.connected) {
+      handleConnect();
+    }
 
     return () => {
       socket?.off("gameData", getGameDataCallback);
       socket?.off("updatedGameData", getUpdatedGameData);
       socket?.off("gameMessage", gameMessageCallback);
-      socket?.off('connect', handleConnect)
-      socket?.off('game-not-found', handleGameNotFound);
-     // socket?.emit("leave-room", code);
+      socket?.off("connect", handleConnect);
+      socket?.off("game-not-found", handleGameNotFound);
+      socket?.off("chatMessage");
     };
-  }, [user, code, socket])
-  
-  useEffect(()=>{
-    if(user){
-      socket?.emit('playerJoin', {userId:user.id, gameCode:code});
+  }, [user, code, socket, showChat]);
+
+  useEffect(() => {
+    if (user) {
+      socket?.emit("playerJoin", { userId: user.id, gameCode: code });
     }
+  }, [user, socket]);
 
-  },[user, socket])
-
-  useEffect(()=>{
-     console.log('players',players)
-     if(players.length >= maxPlayers){
-        setShowParticipants(false);
-        setShowShareOverlay(false);
-        setGameStarted(true);
-   
-     }else if(players.length > 0){
+  useEffect(() => {
+    console.log("players", players);
+    if (players.length >= maxPlayers) {
+      setShowParticipants(false);
+      setShowShareOverlay(false);
+      setGameStarted(true);
+    } else if (players.length > 0) {
       setShowParticipants(true);
-     }
-  },[players, maxPlayers])
+    }
+  }, [players, maxPlayers]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: any) => {
@@ -173,17 +211,18 @@ const PlayWithFriend = () => {
     };
   }, []);
 
-  const getMyData = (data: any[], cards:[]) => {
+  const getMyData = (data: any[], cards: []) => {
     const myData = data.find((player) => player.user.id === user?.id);
-   const showGameButtons = cards.every((card:any)=>card.status == 'in_deck');
-  
+    const showGameButtons = cards.every(
+      (card: any) => card.status == "in_deck"
+    );
+
     if (myData?.is_dealer && showGameButtons) {
       setShowDealButton(true);
       setShowShuffleButton(true);
     }
     setMe(myData);
   };
-
 
   const getOpponentsData = (data: any[]) => {
     const opponents = data.filter((player) => player.user.id !== user?.id);
@@ -211,53 +250,57 @@ const PlayWithFriend = () => {
       card.pos_x = card.pos_x * i;
       card.pos_y = card.pos_y * i;
     });
-     const {meId, firstOpponentId, secondOpponentId, thirdOpponentId} = getPlayerIds(data.players, user);
-          reconcileCards(
-            data.cards,
-            setGameCards,
-            meId,
-            firstOpponentId,
-            secondOpponentId,
-            thirdOpponentId,
-            deckRef,
-            playerHandRef,
-            opponentOneHandRef,
-            opponentTwoHandRef,
-            opponentThreeHandRef,
-            playerPlayAreaRef,
-            opponentOnePlayAreaRef,
-            opponentTwoPlayAreaRef,
-            opponentThreePlayAreaRef
-          );
+    const { meId, firstOpponentId, secondOpponentId, thirdOpponentId } =
+      getPlayerIds(data.players, user);
+    reconcileCards(
+      data.cards,
+      setGameCards,
+      meId,
+      firstOpponentId,
+      secondOpponentId,
+      thirdOpponentId,
+      deckRef,
+      playerHandRef,
+      opponentOneHandRef,
+      opponentTwoHandRef,
+      opponentThreeHandRef,
+      playerPlayAreaRef,
+      opponentOnePlayAreaRef,
+      opponentTwoPlayAreaRef,
+      opponentThreePlayAreaRef
+    );
     //setGameCards(data.cards);
     getMyData(data.players, data.cards);
     getOpponentsData(data.players);
   };
 
-  const dealtCardsCallback = useCallback((cards: any) => {
-    console.log("DealtCards", cards);
-    setGameCards(cards);
-    dealCards(
-      cards,
-      me?.id,
-      firstOpponent?.id,
-      secondOpponent?.id,
-      thirdOpponent?.id,
-      {
-        playerHandRef,
-        opponentOneHandRef,
-        opponentTwoHandRef,
-        opponentThreeHandRef,
-        deckRef,
-      },
-      setGameCards,
-      isDealing,
-      isShuffling,
-      setIsDealing
-    );
-    setShowDealButton(false);
-    setShowShuffleButton(false);
-  }, [firstOpponent, secondOpponent, thirdOpponent]);
+  const dealtCardsCallback = useCallback(
+    (cards: any) => {
+      console.log("DealtCards", cards);
+      setGameCards(cards);
+      dealCards(
+        cards,
+        me?.id,
+        firstOpponent?.id,
+        secondOpponent?.id,
+        thirdOpponent?.id,
+        {
+          playerHandRef,
+          opponentOneHandRef,
+          opponentTwoHandRef,
+          opponentThreeHandRef,
+          deckRef,
+        },
+        setGameCards,
+        isDealing,
+        isShuffling,
+        setIsDealing
+      );
+      setShowDealButton(false);
+      setShowShuffleButton(false);
+    },
+    [firstOpponent, secondOpponent, thirdOpponent]
+  );
 
   const shuffledDeckCallback = (cards: any) => {
     console.log("ShuffleCards", cards);
@@ -268,23 +311,28 @@ const PlayWithFriend = () => {
 
   const gameEndedCallback = (data: any) => {
     console.log("gameEnded", data);
-    logEvent(analytics, 'hand_ended', { winningPlayer: data.winner.user.username, winningPosition: data.winner.position });
+    logEvent(analytics, "hand_ended", {
+      winningPlayer: data.winner.user.username,
+      winningPosition: data.winner.position,
+    });
     setGameEnded(true);
     setWinningPlayer(data.winner);
   };
 
-  
-  const gameOverCallback = (winnerData:any) => {
+  const gameOverCallback = (winnerData: any) => {
     console.log("Game over");
-    logEvent(analytics, 'game_ended', { winningPlayer: winnerData.winner.user.username, winningPosition: winnerData.winner.position });
+    logEvent(analytics, "game_ended", {
+      winningPlayer: winnerData.winner.user.username,
+      winningPosition: winnerData.winner.position,
+    });
     setGameOver(true);
     setWinningPlayer(winnerData.winner);
     console.log("Winner data:", winnerData);
-  }
+  };
 
   const rematchCallback = (data: any) => {
     console.log("Hand rematch:", data);
-    logEvent(analytics, 'rematch_started', { players: data.players });
+    logEvent(analytics, "rematch_started", { players: data.players });
     setGameOver(false);
     setWinningPlayer(null);
     setPlayers(data.players);
@@ -292,58 +340,52 @@ const PlayWithFriend = () => {
     getOpponentsData(data.players);
     setGame(data);
     setGameCards(data.cards);
-  }
+  };
 
   const playedCardCallback = ({
+    card_id,
+    player_id,
+    trick_number,
+  }: {
+    card_id: number;
+    player_id: number;
+    trick_number: number;
+  }) => {
+    handlePlayedCard({
       card_id,
       player_id,
       trick_number,
-    }: {
-      card_id: number;
-      player_id: number;
-      trick_number: number;
-    }) => {
-      handlePlayedCard({
-        card_id,
-        player_id,
-        trick_number,
-        gameCards,
-        game,
-        me,
-        firstOpponent,
-        secondOpponent,
-        thirdOpponent,
-        deckRef,
-        playerPlayAreaRef,
-        opponentOnePlayAreaRef,
-        opponentTwoPlayAreaRef,
-        opponentThreePlayAreaRef,
-        setGameCards,
-        playSound: playPlayedCardSound,
-      });
-    };
+      gameCards,
+      game,
+      me,
+      firstOpponent,
+      secondOpponent,
+      thirdOpponent,
+      deckRef,
+      playerPlayAreaRef,
+      opponentOnePlayAreaRef,
+      opponentTwoPlayAreaRef,
+      opponentThreePlayAreaRef,
+      setGameCards,
+      playSound: playPlayedCardSound,
+    });
+  };
 
-    const startNewHandCallback = (data: any) => {
-      console.log("Start new hand:", data);
-      logEvent(analytics, 'new_hand_started', { handNumber: data.hand_number });
-      setGameEnded(false);
-      setWinningPlayer(null);
-      setPlayers(data.players);
-      getMyData(data.players, data.cards);
-      getOpponentsData(data.players);
-      setGame(data);
-      setGameCards(data.cards);
-    };
-  
-
+  const startNewHandCallback = (data: any) => {
+    console.log("Start new hand:", data);
+    logEvent(analytics, "new_hand_started", { handNumber: data.hand_number });
+    setGameEnded(false);
+    setWinningPlayer(null);
+    setPlayers(data.players);
+    getMyData(data.players, data.cards);
+    getOpponentsData(data.players);
+    setGame(data);
+    setGameCards(data.cards);
+  };
 
   const gameMessageCallback = (message: string) => {
-      handleGameMessage(message, setMessage);
-    };
-
-
-
-  
+    handleGameMessage(message, setMessage);
+  };
 
   const handleShuffle = () => {
     socket?.emit("shuffleDeck", code);
@@ -353,19 +395,73 @@ const PlayWithFriend = () => {
     socket?.emit("dealCards", code);
   };
 
-  const handleConnect = ()=>{
+  const handleConnect = () => {
     socket?.emit("join-room", code);
     socket?.emit("getGameData", code);
-  }
+  };
 
-  const handleGameNotFound = ()=>{
-        console.error("Game not found with code:", code);
-        alert("Game not found. Please check the code and try again.");
-        navigate("/");
-  }
+  const handleGameNotFound = () => {
+    console.error("Game not found with code:", code);
+    alert("Game not found. Please check the code and try again.");
+    navigate("/");
+  };
+
+  const handleSendMessage = (message: string) => {
+    const messageData = {
+      user_id: user?.id,
+      username: user?.username,
+      avatar: user?.image_url,
+      message: message,
+      timestamp: new Date().toISOString(),
+      game_code: code,
+    };
+
+    setMessages((prev) => [...prev, messageData]);
+    socket?.emit("sendMessage", messageData);
+  };
+
+  const ChatToggleButton = () =>
+    !showChat ? (
+      <div className="fixed bottom-4 right-4 z-[100000]">
+        <button
+          onClick={() => {
+            setShowChat(!showChat);
+            setUnreadCount(0);
+          }}
+          className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 relative"
+        >
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {unreadCount}
+            </span>
+          )}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+        </button>
+      </div>
+    ) : null;
 
   return (
     <>
+      {notification && !showChat && (
+        <ChatNotification
+          message={notification}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         {showShareOverlay && !gameStarted && (
           <ShareOverlay
@@ -374,13 +470,20 @@ const PlayWithFriend = () => {
           />
         )}
 
-        {showParticipants && game && players.length > 0 &&  (
-          <ParticipantsModal players={players} maxPlayers={maxPlayers} currentPlayer={me} />
+        {showParticipants && game && players.length > 0 && (
+          <ParticipantsModal
+            players={players}
+            maxPlayers={maxPlayers}
+            currentPlayer={me}
+          />
         )}
 
         <PlayerInfo
           name={firstOpponent?.user.username || "Waiting..."}
-          avatar={firstOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+          avatar={
+            firstOpponent?.user.image_url ||
+            "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+          }
           points={firstOpponent?.score || 0}
           styles="left-1/2 -translate-x-1/2 top-1"
         />
@@ -388,7 +491,10 @@ const PlayWithFriend = () => {
         {secondOpponent && (
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
-            avatar={secondOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+            avatar={
+              secondOpponent?.user.image_url ||
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
             points={secondOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
@@ -396,22 +502,24 @@ const PlayWithFriend = () => {
         {thirdOpponent && (
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
-            avatar={thirdOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+            avatar={
+              thirdOpponent?.user.image_url ||
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
           />
         )}
 
-      {
-        !showShareOverlay && !showParticipants && (<GameControls
-          showButtons={showDealButton && showShuffleButton}
-          isDealing={isDealing}
-          isShuffling={isShuffling}
-          onDeal={handleDeal}
-          onShuffle={handleShuffle}
-        />)
-      }
-        
+        {!showShareOverlay && !showParticipants && (
+          <GameControls
+            showButtons={showDealButton && showShuffleButton}
+            isDealing={isDealing}
+            isShuffling={isShuffling}
+            onDeal={handleDeal}
+            onShuffle={handleShuffle}
+          />
+        )}
 
         <OpponentArea
           id="opponentArea1"
@@ -455,7 +563,7 @@ const PlayWithFriend = () => {
                 <div
                   key={index}
                   className="card-slot-2"
-                  data-position={5  - index - 1}
+                  data-position={5 - index - 1}
                 ></div>
               ))}
             </div>
@@ -503,9 +611,23 @@ const PlayWithFriend = () => {
 
         <PlayerInfo
           name={me?.user.username || "Player"}
-          avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+          avatar={
+            me?.user.image_url ||
+            "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+          }
           points={me?.score || 0}
           styles="left-1/2 -translate-x-1/2 bottom-1"
+        />
+
+        <ChatToggleButton />
+        <GameChat
+          socket={socket}
+          gameCode={code || ""}
+          currentUser={user}
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+          messages={messages}
+          onSendMessage={handleSendMessage}
         />
       </div>
 
