@@ -407,6 +407,8 @@ const PlayWithFriend = () => {
   };
 
   const handleSendMessage = (message: string) => {
+
+    logEvent(analytics, "message_sent", { gameCode: code, messageLength: message.length });
     const messageData = {
       user_id: user?.id,
       username: user?.username,

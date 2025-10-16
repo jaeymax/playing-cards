@@ -430,9 +430,9 @@ const NavBar: React.FC = () => {
               <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
               </Link>
-              <Link to="/leaderboard" className="text-gray-300 hover:text-white px-3 py-2">
+              {/* <Link to="/leaderboard" className="text-gray-300 hover:text-white px-3 py-2">
                 Leaderboard
-              </Link>
+              </Link> */}
               <Link
                 to="/about"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -743,7 +743,7 @@ const NavBar: React.FC = () => {
                   </svg>
                   Home
                 </Link>
-                <Link
+                {/* <Link
                   to="/leaderboard"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
@@ -761,7 +761,7 @@ const NavBar: React.FC = () => {
                     />
                   </svg>
                   Leaderboard
-                </Link>
+                </Link> */}
                 <Link
                   to="/rules"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
