@@ -1,1 +1,14 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap'); */
+
+@keyframes toastFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-toast-slide-down {
+  animation: toastFade 0.7s ease-out;
+}

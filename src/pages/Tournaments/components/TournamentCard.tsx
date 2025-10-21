@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Tournament } from "../types";
 
 interface TournamentCardProps {
@@ -6,6 +7,8 @@ interface TournamentCardProps {
 }
 
 const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -43,8 +46,15 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
     }
   };
 
+  const handleCardClick = () => {
+    navigate(`/tournaments/${tournament.id}`);
+  };
+
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors">
+    <div
+      className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-bold text-white">{tournament.title}</h3>

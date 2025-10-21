@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { removeToken } from "@/utils/Functions";
+import { Home, Trophy, Medal, Info, ScrollText, Mail } from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -410,17 +411,15 @@ const NavBar: React.FC = () => {
               <Link to="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 hidden sm:flex">
                   <img src="./cards.png" className="object-contain" alt="" />
-              </div>
+                </div>
                 <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
-                  <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
+                  <span style={{fontFamily:"Great Vibes"}} className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
                     Spar
                   </span>
-                  <span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
+                  <span style={{fontFamily:"Great Vibes"}} className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
                     play
                   </span>
-                  <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent">
-                    
-                  </span>
+                  <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent"></span>
                 </div>
               </Link>
             </div>
@@ -430,9 +429,18 @@ const NavBar: React.FC = () => {
               <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
               </Link>
-              {/* <Link to="/leaderboard" className="text-gray-300 hover:text-white px-3 py-2">
+              <Link
+                to="/tournaments"
+                className="text-gray-300 hover:text-white px-3 py-2"
+              >
+                Tournaments
+              </Link>
+              <Link
+                to="/leaderboard"
+                className="text-gray-300 hover:text-white px-3 py-2"
+              >
                 Leaderboard
-              </Link> */}
+              </Link>
               <Link
                 to="/about"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -548,7 +556,9 @@ const NavBar: React.FC = () => {
                           ) : (
                             <img
                               className="rounded-full w-full h-full object-cover"
-                              src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+                              src={
+                                "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                              }
                               alt=""
                             />
                           )}
@@ -728,101 +738,42 @@ const NavBar: React.FC = () => {
                   to="/"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
+                  <Home className="w-5 h-5" />
                   Home
                 </Link>
-                {/* <Link
+                <Link
+                  to="/tournaments"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                >
+                  <Trophy className="w-5 h-5" />
+                  Tournaments
+                </Link>
+                <Link
                   to="/leaderboard"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
+                  <Medal className="w-5 h-5" />
                   Leaderboard
-                </Link> */}
+                </Link>
                 <Link
                   to="/rules"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <ScrollText className="w-5 h-5" />
                   Rules
                 </Link>
                 <Link
                   to="/about"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
+                  <Info className="w-5 h-5" />
                   About
                 </Link>
                 <Link
                   to="/contact"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                    />
-                  </svg>
+                  <Mail className="w-5 h-5" />
                   Contact
                 </Link>
               </div>

@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState, useEffect } from "react";
 import { Trophy, Clock, Award, Loader2 } from "lucide-react";
 import { baseUrl } from "@/config/api";
 import { authHeaders } from "@/utils/Functions";
@@ -9,11 +9,9 @@ interface TournamentRegistrationModalProps {
   countdown: string;
 }
 
-const TournamentRegistrationModal: React.FC<TournamentRegistrationModalProps> = ({
-  isOpen,
-  onClose,
-  countdown,
-}) => {
+const TournamentRegistrationModal: React.FC<
+  TournamentRegistrationModalProps
+> = ({ isOpen, onClose, countdown }) => {
   if (!isOpen) return null;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -21,59 +19,62 @@ const TournamentRegistrationModal: React.FC<TournamentRegistrationModalProps> = 
   const [success, setSuccess] = useState(false);
 
   const handleJoinTournament = async () => {
-
-    try{
+    try {
       setIsLoading(true);
       setErrorMsg("");
-      
+
       const response = await fetch(`${baseUrl}/tournament/:id/join`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...authHeaders(),
         },
-        
       });
-  
+
       const data = await response.json();
-      console.log('join tournament response', data);
+      console.log("join tournament response", data);
       setSuccess(true);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to join tournament');
-      } 
-  
+        throw new Error(data.message || "Failed to join tournament");
+      }
+
       setTimeout(() => {
         setIsLoading(false);
         onClose();
       }, 1500);
-  
-
-    }catch(err:any){
-      setErrorMsg('An error occurred');
+    } catch (err: any) {
+      setErrorMsg("An error occurred");
       setIsLoading(false);
     }
-  }
-
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-s  flex items-center justify-center z-50 px-3">
-      <div className="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative borde border-gray-700/50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md animate-fadeIn flex items-center justify-center z-50 px-3">
+      <div className="bg-gray-800/95 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative border border-gray-700/50 animate-slideUp">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white transition text-xl"
+          className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors duration-200 hover:rotate-90 transform p-1"
         >
           ✕
         </button>
 
         <div className="space-y-6 sm:space-y-8">
           {/* Header */}
-          <div className="text-center">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold texttransparent bg-clip-text bg-gradient-to-r from-blue400 via-purple400 topink-400">
               🏆 Weekend Tournament
             </h2>
             <div className="h-1 w-20 sm:w-24 mx-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full"></div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full bg-gray-700/50 h-2 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000"
+              style={{ width: `${(parseInt(countdown) / 60) * 100}%` }}
+            ></div>
           </div>
 
           {/* Info sections */}
@@ -119,8 +120,7 @@ const TournamentRegistrationModal: React.FC<TournamentRegistrationModalProps> = 
                 </h3>
               </div>
               <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                Top{" "}
-                <span className="font-semibold text-white">3 players</span>{" "}
+                Top <span className="font-semibold text-white">3 players</span>{" "}
                 advance to the{" "}
                 <span className="text-purple-300 font-semibold">
                   Championship
@@ -130,35 +130,41 @@ const TournamentRegistrationModal: React.FC<TournamentRegistrationModalProps> = 
             </div>
           </div>
 
-           {/* Feedback Messages */}
-           {errorMsg && (
-            <p className="text-red-400 text-center text-sm">{errorMsg}</p>
+          {/* Feedback Messages */}
+          {errorMsg && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-center">
+              <p className="text-red-400 text-sm">{errorMsg}</p>
+            </div>
           )}
           {success && (
-            <p className="text-green-400 text-center text-sm font-semibold">
-              ✅ Successfully joined tournament!
-            </p>
+            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 text-center animate-pulse">
+              <p className="text-green-400 text-sm font-semibold">
+                ✅ Successfully joined tournament!
+              </p>
+            </div>
           )}
 
           {/* Join Button */}
           <button
             onClick={handleJoinTournament}
             disabled={isLoading || success}
-            className={`w-full py-2.5 sm:py-3 flex items-center justify-center gap-2 
+            className={`w-full py-3 sm:py-4 flex items-center justify-center gap-2 
               ${
-                isLoading
-                  ? "bg-gray-700 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+                isLoading || success
+                  ? "bg-gray-700 cursor-not-allowed opacity-75"
+                  : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 active:scale-95"
               } 
-              text-white font-bold rounded-lg transform transition hover:scale-105 shadow-lg text-sm sm:text-base`}
+              text-white font-bold rounded-lg transform transition-all duration-200 shadow-lg hover:shadow-purple-500/25 text-sm sm:text-base`}
           >
             {isLoading ? (
               <>
-                <Loader2 className="animate-spin" size={18} />
-                Joining...
+                <Loader2 className="animate-spin" size={20} />
+                <span>Joining...</span>
               </>
             ) : success ? (
-              "Joined!"
+              <span className="flex items-center gap-2">
+                <span className="text-lg">🎉</span> Joined!
+              </span>
             ) : (
               "Join Tournament"
             )}
