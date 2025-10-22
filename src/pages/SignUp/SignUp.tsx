@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
@@ -16,9 +16,14 @@ const SignUp: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState("");
 
   verificationCode;
-  const { updateUser } = useAppContext();
+  const { user, updateUser } = useAppContext();
 
   const navigate = useNavigate();
+
+  useEffect(()=>{
+      if(user)navigate('/')
+  
+    },[user])
 
   const steps = [
     { key: "email", label: "Email" },
@@ -74,7 +79,7 @@ const SignUp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      <NavBar />
+      <NavBar showSignUps = {false} />
 
       {/* Main Content */}
       <main className="flex-grow flex items-center justify-center px-4 py-12">
@@ -149,7 +154,7 @@ const SignUp: React.FC = () => {
       <footer className="bg-gray-800 border-t border-gray-700">
         <div className="container mx-auto px-4 py-4">
           <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} SpaGameZone. All rights reserved.
+            © {new Date().getFullYear()} SparPlay. All rights reserved.
           </p>
         </div>
       </footer>

@@ -1,3 +1,4 @@
+import NavBar from "@/components/NavBar";
 import React, { useState, useEffect } from "react";
 
 const PrivacyPolicy: React.FC = () => {
@@ -100,7 +101,8 @@ const PrivacyPolicy: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <div className="bg-gray-800 border-b border-gray-700">
+      <NavBar showSignUps = {true} />
+      <div className="bg-gray800 border- border-gray-700">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-2xl font-bold text-white">Privacy Policy</h1>
           <p className="text-gray-400 mt-2">

@@ -72,7 +72,7 @@ const AboutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <NavBar/>
+      <NavBar showSignUps = {true} />
 
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900">

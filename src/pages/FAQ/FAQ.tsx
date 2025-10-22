@@ -6,6 +6,7 @@ import {
   HelpCircle,
   ExternalLink,
 } from "lucide-react";
+import NavBar from "@/components/NavBar";
 
 const faqCategories = {
   general: {
@@ -97,14 +98,15 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <NavBar showSignUps = {true} />
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700">
+      <div className="bg-gray800 border- border-gray-700">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl font-bold mb-6">
               Frequently Asked Questions
             </h1>
-            <div className="relative">
+            {/* <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
@@ -113,7 +115,7 @@ const FAQ = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -175,20 +177,20 @@ const FAQ = () => {
               support team.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button
-                onClick={() => (window.location.href = "/support")}
+              <a
+                href="mailto:support@sparplay.com"
                 className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium flex items-center justify-center"
               >
                 <HelpCircle className="w-5 h-5 mr-2" />
                 Contact Support
-              </button>
-              <a
+              </a>
+              {/* <a
                 href="/help"
                 className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium flex items-center justify-center"
               >
                 View Help Center
                 <ExternalLink className="w-4 h-4 ml-2" />
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
