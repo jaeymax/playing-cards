@@ -34,7 +34,7 @@ const GameChat = ({
   let typingTimeout: NodeJS.Timeout;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -82,7 +82,7 @@ const GameChat = ({
 
   return (
     <div
-      className={`fixed md:bottom-24 bottom-0 md:right-4 right-0 md:w-[400px] w-full md:h-[500px] h-full z-[1000000000000000000000] bg-gray-800/40 backdrop-blur-s md:rounded-lg shadow-2xl border border-gray-700 flex flex-col transform transition-all duration-300 ease-out ${
+      className={`fixed md:bottom-24 bottom-0 md:right-4 right-0 md:w-[400px] w-full md:h-[500px] h-full z-[1000000000000000000000] bg-gray-800/40 backdrop-blur-md md:rounded-lg shadow-2xl border border-gray-700 flex flex-col transform transition-all duration-300 ease-out ${
         isClosing ? "animate-slide-out" : "animate-slide-in"
       }`}
       style={{
