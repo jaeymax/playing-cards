@@ -130,7 +130,7 @@ const NotificationsPage = () => {
           </div>
         </div>
       </header> */}
-      <NavBar/>
+      <NavBar showSignUps = {true} />
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-6">

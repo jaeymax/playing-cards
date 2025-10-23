@@ -29,6 +29,7 @@ import ScoresTable from "@/components/ScoresTable";
 import GameChat from "@/components/GameChat";
 import ChatNotification from "@/components/ChatNotification";
 import { baseUrl } from "@/config/api";
+import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 
 interface Message {
   user_id: number | undefined;
@@ -78,6 +79,17 @@ const PlayWithFriend = () => {
   const { user, updateUser } = useAppContext();
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
   const navigate = useNavigate();
+
+  const getPlayerByPosition = (player_position: number) => {
+    return players.find((player) => player.position === player_position);
+  };
+
+  const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+    const player = getPlayerByPosition(player_position);
+
+    return cards.find((card) => card.player_id === player?.id);
+  };
+
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -424,7 +436,7 @@ const PlayWithFriend = () => {
 
   const ChatToggleButton = () =>
     !showChat ? (
-      <div className="fixed bottom-4 right-4 z-[100000]">
+      <div className="fixed bottom-12 right-2 z-[100000]">
         <button
           onClick={() => {
             setShowChat(!showChat);
@@ -610,6 +622,12 @@ const PlayWithFriend = () => {
         />
 
         <ScoresTable players={players} />
+
+        <LeadingPlayerInfo
+          game={game}
+          getPlayerByPosition={getPlayerByPosition}
+          getCardByPlayerPosition={getCardByPlayerPosition}
+        />
 
         <PlayerInfo
           name={me?.user.username || "Player"}

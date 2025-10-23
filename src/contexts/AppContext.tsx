@@ -74,7 +74,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       })
         .then((response) => {
           
-          if (!response.ok) throw new Error("Failed to fetch user data");
+         // if (!response.ok) throw new Error("Failed to fetch user data");
+
+          if(response.status === 401 || response.status === 403){
+            removeToken();
+            throw new Error("Unauthorized");
+          }
           return response.json();
         })
         .then((userData) => {
@@ -92,7 +97,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          removeToken();
+         // removeToken();
           //sessionStorage.removeItem("accessToken"); // Clear invalid token
         })
         .finally(() => {

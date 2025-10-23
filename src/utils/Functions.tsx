@@ -835,3 +835,13 @@ export function getDivision(rating: number) {
   }
   return division;
 }
+
+// export const getPlayerByPosition = (player_position: number, players) => {
+//   return players.find((player) => player.position === player_position);
+// };
+
+// export const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+//   const player = getPlayerByPosition(player_position);
+
+//   return cards.find((card) => card.player_id === player?.id);
+// };

@@ -25,7 +25,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
 
   return (
     <div className="bg-gray800 border- border-ray-700">
-      <NavBar/>
+      <NavBar showSignUps = {true} />
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
           <div className="flex flex-col lg:flex-row items-center gap-6">

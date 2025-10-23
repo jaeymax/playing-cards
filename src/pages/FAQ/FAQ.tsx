@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import {
-  Search,
+  //Search,
   ChevronDown,
   ChevronUp,
   HelpCircle,
-  ExternalLink,
+  // ExternalLink,
 } from "lucide-react";
 import NavBar from "@/components/NavBar";
 
@@ -68,7 +68,7 @@ const faqCategories = {
 };
 
 const FAQ = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [filteredQuestions, setFilteredQuestions] =
     useState<any>(faqCategories);
