@@ -93,12 +93,29 @@ const PlayWithFriend = () => {
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
-      setMessage("Your turn! Click to play");
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("");
+        } else {
+          setMessage("Waiting for dealer to shuffle and deal");
+        }
+      } else {
+        setMessage("Your turn! Click to play");
+      }
     } else {
       const player = players.find(
         (player: any) => player.position === game?.current_player_position
       );
-      setMessage(`${player?.user.username}'s turn`);
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("Click to shuffle or deal");
+        } else {
+          setMessage("");
+        }
+      } else {
+        setMessage(`${player?.user.username}'s turn`);
+      }
+      //setMessage(`${player?.user.username}'s turn`);
     }
 
     if (game) {
@@ -494,6 +511,8 @@ const PlayWithFriend = () => {
 
         <PlayerInfo
           name={firstOpponent?.user.username || "Waiting..."}
+          player_position={firstOpponent?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           avatar={
             firstOpponent?.user.image_url ||
             "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
@@ -504,6 +523,8 @@ const PlayWithFriend = () => {
 
         {secondOpponent && (
           <PlayerInfo
+            player_position={secondOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             name={secondOpponent?.user.username || "Opponent 2"}
             avatar={
               secondOpponent?.user.image_url ||
@@ -515,6 +536,8 @@ const PlayWithFriend = () => {
         )}
         {thirdOpponent && (
           <PlayerInfo
+            player_position={thirdOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             name={thirdOpponent?.user.username || "Opponent 3"}
             avatar={
               thirdOpponent?.user.image_url ||
@@ -630,6 +653,8 @@ const PlayWithFriend = () => {
         />
 
         <PlayerInfo
+          player_position={me?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           name={me?.user.username || "Player"}
           avatar={
             me?.user.image_url ||
