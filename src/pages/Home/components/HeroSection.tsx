@@ -79,9 +79,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
           Welcome to SparPlay
         </h1>
         <p className="text-sm md:text-lg text-gray-300">
-          Spar is a fast-paced Ghanaian card game. Win the final trick to take
-          the crown—play with friends, face a random challenger, or battle the
-          computer.
+          SparPlay is a web-based version of the Popular Ghanaian Spar card game. Play with friends, compete in tournaments, or battle the
+          computer and climb the global leaderboards. Are you ready to Spar?
         </p>
         <div className="flex flex-wrap gap-4">
           {/* <button

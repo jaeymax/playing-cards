@@ -1,5 +1,5 @@
 import { useAppContext } from "@/contexts/AppContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -17,7 +17,12 @@ const SignInPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { updateUser } = useAppContext();
+  const { user, updateUser } = useAppContext();
+
+  useEffect(()=>{
+    if(user)navigate('/')
+
+  },[user])
 
   // const handleSuccess = async (credentialResponse: any) => {
   //   const idToken = credentialResponse.credential;
@@ -87,6 +92,8 @@ const SignInPage = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
+      
+      <NavBar showSignUps = {false} />
         <NavBar />
 
         {/* Main Content */}
@@ -315,7 +322,7 @@ const SignInPage = () => {
             </div>
 
             {/* Additional Links */}
-            <div className="mt-6 text-center space-y-2">
+            {/* <div className="mt-6 text-center space-y-2">
               <a
                 href="#"
                 className="text-sm text-gray-400 hover:text-gray-300 block"
@@ -328,7 +335,7 @@ const SignInPage = () => {
               >
                 Contact Support
               </a>
-            </div>
+            </div> */}
           </div>
         </main>
 

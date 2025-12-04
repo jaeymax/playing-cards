@@ -41,6 +41,7 @@ import { useEffect } from "react";
 import { analytics, logEvent } from "./firebase/config";
 import TournamentLobby from "./pages/TournamentLobby/TournamentLobby";
 import TournamentDetailsPage from "./pages/Tournaments/TournamentDetailsPage";
+import PrivateRoute from "./components/PrivateRoute";
 //import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
@@ -76,13 +77,16 @@ function App() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<GameModal />} />
           <Route path="/support" element={<SupportPage />} />
+          <Route element={<PrivateRoute />}>
+            {/* Protected routes go here */}
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<DashboardPage />} />
+          <Route path="/friends" element={<FriendsPage />} />
+          </Route>
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/tournaments" element={<TournamentsPage />} />
           <Route path="/tournaments/:id" element={<TournamentDetailsPage />} />

@@ -173,6 +173,7 @@ body {
   transition: all 0.4s;
   border-radius: 8px;
   transform-origin: bottom right;
+  perspective: 1000px;
 }
 
 .deck{
@@ -216,6 +217,7 @@ body {
   height: 100%;
   transition: all 0.6s;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
  
 }
 
@@ -228,6 +230,8 @@ body {
   top: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 
 .card-back{

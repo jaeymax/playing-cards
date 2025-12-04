@@ -10,9 +10,9 @@ const HomePage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 w-full">
-      <NavBar />
-      <div className="container mx-auto px-4 py-8 space-y-16">
+    <div className="min-h-screen bg-gray-900 text-gray-100 w-full flex flex-col">
+      <NavBar showSignUps = {true} />
+      <div className="container mx-auto px-4 py-8 space-y-16 flex-1">
         <HeroSection />
 
          {/* Main Grid Layout */}

@@ -207,7 +207,7 @@ const RecentGamesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col borde">
-      <NavBar />
+      <NavBar showSignUps = {true} />
       <div className="containe max-w-4xl mx-auto px-4 py-8 borde flex-1 w-full">
         <div className="bg-gray-800 rounded-lg border border-gray-700">
           <div className="p-4 border-b border-gray-700 flex justify-between items-center">

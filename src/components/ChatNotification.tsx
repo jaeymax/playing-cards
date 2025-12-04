@@ -22,7 +22,7 @@ const ChatNotification = ({ message, onClose }: ChatNotificationProps) => {
 
   return (
     <div
-      className={`fixed md:top-4 top-2 md:right-4 mx-2 md:max-w-sm w-[calc(100%-16px)] bg-gradient-to-r from-gray-900/20 via-slate-800/20 to-gray-900/20 backdrop-blur-s text-white p-4 rounded-lg shadow-lg border border-gray-700/20 transform transition-all duration-300 z-[100000] ${
+      className={`z-[100000000000000000000000000000] fixed md:top-4 top-2 md:right-4 mx-2 md:max-w-sm w-[calc(100%-16px)] bg-gradient-to-r from-gray-900/50 viaslate-800/20 to-gray-900/50 backdrop-blur-s text-white p-4 rounded-lg shadow-lg border border-gray-700/20 transform transition-all duration-300 ${
         isClosing
           ? "md:opacity-0 md:translate-x-full opacity-0 -translate-y-full"
           : "md:opacity-100 md:translate-x-0 opacity-100 translate-y-0"

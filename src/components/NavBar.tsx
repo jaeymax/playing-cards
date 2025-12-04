@@ -16,7 +16,12 @@ type Message = {
   avatar: string; // Add avatar field
 };
 
-const NavBar: React.FC = () => {
+interface NavBarProps {
+   showSignUps:boolean;
+}
+
+
+const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
   // Add new loading state
   //const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -699,6 +704,7 @@ const NavBar: React.FC = () => {
                   </div>
                 </>
               ) : (
+                showSignUps && (
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => navigate("/signin")}
@@ -713,6 +719,7 @@ const NavBar: React.FC = () => {
                     Sign Up
                   </button>
                 </div>
+                )
               )}
             </div>
           </div>

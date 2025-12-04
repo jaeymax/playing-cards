@@ -23,6 +23,7 @@ import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
 import { analytics, logEvent } from "@/firebase/config";
 import ScoresTable from "@/components/ScoresTable";
+import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 
 const PlayVsComputer = () => {
   const { code } = useParams();
@@ -60,6 +61,12 @@ const PlayVsComputer = () => {
 
   const getPlayerByPosition = (player_position: number) => {
     return players.find((player) => player.position === player_position);
+  };
+
+  const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+    const player = getPlayerByPosition(player_position);
+
+    return cards.find((card) => card.player_id === player?.id);
   };
 
   const getOpponentsData = useCallback(
@@ -229,12 +236,28 @@ const PlayVsComputer = () => {
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
-      setMessage("Your turn! Click to play");
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("");
+        } else {
+          setMessage("Waiting for dealer to shuffle and deal");
+        }
+      } else {
+        setMessage("Your turn! Click to play");
+      }
     } else {
       const player = players.find(
         (player: any) => player.position === game?.current_player_position
       );
-      setMessage(`${player?.user.username}'s turn`);
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("Click to shuffle or deal");
+        } else {
+          setMessage("");
+        }
+      } else {
+        setMessage(`${player?.user.username}'s turn`);
+      }
       computerPlay(game);
     }
   }, [game]);
@@ -348,9 +371,9 @@ const PlayVsComputer = () => {
     [user]
   );
 
-  const getCardById = (cardId: number, cards: any[]) => {
-    return cards.find((card) => card.id === cardId);
-  };
+  // const getCardById = (cardId: number, cards: any[]) => {
+  //   return cards.find((card) => card.id === cardId);
+  // };
 
   const computerPlay = (game: any) => {
     const botCards = game.cards.filter(
@@ -382,21 +405,29 @@ const PlayVsComputer = () => {
         const sortedCards = validCards.sort(
           (a: any, b: any) => a.card.value - b.card.value
         );
-        const leadingCard = getCardById(
-          game.current_trick.cards[0].id,
-          game.cards
+
+        const leadingCard = getCardByPlayerPosition(
+          game.current_trick.leader_position,
+          game.current_trick.cards.length === 0
+            ? game.completed_tricks[game.completed_tricks.length - 1].cards
+            : game.current_trick.cards
         );
+        // const leadingCard = getCardById(
+        //   game.current_trick.cards[0]?.id,
+        //   game.cards
+        // );
         console.log("Leading Card:", leadingCard);
         if (
-          leadingCard.card.value >
-          sortedCards[sortedCards.length - 1].card.value
+          leadingCard?.card?.value >
+          sortedCards[sortedCards.length - 1]?.card.value
         ) {
           randomCard = sortedCards[0];
         } else {
           let optimalCardIndex = 0;
           while (optimalCardIndex < sortedCards.length) {
             if (
-              sortedCards[optimalCardIndex].card.value > leadingCard.card.value
+              sortedCards[optimalCardIndex]?.card.value >
+              leadingCard?.card?.value
             ) {
               randomCard = sortedCards[optimalCardIndex];
               break;
@@ -412,6 +443,8 @@ const PlayVsComputer = () => {
         randomCard = sortedCards[0];
       }
     }
+
+    console.log("debugging here...");
 
     if (botHand.length === 5 && !firstOpponent?.is_dealer) {
       setTimeout(() => {
@@ -459,6 +492,8 @@ const PlayVsComputer = () => {
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
           name={"Computer"}
+          player_position={firstOpponent?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           avatar={bot}
           points={firstOpponent?.score}
           styles="left-1/2 -translate-x-1/2 top-1"
@@ -467,6 +502,8 @@ const PlayVsComputer = () => {
         {secondOpponent && (
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
+            player_position={secondOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             avatar={secondOpponent?.user.image_url || "path/to/avatar.jpg"}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
@@ -475,6 +512,8 @@ const PlayVsComputer = () => {
         {thirdOpponent && (
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
+            player_position={thirdOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             avatar={thirdOpponent?.user.image_url || "path/to/avatar.jpg"}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
@@ -577,47 +616,16 @@ const PlayVsComputer = () => {
 
         <ScoresTable players={players} />
 
-        <div className="absolute bottom-0 right-0 max-w-[150px] m-2 text-right">
-          {game?.current_trick ? (
-            <span className="text-xs text-white break-words">
-              {getPlayerByPosition(game?.current_trick.leader_position)?.user
-                ?.is_bot
-                ? "Computer"
-                : getPlayerByPosition(game?.current_trick.leader_position)?.user
-                    ?.id === user?.id
-                ? "You are"
-                : `${
-                    getPlayerByPosition(game?.current_trick.leader_position)
-                      ?.user?.username
-                  } is`}{" "}
-              leading with{" "}
-              <span className="text-xs whitespace-nowrap">
-                {game.current_trick.cards.length > 0 ? (
-                  <>
-                    {game.current_trick.cards[0]?.card?.rank} of{" "}
-                    {game.current_trick.leading_suit}
-                  </>
-                ) : (
-                  game.completed_tricks[
-                    game.completed_tricks.length - 1
-                  ]?.cards.find(
-                    (card: any) =>
-                      card.player_position ===
-                      game.current_trick.leader_position
-                  )?.card?.rank +
-                  " of " +
-                  game.completed_tricks[game.completed_tricks.length - 1]
-                    ?.leading_suit
-                )}
-              </span>
-            </span>
-          ) : (
-            <span className="text-xs text-white">No leading suit</span>
-          )}
-        </div>
+        <LeadingPlayerInfo
+          game={game}
+          getPlayerByPosition={getPlayerByPosition}
+          getCardByPlayerPosition={getCardByPlayerPosition}
+        />
 
         <PlayerInfo
           name={me?.user.username || "Player"}
+          player_position={me?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           avatar={
             me?.user.image_url ||
             "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"

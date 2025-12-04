@@ -6,8 +6,12 @@ interface ScoresTableProps {
 
 const ScoresTable = ({ players }: ScoresTableProps) => {
   const { user } = useAppContext();
+  if(players.length === 0){
+    return null;
+  }
 
   return (
+     
     <div className="absolute bottom-0 left-0 max-w-[150px] m-2">
       <table className="w-full text-sm">
         <thead>

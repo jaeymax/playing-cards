@@ -34,7 +34,7 @@ const GameChat = ({
   let typingTimeout: NodeJS.Timeout;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -82,7 +82,7 @@ const GameChat = ({
 
   return (
     <div
-      className={`fixed md:bottom-24 bottom-0 md:right-4 right-0 md:w-[400px] w-full md:h-[500px] h-full z-[1000000000000000000000] bg-gray-800/40 backdrop-blur-sm md:rounded-lg shadow-2xl border border-gray-700 flex flex-col transform transition-all duration-300 ease-out ${
+      className={`fixed md:bottom-24 bottom-0 md:right-4 right-0 md:w-[400px] w-full md:h-[500px] h-full z-[1000000000000000000000] bg-gray-800/40 backdrop-blur-md md:rounded-lg shadow-2xl border border-gray-700 flex flex-col transform transition-all duration-300 ease-out ${
         isClosing ? "animate-slide-out" : "animate-slide-in"
       }`}
       style={{
@@ -198,11 +198,16 @@ const GameChat = ({
                 : "bg-gradient-to-r from-gray-900/20 via-slate-800/20 to-gray-900/20"
             } hover:bg-gradient-to-r hover:from-slate-700/40 hover:to-slate-800/40 transition-all duration-300 rounded-lg animate-[messageAppear_0.3s_ease-out] border border-gray-700/20`}
           >
-            <img
+              {msg.avatar? (<img
               src={msg.avatar}
               alt={msg.username}
               className="flex-shrink-0 w-8 h-8 rounded-full object-cover"
-            />
+            />): (<img
+              src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+              alt={msg.username}
+              className="flex-shrink-0 w-8 h-8 rounded-full object-cover"
+            />)}
+            
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span

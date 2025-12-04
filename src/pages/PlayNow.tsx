@@ -327,6 +327,8 @@ const PlayTest = () => {
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
           name={firstOpponent?.user.username || "Opponent 1"}
+          player_position={firstOpponent?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           avatar={firstOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
           points={firstOpponent?.score}
           styles="left-1/2 -translate-x-1/2 top-1"
@@ -334,6 +336,8 @@ const PlayTest = () => {
         {secondOpponent && (
           <PlayerInfo
             name={secondOpponent?.user.username || "Opponent 2"}
+            player_position={secondOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             avatar={secondOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
             points={secondOpponent?.score}
             styles="top-1/2 -translate-y-1/2 left-1"
@@ -342,6 +346,8 @@ const PlayTest = () => {
         {thirdOpponent && (
           <PlayerInfo
             name={thirdOpponent?.user.username || "Opponent 3"}
+            player_position={thirdOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
             avatar={thirdOpponent?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
             points={thirdOpponent?.score}
             styles="top-1/2 -translate-y-1/2 right-1"
@@ -447,6 +453,8 @@ const PlayTest = () => {
 
         <PlayerInfo
           name={me?.user.username || "Player"}
+          player_position={me?.position || 0}
+          current_player_position={game?.current_player_position || 0}
           avatar={me?.user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
           points={me?.score}
           styles="left-1/2 -translate-x-1/2 bottom-1"
