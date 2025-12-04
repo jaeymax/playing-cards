@@ -13,10 +13,11 @@ const useCountdown = (targetDate: string) => {
     const difference = new Date(targetDate).getTime() - new Date().getTime();
 
     if (difference <= 0) {
-      return { hours: 0, minutes: 0, seconds: 0 };
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
 
     return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
       hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
@@ -31,8 +32,8 @@ const useCountdown = (targetDate: string) => {
       const remaining = calculateTimeLeft();
       setTimeLeft(remaining);
 
-      // Check if all values are 0
       if (
+        remaining.days === 0 &&
         remaining.hours === 0 &&
         remaining.minutes === 0 &&
         remaining.seconds === 0
@@ -51,11 +52,11 @@ const useCountdown = (targetDate: string) => {
 const TournamentBanner: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   // Mock tournament data - replace with actual API call
   const tournamentData: TournamentData = {
-    startDate: "2025-10-20T20:30:00", // Example date
+    startDate: "2025-12-04T20:00:00", // Example date
     prizePool: 1000,
     qualifyingSpots: 3,
   };
@@ -63,9 +64,16 @@ const TournamentBanner: React.FC = () => {
   const { timeLeft, isExpired } = useCountdown(tournamentData.startDate);
 
   const formatCountdown = () => {
-    return `${String(timeLeft.hours).padStart(2, "0")}:${String(
-      timeLeft.minutes
-    ).padStart(2, "0")}:${String(timeLeft.seconds).padStart(2, "0")}`;
+    const { days, hours, minutes, seconds } = timeLeft;
+    return days > 0
+      ? `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+          2,
+          "0"
+        )}:${String(seconds).padStart(2, "0")}`
+      : `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+          2,
+          "0"
+        )}:${String(seconds).padStart(2, "0")}`;
   };
 
   const handleJoinTournament = () => {

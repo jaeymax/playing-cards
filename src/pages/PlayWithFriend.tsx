@@ -29,6 +29,7 @@ import ScoresTable from "@/components/ScoresTable";
 import GameChat from "@/components/GameChat";
 import ChatNotification from "@/components/ChatNotification";
 import { baseUrl } from "@/config/api";
+import Modal from "@/components/Modal";
 
 interface Message {
   user_id: number | undefined;
@@ -61,6 +62,7 @@ const PlayWithFriend = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notification, setNotification] = useState<Message | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -113,15 +115,32 @@ const PlayWithFriend = () => {
 
   useEffect(() => {
     const authToken = getToken();
-    const getGuestCredentials = async () => {
-      const user = await ensureGuest();
-      if (user) {
-        updateUser(user);
-      }
-    };
+    // const getGuestCredentials = async () => {
+    //   const user = await ensureGuest();
+    //   if (user) {
+    //     updateUser(user);
+    //   }
+    // };
 
-    if (!authToken) getGuestCredentials();
-  }, []);
+    if (!authToken && !user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
+
+  const handleLogin = () => {
+    setShowLoginPrompt(false);
+    navigate("/signin", { state: { from: window.location.pathname } }); // Pass current page path
+  };
+
+  
+
+  const handlePlayAsGuest = async () => {
+    setShowLoginPrompt(false);
+    const user = await ensureGuest();
+    if (user) {
+      updateUser(user);
+    }
+  };
 
   useEffect(() => {
     if (game) {
@@ -186,6 +205,11 @@ const PlayWithFriend = () => {
   useEffect(() => {
     if (user) {
       socket?.emit("playerJoin", { userId: user.id, gameCode: code });
+    // } else {
+    //   const state = window.history.state?.usr?.state;
+    //   if (state?.from) {
+    //     navigate(state.from); // Redirect back to the page we came from
+    //   }
     }
   }, [user, socket]);
 
@@ -407,8 +431,10 @@ const PlayWithFriend = () => {
   };
 
   const handleSendMessage = (message: string) => {
-
-    logEvent(analytics, "message_sent", { gameCode: code, messageLength: message.length });
+    logEvent(analytics, "message_sent", {
+      gameCode: code,
+      messageLength: message.length,
+    });
     const messageData = {
       user_id: user?.id,
       username: user?.username,
@@ -657,6 +683,33 @@ const PlayWithFriend = () => {
           }}
           onLeaveGame={() => navigate("/")}
         />
+      )}
+
+      {showLoginPrompt && (
+        <Modal
+          title=""
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Welcome!</h2>
+            <p className="mb-4">Would you like to log in or play as a guest?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={handleLogin}
+              >
+                Log In
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+                onClick={handlePlayAsGuest}
+              >
+                Play as Guest
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
     </>
   );

@@ -84,12 +84,12 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
           computer.
         </p>
         <div className="flex flex-wrap gap-4">
-          <button
+          {/* <button
             onClick={handlePlayNowModalClicked}
             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play Now
-          </button>
+          </button> */}
           <button
             onClick={() => {
               setIsInviteModalOpen(true);

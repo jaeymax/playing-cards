@@ -2,10 +2,11 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import { GoogleOAuthProvider} from "@react-oauth/google";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleSigninCustom from "../Home/components/GoogleSigninCustom";
 import NavBar from "@/components/NavBar";
 import { saveToken } from "@/utils/Functions";
+import { useLocation } from "react-router-dom";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ const SignInPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   //const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { updateUser } = useAppContext();
 
@@ -59,7 +61,14 @@ const SignInPage = () => {
         saveToken(data.token);
         updateUser(data);
         // Here you might want to store the token in localStorage or context
-        navigate("/");
+
+        if (location.state?.from) {
+          navigate(location.state.from, {
+            state: { gameType: "playWithFriend" },
+          }); // Redirect back to the page we came from
+        } else {
+          navigate("/");
+        }
       } else if (response.status === 400) {
         alert("Invalid input. Please check your email and password.");
       } else if (response.status === 401) {
@@ -78,8 +87,7 @@ const SignInPage = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      
-      <NavBar/>
+        <NavBar />
 
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center px-4 py-12">
