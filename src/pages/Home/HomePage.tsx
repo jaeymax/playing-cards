@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-6 space-y-8">
-            <TournamentBanner />
+            {/* <TournamentBanner /> */}
             <RecentGames />
             {/* <RecentActivities /> */}
           </div>

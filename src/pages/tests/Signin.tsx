@@ -94,7 +94,7 @@ const SignInPage = () => {
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
       
       <NavBar showSignUps = {false} />
-        <NavBar />
+  
 
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center px-4 py-12">
