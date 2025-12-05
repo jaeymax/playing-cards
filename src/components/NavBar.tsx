@@ -434,7 +434,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
               <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
               </Link>
-              <Link
+              {/* <Link
                 to="/tournaments"
                 className="text-gray-300 hover:text-white px-3 py-2"
               >
@@ -445,7 +445,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                 className="text-gray-300 hover:text-white px-3 py-2"
               >
                 Leaderboard
-              </Link>
+              </Link> */}
               <Link
                 to="/about"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -748,7 +748,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                   <Home className="w-5 h-5" />
                   Home
                 </Link>
-                <Link
+                {/* <Link
                   to="/tournaments"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
@@ -761,7 +761,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                 >
                   <Medal className="w-5 h-5" />
                   Leaderboard
-                </Link>
+                </Link> */}
                 <Link
                   to="/rules"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"

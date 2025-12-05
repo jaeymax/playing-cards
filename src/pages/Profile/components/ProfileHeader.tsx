@@ -228,9 +228,9 @@ const ProfileHeader: React.FC = () => {
       </div>
       <Toast
         message={toast.message}
-        type={toast.type}
+        // type={toast.type}
         isVisible={toast.isVisible}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        //onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
       />
     </>
   );

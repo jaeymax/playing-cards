@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Trophy, Clock, Award, Loader2 } from "lucide-react";
 import { baseUrl } from "@/config/api";
 import { authHeaders } from "@/utils/Functions";

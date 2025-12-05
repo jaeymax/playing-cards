@@ -5,7 +5,7 @@ import TopPlayers from "./components/TopPlayers";
 import RecentGames from "./components/RecentGames";
 //import Announcements from "./components/Announcements";
 import Footer from "@/components/Footer";
-import TournamentBanner from "./components/TournamentBanner";
+//import TournamentBanner from "./components/TournamentBanner";
 const HomePage: React.FC = () => {
 
 

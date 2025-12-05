@@ -64,6 +64,7 @@ const PlayWithFriend = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [notification, setNotification] = useState<Message | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -91,7 +92,6 @@ const PlayWithFriend = () => {
 
     return cards.find((card) => card.player_id === player?.id);
   };
-
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -160,8 +160,6 @@ const PlayWithFriend = () => {
     setShowLoginPrompt(false);
     navigate("/signin", { state: { from: window.location.pathname } }); // Pass current page path
   };
-
-  
 
   const handlePlayAsGuest = async () => {
     setShowLoginPrompt(false);
@@ -234,11 +232,11 @@ const PlayWithFriend = () => {
   useEffect(() => {
     if (user) {
       socket?.emit("playerJoin", { userId: user.id, gameCode: code });
-    // } else {
-    //   const state = window.history.state?.usr?.state;
-    //   if (state?.from) {
-    //     navigate(state.from); // Redirect back to the page we came from
-    //   }
+      // } else {
+      //   const state = window.history.state?.usr?.state;
+      //   if (state?.from) {
+      //     navigate(state.from); // Redirect back to the page we came from
+      //   }
     }
   }, [user, socket]);
 
@@ -485,7 +483,7 @@ const PlayWithFriend = () => {
             setShowChat(!showChat);
             setUnreadCount(0);
           }}
-          className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 relative"
+          className="bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 relative"
         >
           {unreadCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -509,6 +507,27 @@ const PlayWithFriend = () => {
         </button>
       </div>
     ) : null;
+
+  const MicrophoneButton = () => (
+    <div className="fixed bottom-24 right-2 z-[100000] mb-3">
+      <button
+        onClick={() => setIsRecording((prev) => !prev)}
+        className={`p-2 rounded-full shadow-lg ${
+          isRecording ? "bg-red-600 animate-pulse" : "bg-red-500"
+        } hover:bg-red-700`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-white"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 14a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4zm5-4a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2zm-5 6a1 1 0 0 0-1 1v2h-2a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2a1 1 0 0 0-1-1z" />
+        </svg>
+      </button>
+      
+    </div>
+  );
 
   return (
     <>
@@ -690,6 +709,7 @@ const PlayWithFriend = () => {
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
 
+        <MicrophoneButton />
         <ChatToggleButton />
         <GameChat
           socket={socket}

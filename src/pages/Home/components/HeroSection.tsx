@@ -2,58 +2,78 @@ import React, { useState, useEffect } from "react";
 import InviteFriendModal from "./InviteFriendModal";
 import PlayNowModal from "./PlayNowModal";
 import PlayVsComputerModal from "./PlayVsComputerModal";
-import { baseUrl } from "@/config/api";
+//import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 //import animationlogo from '@/assets/animationPicture.png';
 import animationVideo from "@/assets/animationVideo.webm";
-import { ensureGuest, getToken } from "@/utils/Functions";
+//import { ensureGuest, getToken } from "@/utils/Functions";
 import { useSocket } from "@/contexts/SocketProvider";
+import Modal from "@/components/Modal";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {}
 
 const HeroSection: React.FC<HeroSectionProps> = () => {
   const { socket } = useSocket();
-  const { user, updateUser } = useAppContext();
+  const { user } = useAppContext();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isPlayNowModalOpen, setIsPlayNowModalOpen] = useState(false);
   const [isPlayVsComputerModalOpen, setIsPlayVsComputerModalOpen] =
     useState(false);
+  const [isLoginPromptModalOpen, setIsLoginPromptModalOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const navigate = useNavigate();
 
+  // const handlePlayNowModalClicked = async () => {
+  //   setIsPlayNowModalOpen(true);
+  //   const authToken = getToken();
+  //   let guestUser = null;
+  //   if (!authToken) {
+  //     const user = await ensureGuest();
+  //     if (user) {
+  //       updateUser(user);
+  //       guestUser = user;
+  //     }
+  //   }
 
-  const handlePlayNowModalClicked = async () => {
-    setIsPlayNowModalOpen(true);
-    const authToken = getToken();
-    let guestUser = null;
-    if (!authToken) {
-      const user = await ensureGuest();
-      if (user) {
-        updateUser(user);
-        guestUser = user;
-      }
+  //   const response = fetch(`${baseUrl}/matchmaking/join`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       userId: user?.id || guestUser?.id,
+  //       rating: user?.rating || guestUser?.rating,
+  //     }),
+  //   });
+
+  //   response
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log("Matchmaking response:", data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error joining matchmaking:", error);
+  //     });
+  // };
+
+  const handleInviteModalClicked = () => {
+    setSelectedOption("invite");
+    if (!user) {
+      setIsLoginPromptModalOpen(true);
+    } else {
+      setIsInviteModalOpen(true);
     }
-
-    const response = fetch(`${baseUrl}/matchmaking/join`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user?.id || guestUser?.id,
-        rating: user?.rating || guestUser?.rating,
-      }),
-    });
-
-    response
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Matchmaking response:", data);
-      })
-      .catch((error) => {
-        console.error("Error joining matchmaking:", error);
-      });
   };
 
-
+  const handlePlayVsComputerModalClicked = () => {
+    setSelectedOption("computer");
+    if(!user){
+      setIsLoginPromptModalOpen(true);
+    } else {
+      setIsPlayVsComputerModalOpen(true);
+    }
+  };
 
   useEffect(() => {
     socket?.on("queue_left", () => {
@@ -71,6 +91,23 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
     handleLeaveQueue();
   };
 
+  const handleLogin = () => {
+    console.log("Redirecting to login...");
+    navigate("/signin", { state: { from: window.location.pathname } });
+    setIsLoginPromptModalOpen(false);
+  };
+
+  const handlePlayAsGuest = () => {
+    console.log("Continuing as guest...");
+    setIsLoginPromptModalOpen(false);
+    if(selectedOption === "invite"){
+      setIsInviteModalOpen(true);
+    }
+    else if(selectedOption === "computer"){
+      setIsPlayVsComputerModalOpen(true);
+    }
+  };
+
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       {/* Left: Call to Action */}
@@ -79,7 +116,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
           Welcome to SparPlay
         </h1>
         <p className="text-sm md:text-lg text-gray-300">
-          SparPlay is a web-based version of the Popular Ghanaian Spar card game. Play with friends, compete in tournaments, or battle the
+          SparPlay is a digital adaptation of the Popular Ghanaian Spar card
+          game. Play with friends, compete in tournaments, or battle the
           computer and climb the global leaderboards. Are you ready to Spar?
         </p>
         <div className="flex flex-wrap gap-4">
@@ -90,17 +128,13 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
             Play Now
           </button> */}
           <button
-            onClick={() => {
-              setIsInviteModalOpen(true);
-            }}
+            onClick={handleInviteModalClicked}
             className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Invite Friend
           </button>
           <button
-            onClick={() => {
-              setIsPlayVsComputerModalOpen(true);
-            }}
+            onClick={handlePlayVsComputerModalClicked}
             className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play vs Computer
@@ -136,6 +170,33 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         isOpen={isPlayVsComputerModalOpen}
         onClose={() => setIsPlayVsComputerModalOpen(false)}
       />
+      {/* <LoginPromptModal
+        isOpen={isLoginPromptModalOpen}
+        onClose={() => setIsLoginPromptModalOpen(false)}
+      /> */}
+      <Modal isOpen={isLoginPromptModalOpen} onClose={() => setIsLoginPromptModalOpen(false)} title="">
+      <div className="p-6 space-y-4 borde">
+        <h2 className="text-xl font-bold text-gray-00">Log In or Play as Guest</h2>
+        <p className="text-gray-400">
+          You need to log in to play. Alternatively, you can continue
+          as a guest.
+        </p>
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={handlePlayAsGuest}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+          >
+            Play as Guest
+          </button>
+          <button
+            onClick={handleLogin}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    </Modal>
     </div>
   );
 };

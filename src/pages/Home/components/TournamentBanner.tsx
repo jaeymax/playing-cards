@@ -52,7 +52,7 @@ const useCountdown = (targetDate: string) => {
 const TournamentBanner: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [isRegistered] = useState(false);
 
   // Mock tournament data - replace with actual API call
   const tournamentData: TournamentData = {
