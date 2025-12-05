@@ -709,7 +709,7 @@ const PlayWithFriend = () => {
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
 
-        <MicrophoneButton />
+        {/* <MicrophoneButton /> */}
         <ChatToggleButton />
         <GameChat
           socket={socket}
