@@ -4,11 +4,17 @@ interface ChatNotificationProps {
   message: {
     username?: string;
     message: string;
+    type?: "text" | "audio";
   };
   onClose: () => void;
+  onClick?: () => void;
 }
 
-const ChatNotification = ({ message, onClose }: ChatNotificationProps) => {
+const ChatNotification = ({
+  message,
+  onClose,
+  onClick,
+}: ChatNotificationProps) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -20,9 +26,20 @@ const ChatNotification = ({ message, onClose }: ChatNotificationProps) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
+  const isAudio = message.type === "audio";
+
+  const handleClick = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClick?.();
+      onClose();
+    }, 300);
+  };
+
   return (
     <div
-      className={`z-[100000000000000000000000000000] fixed md:top-4 top-2 md:right-4 mx-2 md:max-w-sm w-[calc(100%-16px)] bg-gradient-to-r from-gray-900/50 viaslate-800/20 to-gray-900/50 backdrop-blur-s text-white p-4 rounded-lg shadow-lg border border-gray-700/20 transform transition-all duration-300 ${
+      onClick={handleClick}
+      className={`z-[100000000000000000000000000000] fixed md:top-4 top-2 md:right-4 mx-2 md:max-w-sm w-[calc(100%-16px)] bg-green-900/100 backdrop-blur-s text-white p-4 rounded-lg shadow-lg borde border-gray-700/20 transform transition-all duration-300 cursor-pointer ${
         isClosing
           ? "md:opacity-0 md:translate-x-full opacity-0 -translate-y-full"
           : "md:opacity-100 md:translate-x-0 opacity-100 translate-y-0"
@@ -64,7 +81,9 @@ const ChatNotification = ({ message, onClose }: ChatNotificationProps) => {
           <p className="font-semibold text-sm text-blue-400">
             {message.username}
           </p>
-          <p className="text-sm text-gray-100">{message.message}</p>
+          <p className="text-sm text-gray-100">
+            {isAudio ? "🎤 Sent a voice message" : message.message}
+          </p>
         </div>
       </div>
     </div>

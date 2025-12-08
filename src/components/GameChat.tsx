@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import AudioMessageBubble from "./AudioMessageBubble";
 
 interface Message {
   user_id: number | undefined;
@@ -6,6 +7,9 @@ interface Message {
   avatar: string | undefined;
   message: string;
   timestamp: string;
+  type: "text" | "audio";
+  blob?: Blob;
+  audio?: ArrayBuffer;
 }
 
 interface GameChatProps {
@@ -214,15 +218,28 @@ const GameChat = ({
                   className={`font-medium text-sm ${
                     msg.user_id === currentUser.id
                       ? "text-blue-400"
-                      : "text-gray-200"
+                      : "text-green-500"
                   }`}
                 >
-                  {msg.username}
+                  {msg.user_id === currentUser.id? "You": msg.username}
+                    
                 </span>
               </div>
-              <p className="text-xs md:text-sm text-gray-100 break-words">
-                {msg.message}
-              </p>
+             {/* ================================
+        TEXT MESSAGE
+    ================================= */}
+    {msg.type === "text" && (
+      <p className="text-xs md:text-sm text-gray-100 break-words">
+        {msg.message}
+      </p>
+    )}
+
+    {/* ================================
+        AUDIO MESSAGE
+    ================================= */}
+    {msg.type === "audio" && msg.audio && (
+      <AudioMessageBubble audioBuffer={msg.audio} />
+    )}
             </div>
             <span className="flex-shrink-0 text-[10px] text-gray-400 mt-1">
               {formatTime(msg.timestamp)}
@@ -260,7 +277,7 @@ const GameChat = ({
 
       <form
         onSubmit={handleSendMessage}
-        className="p-3 border-t border-gray-700"
+        className="p-3 border-t border-gray-700 bg-green900/50 backdrop-blur-md"
       >
         <div className="flex gap-2">
           <input

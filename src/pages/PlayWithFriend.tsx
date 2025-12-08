@@ -31,13 +31,18 @@ import ChatNotification from "@/components/ChatNotification";
 import { baseUrl } from "@/config/api";
 import Modal from "@/components/Modal";
 import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
+//import AudioRecorder from "@/components/AudioRecorder";
+import BottomBar from "@/components/BottomBar";
 
 interface Message {
   user_id: number | undefined;
   username: string | undefined;
   avatar: string | undefined;
   message: string;
+  type: "text" | "audio";
   timestamp: string;
+  mime_type?: string;
+  audio?: ArrayBuffer;
 }
 
 const PlayWithFriend = () => {
@@ -64,7 +69,8 @@ const PlayWithFriend = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [notification, setNotification] = useState<Message | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  const [gameNotFound, setGameNotFound] = useState(false);
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -82,6 +88,7 @@ const PlayWithFriend = () => {
   const { user, updateUser } = useAppContext();
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
   const navigate = useNavigate();
+
 
   const getPlayerByPosition = (player_position: number) => {
     return players.find((player) => player.position === player_position);
@@ -169,6 +176,29 @@ const PlayWithFriend = () => {
     }
   };
 
+  const chatMessageCallback = (message: Message) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+    console.log("Received chat message:", message);
+  };
+
+  console.log("Messages:", messages);
+
+  const voiceMessageCallback = (message: any) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+
+    console.log("Received voice message:", message);
+  };
+
   useEffect(() => {
     if (game) {
       const isHost = me?.user?.id == game?.created_by;
@@ -207,13 +237,9 @@ const PlayWithFriend = () => {
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
-    socket?.on("chatMessage", (message: Message) => {
-      if (!showChat) {
-        setUnreadCount((prev) => prev + 1);
-        setNotification(message);
-      }
-      setMessages((prev) => [...prev, message]);
-    });
+    socket?.on("chatMessage", chatMessageCallback);
+
+    socket?.on("voiceMessage", voiceMessageCallback);
 
     if (socket?.connected) {
       handleConnect();
@@ -225,9 +251,10 @@ const PlayWithFriend = () => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("connect", handleConnect);
       socket?.off("game-not-found", handleGameNotFound);
-      socket?.off("chatMessage");
+      socket?.off("chatMessage", chatMessageCallback);
+      socket?.off("voiceMessage", voiceMessageCallback);
     };
-  }, [user, code, socket, showChat]);
+  }, [user, code, socket]);
 
   useEffect(() => {
     if (user) {
@@ -453,8 +480,7 @@ const PlayWithFriend = () => {
 
   const handleGameNotFound = () => {
     console.error("Game not found with code:", code);
-    alert("Game not found. Please check the code and try again.");
-    navigate("/");
+    setGameNotFound(true);
   };
 
   const handleSendMessage = (message: string) => {
@@ -462,83 +488,45 @@ const PlayWithFriend = () => {
       gameCode: code,
       messageLength: message.length,
     });
-    const messageData = {
+    const messageData: Message = {
       user_id: user?.id,
       username: user?.username,
       avatar: user?.image_url,
+      type: "text",
       message: message,
       timestamp: new Date().toISOString(),
-      game_code: code,
     };
 
     setMessages((prev) => [...prev, messageData]);
     socket?.emit("sendMessage", messageData);
   };
 
-  const ChatToggleButton = () =>
-    !showChat ? (
-      <div className="fixed bottom-12 right-2 z-[100000]">
-        <button
-          onClick={() => {
-            setShowChat(!showChat);
-            setUnreadCount(0);
-          }}
-          className="bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 relative"
-        >
-          {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
-        </button>
-      </div>
-    ) : null;
+  const handleLeaveRoom = () => {
+    logEvent(analytics, "leave_game_initiated", { gameCode: code });
+    setShowLeaveConfirmation(true);
+  };
 
-  const MicrophoneButton = () => (
-    <div className="fixed bottom-24 right-2 z-[100000] mb-3">
-      <button
-        onClick={() => setIsRecording((prev) => !prev)}
-        className={`p-2 rounded-full shadow-lg ${
-          isRecording ? "bg-red-600 animate-pulse" : "bg-red-500"
-        } hover:bg-red-700`}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-white"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 14a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4zm5-4a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2zm-5 6a1 1 0 0 0-1 1v2h-2a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2a1 1 0 0 0-1-1z" />
-        </svg>
-      </button>
-      
-    </div>
-  );
+  const handleConfirmLeave = () => {
+    logEvent(analytics, "left_game", { gameCode: code });
+    setShowLeaveConfirmation(false);
+    navigate("/");
+  };
+
+  const handleCancelLeave = () => {
+    setShowLeaveConfirmation(false);
+  };
 
   return (
-    <>
+    <div className="relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full">
       {notification && !showChat && (
         <ChatNotification
           message={notification}
           onClose={() => setNotification(null)}
+          onClick={() => setShowChat(true)}
         />
       )}
 
-      <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
+      <div className="min-h-screen relative bg-green800 bg\-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
         {showShareOverlay && !gameStarted && (
           <ShareOverlay
             gameCode={code}
@@ -709,8 +697,10 @@ const PlayWithFriend = () => {
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
 
-        {/* <MicrophoneButton /> */}
-        <ChatToggleButton />
+        {/* <div className="">
+          <AudioRecorder onAudioReady={handleAudio} />
+        </div> */}
+
         <GameChat
           socket={socket}
           gameCode={code || ""}
@@ -721,6 +711,20 @@ const PlayWithFriend = () => {
           onSendMessage={handleSendMessage}
         />
       </div>
+
+      {/* Bottom Bar */}
+      <BottomBar
+        unreadCount={unreadCount}
+        showChat={showChat}
+        onToggleChat={() => {
+          setShowChat(!showChat);
+          setUnreadCount(0);
+        }}
+        socket={socket}
+        gameCode={code}
+        onLeaveRoom={handleLeaveRoom}
+        setMessages={setMessages}
+      />
 
       <WinnerModal
         isOpen={gameEnded}
@@ -774,7 +778,64 @@ const PlayWithFriend = () => {
           </div>
         </Modal>
       )}
-    </>
+
+      {gameNotFound && (
+        <Modal
+          title=""
+          isOpen={gameNotFound}
+          onClose={() => setGameNotFound(false)}
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Game Not Found</h2>
+            <p className="mb-4">
+              The game with this code is not found or has expired. Please check
+              the code and try again.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={() => {
+                  setGameNotFound(false);
+                  navigate("/");
+                }}
+              >
+                Return Home
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showLeaveConfirmation && (
+        <Modal
+          title=""
+          isOpen={showLeaveConfirmation}
+          onClose={handleCancelLeave}
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Leave Game?</h2>
+            <p className="mb-4">
+              Are you sure you want to leave the game? Your game progress will
+              be lost.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+                onClick={handleCancelLeave}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={handleConfirmLeave}
+              >
+                Leave Game
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
   );
 };
 

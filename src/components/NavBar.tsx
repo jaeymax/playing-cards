@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { removeToken } from "@/utils/Functions";
-import { Home, Trophy, Medal, Info, ScrollText, Mail } from "lucide-react";
+import { Home, Info, ScrollText, Mail } from "lucide-react";
 
 // Add Message type
 type Message = {
