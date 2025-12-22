@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { useAppContext } from "./AppContext";
 
 const sockerUrl = import.meta.env.VITE_ENV === "development"
-  ? "wss://192.168.43.218:5000"
+  ? "ws://192.168.43.218:5000"
   : "wss://api.sparplay.com";
 
 

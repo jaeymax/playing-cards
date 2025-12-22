@@ -1,33 +1,48 @@
 import React from "react";
 
-const Participants: React.FC = () => {
-  const participants = [
-    {
-      id: 1,
-      name: "CardMaster123",
-      rank: "#1",
-      status: "qualified",
-      wins: 3,
-      losses: 0,
-    },
-    {
-      id: 2,
-      name: "AceHunter",
-      rank: "#4",
-      status: "qualified",
-      wins: 2,
-      losses: 1,
-    },
-    {
-      id: 3,
-      name: "PokerQueen",
-      rank: "#2",
-      status: "eliminated",
-      wins: 1,
-      losses: 2,
-    },
-    // Add more participants...
-  ];
+interface Participant {
+  id: number;
+  username: string;
+  image_url: string;
+  rank: string;
+  status: string;
+  wins: number;
+  losses: number;
+}
+
+interface ParticipantsProps {
+  participants: Participant[];
+}
+
+
+const Participants: React.FC<ParticipantsProps> = ({participants}) => {
+  // const participants = [
+  //   {
+  //     id: 1,
+  //     name: "CardMaster123",
+  //     rank: "#1",
+  //     status: "qualified",
+  //     wins: 3,
+  //     losses: 0,
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "AceHunter",
+  //     rank: "#4",
+  //     status: "qualified",
+  //     wins: 2,
+  //     losses: 1,
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "PokerQueen",
+  //     rank: "#2",
+  //     status: "eliminated",
+  //     wins: 1,
+  //     losses: 2,
+  //   },
+  //   // Add more participants...
+  // ];
 
   return (
     <div className="overflow-x-auto">
@@ -54,11 +69,20 @@ const Participants: React.FC = () => {
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                    <span className="text-sm">👤</span>
+                    {/* <span className="text-sm">👤</span> */}
+                    {player.image_url ? (
+                      <img
+                        className="object-cover w-full h-full rounded-full"
+                        src={player.image_url}
+                        alt={player.username}
+                      />
+                    ) : (
+                      <span className="text-sm text-white">👤</span>
+                    )}
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-white">
-                      {player.name}
+                      {player.username}
                     </div>
                   </div>
                 </div>

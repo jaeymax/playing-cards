@@ -1,14 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TournamentHeader from "./components/TournamentHeader";
 import TournamentBracket from "./components/TournamentBracket";
 import Participants from "./components/Participants";
 import PrizePool from "./components/PrizePool";
 import TournamentRules from "./components/TournamentRules";
+import { useParams } from "react-router-dom";
+import { baseUrl } from "@/config/api";
+import { authHeaders } from "@/utils/Functions";
 
 const TournamentPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "bracket" | "participants" | "rules"
   >("bracket");
+
+  const [tournamentData, setTournamentData] = useState(null);
+
+  console.log("tournamentData", tournamentData);
+
+  const { id } = useParams();
+
+  const fetchTournamentData = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/tournaments/${id}/lobby`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      const data = await response.json();
+      setTournamentData(data);
+    } catch (error) {
+      console.error("Error fetching tournament data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTournamentData();
+  }, [id]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -39,7 +65,7 @@ const TournamentPage: React.FC = () => {
               {/* Tab Content */}
               <div className="mt-6">
                 {activeTab === "bracket" && <TournamentBracket />}
-                {activeTab === "participants" && <Participants />}
+                {activeTab === "participants" && <Participants participants={tournamentData?.participants} />}
                 {activeTab === "rules" && <TournamentRules />}
               </div>
             </div>

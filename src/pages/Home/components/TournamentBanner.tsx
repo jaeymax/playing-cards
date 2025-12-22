@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TournamentRegistrationModal from "./TournamentRegistrationModal";
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
 
 interface TournamentData {
-  startDate: string;
-  prizePool: number;
-  qualifyingSpots: number;
+  id: number;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  formmat: string;
+  cretaed_at: string;
+  updated_at: string;
+  winner_id: number | null;
+  prize: number;
+  is_current: boolean;
+  registration_fee: number;
+  registration_closing_date: string;
+  registered: boolean;
 }
 
 const useCountdown = (targetDate: string) => {
   const calculateTimeLeft = () => {
+    if (!targetDate) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
     const difference = new Date(targetDate).getTime() - new Date().getTime();
 
     if (difference <= 0) {
@@ -25,9 +43,18 @@ const useCountdown = (targetDate: string) => {
   };
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  const [isExpired, setIsExpired] = useState(false);
+  const [isExpired, setIsExpired] = useState(
+    !targetDate || new Date(targetDate).getTime() <= new Date().getTime()
+  );
 
   useEffect(() => {
+    // Recalculate immediately when targetDate changes
+    const initial = calculateTimeLeft();
+    setTimeLeft(initial);
+    setIsExpired(
+      !targetDate || new Date(targetDate).getTime() <= new Date().getTime()
+    );
+
     const timer = setInterval(() => {
       const remaining = calculateTimeLeft();
       setTimeLeft(remaining);
@@ -49,19 +76,45 @@ const useCountdown = (targetDate: string) => {
   return { timeLeft, isExpired };
 };
 
+const TournamentSkeleton: React.FC = () => {
+  return (
+    <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1">
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="w-full lg:w-auto">
+            <div className="h-6 bg-gray-700 rounded mb-2 w-40 animate-pulse"></div>
+            <div className="h-4 bg-gray-700 rounded w-60 animate-pulse"></div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+            <div className="text-center w-full sm:w-auto">
+              <div className="h-8 bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
+              <div className="h-3 bg-gray-700 rounded w-24 animate-pulse"></div>
+            </div>
+            <div className="h-10 bg-gray-700 rounded w-32 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TournamentBanner: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRegistered] = useState(false);
+  // const [isRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock tournament data - replace with actual API call
-  const tournamentData: TournamentData = {
-    startDate: "2025-12-04T20:00:00", // Example date
-    prizePool: 1000,
-    qualifyingSpots: 3,
-  };
+  const [tournamentData, setTournamentData] = useState<TournamentData | null>(
+    null
+  );
 
-  const { timeLeft, isExpired } = useCountdown(tournamentData.startDate);
+  const { user } = useAppContext();
+
+  const { timeLeft, isExpired } = useCountdown(
+    tournamentData?.registered
+      ? tournamentData?.start_date || ""
+      : tournamentData?.registration_closing_date || ""
+  );
 
   const formatCountdown = () => {
     const { days, hours, minutes, seconds } = timeLeft;
@@ -77,8 +130,40 @@ const TournamentBanner: React.FC = () => {
   };
 
   const handleJoinTournament = () => {
-    navigate("/tournaments/lobby/1");
+    navigate(`/tournaments/lobby/${tournamentData?.id}`);
   };
+
+  const getTournamentDetails = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${baseUrl}/tournaments/weekly/current`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user ? user.id : null }),
+      });
+      if (response.ok) {
+        const { data } = await response.json();
+        console.log("Tournament Data:", data);
+        setTournamentData(data);
+      } else {
+        console.error("Failed to fetch tournament details");
+      }
+    } catch (err) {
+      console.error("Error fetching tournament details:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getTournamentDetails();
+  }, [user]);
+
+  if (isLoading) {
+    return <TournamentSkeleton />;
+  }
 
   return (
     <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1">
@@ -89,26 +174,30 @@ const TournamentBanner: React.FC = () => {
               Weekend Tournament
             </h3>
             <p className="text-gray-300 text-center lg:text-left">
-              Prize pool: {tournamentData.prizePool} Gems | Top{" "}
-              {tournamentData.qualifyingSpots} players qualify for Championships
+              Prize pool: {tournamentData ? tournamentData.prize : 0} GHC
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
             <div className="text-center w-full sm:w-auto">
               <div className="text-2xl font-bold text-white">
-                {!isExpired && formatCountdown()}
+                {tournamentData && !isExpired ? formatCountdown() : ""}
               </div>
               <div className="text-sm text-gray-400">
-                {/* {isRegistered ? "Tournament Starts In " : ""} */}
-                {isExpired ? "Registration closed" : "Registration ends in"}
+                {isExpired
+                  ? tournamentData?.registered
+                    ? "Tournament started"
+                    : "Registration closed"
+                  : tournamentData?.registered
+                  ? "Tournament starts in"
+                  : "Registration ends in"}
               </div>
             </div>
-            {!isRegistered ? (
+            {!tournamentData?.registered ? (
               <button
                 onClick={() => setIsModalOpen(true)}
-                disabled={isExpired}
+                disabled={!tournamentData || isExpired}
                 className={`w-full sm:w-auto px-6 py-2 ${
-                  isExpired
+                  !tournamentData || isExpired
                     ? "bg-gray-600 cursor-not-allowed"
                     : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transform transition hover:scale-105"
                 } text-white font-medium rounded-lg`}
@@ -135,9 +224,12 @@ const TournamentBanner: React.FC = () => {
         </div>
       </div>
       <TournamentRegistrationModal
+        id={tournamentData ? tournamentData.id : 0}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         countdown={formatCountdown()}
+        registrationFee={tournamentData ? tournamentData.registration_fee : 0}
+        getTournamentDetails={getTournamentDetails}
       />
     </div>
   );

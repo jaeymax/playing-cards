@@ -4,14 +4,17 @@ import { baseUrl } from "@/config/api";
 import { authHeaders } from "@/utils/Functions";
 
 interface TournamentRegistrationModalProps {
+  id: number;
   isOpen: boolean;
   onClose: () => void;
   countdown: string;
+  registrationFee: number;
+  getTournamentDetails: () => Promise<void>;
 }
 
 const TournamentRegistrationModal: React.FC<
   TournamentRegistrationModalProps
-> = ({ isOpen, onClose, countdown }) => {
+> = ({ isOpen, onClose, countdown, id, registrationFee, getTournamentDetails }) => {
   if (!isOpen) return null;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +26,7 @@ const TournamentRegistrationModal: React.FC<
       setIsLoading(true);
       setErrorMsg("");
 
-      const response = await fetch(`${baseUrl}/tournament/:id/join`, {
+      const response = await fetch(`${baseUrl}/tournaments/join/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,11 +41,14 @@ const TournamentRegistrationModal: React.FC<
       if (!response.ok) {
         throw new Error(data.message || "Failed to join tournament");
       }
-
-      setTimeout(() => {
+      else{
+        // Successfully joined the tournament
+        // You can handle any additional logic here if needed
+        await getTournamentDetails();
         setIsLoading(false);
         onClose();
-      }, 1500);
+      }
+
     } catch (err: any) {
       setErrorMsg("An error occurred");
       setIsLoading(false);

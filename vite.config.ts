@@ -5,13 +5,13 @@ import fs from "fs"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  server: {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, "certs/192.168.43.218-key.pem")),
-      cert: fs.readFileSync(path.resolve(__dirname, "certs/192.168.43.218.pem")),
-    },
-    host: true,
-  },
+  // server: {
+  //   https: {
+  //     key: fs.readFileSync(path.resolve(__dirname, "certs/192.168.43.218-key.pem")),
+  //     cert: fs.readFileSync(path.resolve(__dirname, "certs/192.168.43.218.pem")),
+  //   },
+  //   host: true,
+  // },
   plugins: [react()],
   resolve: {
     alias: {
