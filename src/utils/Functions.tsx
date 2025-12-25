@@ -836,6 +836,13 @@ export function getDivision(rating: number) {
   return division;
 }
 
+
+export function customLog(...args: any[]) {
+ if(import.meta.env.VITE_ENV === 'development') {
+    console.log(...args);
+  }
+}
+
 // export const getPlayerByPosition = (player_position: number, players) => {
 //   return players.find((player) => player.position === player_position);
 // };

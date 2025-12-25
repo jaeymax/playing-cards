@@ -1,6 +1,12 @@
 import React from "react";
 
-const TournamentRules: React.FC = () => {
+interface TournamentRulesProps {
+  loading?: boolean;
+}
+
+const TournamentRules: React.FC<TournamentRulesProps> = ({
+  loading = false,
+}) => {
   const rules = [
     {
       title: "Format",
@@ -23,6 +29,24 @@ const TournamentRules: React.FC = () => {
         "Two reconnect attempts allowed per match. Exceed this and forfeit the game.",
     },
   ];
+
+  const RulesSkeleton: React.FC = () => (
+    <div className="space-y-6">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="bg-gray-750 rounded-lg p-4">
+          <div className="h-6 bg-gray-700 rounded animate-pulse w-32 mb-2"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-700 rounded animate-pulse w-full"></div>
+            <div className="h-4 bg-gray-700 rounded animate-pulse w-5/6"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (loading) {
+    return <RulesSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

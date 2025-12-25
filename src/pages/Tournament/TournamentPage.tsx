@@ -4,41 +4,165 @@ import TournamentBracket from "./components/TournamentBracket";
 import Participants from "./components/Participants";
 import PrizePool from "./components/PrizePool";
 import TournamentRules from "./components/TournamentRules";
+import TournamentFooter from "./components/TournamentFooter";
+import TimelineWidget from "./components/TimelineWidget";
 import { useParams } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import { authHeaders } from "@/utils/Functions";
+import { authHeaders, customLog } from "@/utils/Functions";
+import { useAppContext } from "@/contexts/AppContext";
+import { useSocket } from "@/contexts/SocketProvider";
+
+interface Tournament {
+  id: number;
+  name: string;
+  start_date: string;
+  status: "upcoming" | "ongoing" | "completed";
+  format: string;
+  prize: string;
+  registration_fee: string;
+  current_round_number: number;
+}
+
+interface Participant {
+  id: number;
+  username: string;
+  image_url: string;
+  rank: string;
+  status: string;
+  wins: number;
+  losses: number;
+}
+
+interface Player {
+  id: number;
+  name: string;
+  image_url: string;
+  score: number;
+  winner: boolean;
+}
+
+interface Match {
+  id: number;
+  player1: Player;
+  player2: Player;
+  status: "pending" | "in_progress" | "completed";
+  game_id: number;
+  game_code: string;
+  winner_id: number | null;
+}
+
+interface Round {
+  round: number;
+  matches: Match[];
+}
+
+interface TournamentData {
+  success: boolean;
+  tournament: Tournament;
+  participants: Participant[];
+  rounds: Round[];
+}
 
 const TournamentPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "bracket" | "participants" | "rules"
   >("bracket");
 
-  const [tournamentData, setTournamentData] = useState(null);
+  const { user } = useAppContext();
+  const [tournamentData, setTournamentData] = useState<TournamentData | null>(
+    null
+  );
+  const { socket } = useSocket();
+  const [loading, setLoading] = useState(true);
+  const [tournamentStartTime, setTournamentStartTime] = useState<Date | null>(
+    null
+  );
+  const [tournamentStarted, setTournamentStarted] = useState(false);
+  const [myGameCode, setMyGameCode] = useState<string>("");
 
-  console.log("tournamentData", tournamentData);
+  const extractGameCodeFromTournamentData = (data: TournamentData): string => {
+    const current_round_number = data.tournament.current_round_number;
+    const current_round_matches = data.rounds.find(
+      (round) => round.round === current_round_number
+    )?.matches;
+    customLog("current_round_matches", current_round_matches);
+    const myMatch = current_round_matches?.find(
+      (match) =>
+        match.player1.id === user?.id ||
+        match.player2.id === user?.id
+    );
+    if (myMatch) {
+      return myMatch.game_code;
+    }
+    return "";
+  };
 
   const { id } = useParams();
 
+  customLog("tournament data", tournamentData);
+
   const fetchTournamentData = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${baseUrl}/tournaments/${id}/lobby`, {
         method: "GET",
         headers: { "Content-Type": "application/json", ...authHeaders() },
       });
-      const data = await response.json();
+      const data: TournamentData = await response.json();
       setTournamentData(data);
+      setMyGameCode(extractGameCodeFromTournamentData(data));
+
+      // Set tournament start time from data if available
+      if (data.tournament.start_date) {
+        const startDate = new Date(data.tournament.start_date);
+        setTournamentStartTime(startDate);
+        setTournamentStarted(new Date() >= startDate);
+      }
     } catch (error) {
       console.error("Error fetching tournament data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    if(!user) return;
     fetchTournamentData();
-  }, [id]);
+  }, [id, user]);
+
+
+  const lobbyUpdateCallback = (tournamentData: TournamentData) => {
+    customLog("Received tournamentData via socket");
+    setTournamentData(tournamentData);
+    console.log('tournamentData via socket', tournamentData);
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    if(!socket) return;
+    socket?.emit("joinTournamentRoom", {
+      tournamentId: id,
+      userId: user.id,
+    });
+    socket?.on("lobbyUpdate", lobbyUpdateCallback);
+
+    return () => {
+      socket?.off("lobbyUpdate", lobbyUpdateCallback);
+    };
+
+  }, [user, socket]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      <TournamentHeader />
+    <div className="min-h-screen bg-gray-900 text-gray-100 pb-32">
+      <TournamentHeader
+        name={tournamentData?.tournament.name}
+        format={tournamentData?.tournament.format}
+        status={tournamentData?.tournament.status}
+        numberOfParticipants={tournamentData?.participants.length}
+        prize={tournamentData?.tournament.prize}
+        current_round_number={tournamentData?.tournament.current_round_number}
+        loading={loading}
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -64,55 +188,48 @@ const TournamentPage: React.FC = () => {
 
               {/* Tab Content */}
               <div className="mt-6">
-                {activeTab === "bracket" && <TournamentBracket />}
-                {activeTab === "participants" && <Participants participants={tournamentData?.participants} />}
-                {activeTab === "rules" && <TournamentRules />}
+                {activeTab === "bracket" && (
+                  <TournamentBracket
+                    rounds={tournamentData?.rounds}
+                    numberOfParticipants={tournamentData?.participants.length}
+                    loading={loading}
+                  />
+                )}
+                {activeTab === "participants" && (
+                  <Participants
+                    participants={tournamentData?.participants}
+                    loading={loading}
+                  />
+                )}
+                {activeTab === "rules" && <TournamentRules loading={loading} />}
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            <PrizePool />
-            <TimelineWidget />
+            <PrizePool
+              prize={tournamentData?.tournament.prize}
+              registrationFee={tournamentData?.tournament.registration_fee}
+              loading={loading}
+            />
+            <TimelineWidget
+              status={tournamentData?.tournament.status}
+              loading={loading}
+            />
           </div>
         </div>
       </div>
-    </div>
-  );
-};
 
-const TimelineWidget: React.FC = () => {
-  const timeline = [
-    { phase: "Registration", status: "completed", time: "Ended 2h ago" },
-    { phase: "Group Stage", status: "active", time: "In Progress" },
-    { phase: "Quarter Finals", status: "upcoming", time: "Starts in 2h" },
-    { phase: "Semi Finals", status: "upcoming", time: "Mar 15, 2:00 PM" },
-    { phase: "Finals", status: "upcoming", time: "Mar 15, 4:00 PM" },
-  ];
-
-  return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-      <h3 className="text-lg font-bold text-white mb-4">Tournament Timeline</h3>
-      <div className="space-y-4">
-        {timeline.map((item, index) => (
-          <div key={index} className="flex items-start gap-3">
-            <div
-              className={`w-3 h-3 rounded-full mt-1.5 ${
-                item.status === "completed"
-                  ? "bg-green-500"
-                  : item.status === "active"
-                  ? "bg-blue-500"
-                  : "bg-gray-600"
-              }`}
-            />
-            <div>
-              <p className="text-white font-medium">{item.phase}</p>
-              <p className="text-sm text-gray-400">{item.time}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <TournamentFooter
+        tournamentStarted={tournamentStarted}
+        tournamentStartTime={tournamentStartTime}
+        setTournamentStarted={setTournamentStarted}
+        tournamentStatus={tournamentData?.tournament.status}
+        Matches={tournamentData?.rounds}
+        currentRoundNumber={tournamentData?.tournament.current_round_number ?? 0}
+        loading={loading}
+      />
     </div>
   );
 };

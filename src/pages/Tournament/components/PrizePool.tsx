@@ -1,23 +1,61 @@
 import React from "react";
 
-const PrizePool: React.FC = () => {
+interface PrizePoolProps {
+  prize: string | undefined;
+  registrationFee: string | undefined;
+  loading?: boolean;
+}
+
+const PrizePool: React.FC<PrizePoolProps> = ({
+  prize,
+  registrationFee,
+  loading = false,
+}) => {
+  if (prize === "0" && registrationFee === "0") {
+  }
+
   const prizes = [
     {
       position: "1st Place",
-      reward: "500 Gems",
+      reward: "50 GHC",
       extra: "Championship Qualifier",
     },
     {
       position: "2nd Place",
-      reward: "300 Gems",
+      reward: "30 GHC",
       extra: "Championship Qualifier",
     },
     {
       position: "3rd Place",
-      reward: "200 Gems",
+      reward: "20 GHC",
       extra: "Championship Qualifier",
     },
   ];
+
+  const PrizePoolSkeleton: React.FC = () => (
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+      <div className="h-6 bg-gray-700 rounded animate-pulse w-32 mb-4"></div>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-start gap-4 p-3 bg-gray-750 rounded-lg"
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+              <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+              <div className="h-3 bg-gray-700 rounded animate-pulse w-32"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return <PrizePoolSkeleton />;
+  }
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
@@ -42,7 +80,7 @@ const PrizePool: React.FC = () => {
             <div>
               <p className="text-white font-medium">{prize.position}</p>
               <p className="text-sm text-blue-400">{prize.reward}</p>
-              <p className="text-xs text-gray-400">{prize.extra}</p>
+              {/* <p className="text-xs text-gray-400">{prize.extra}</p> */}
             </div>
           </div>
         ))}

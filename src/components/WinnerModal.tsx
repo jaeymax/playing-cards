@@ -73,13 +73,13 @@ const WinnerModal = ({
             <span className="text-xs sm:text-sm">Play Next Hand</span>
           </button>
 
-          <button
+          {/* <button
             onClick={onLeaveGame}
             className="px-3 sm:px-6 py-2 bg-gray-700 hover:bg-gray-600 
                 text-gray-300 rounded-lg transition-all duration-300"
           >
             <span className="text-xs sm:text-normal">Leave Game</span>
-          </button>
+          </button> */}
         </div>
       </div>
     </Modal>

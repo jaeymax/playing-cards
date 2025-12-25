@@ -11,38 +11,51 @@ interface Participant {
 }
 
 interface ParticipantsProps {
-  participants: Participant[];
+  participants: Participant[] | undefined;
+  loading?: boolean;
 }
 
+const Participants: React.FC<ParticipantsProps> = ({
+  participants,
+  loading = false,
+}) => {
+  const ParticipantsSkeleton: React.FC = () => (
+    <div className="overflow-x-auto">
+      <table className="min-w-full">
+        <thead className="border-b border-gray-700">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Player
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Status
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-700">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <tr key={index} className="hover:bg-gray-750">
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="h-8 w-8 rounded-full bg-gray-700 animate-pulse"></div>
+                  <div className="ml-4 space-y-2 w-32">
+                    <div className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="h-6 bg-gray-700 rounded animate-pulse w-20"></div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
-const Participants: React.FC<ParticipantsProps> = ({participants}) => {
-  // const participants = [
-  //   {
-  //     id: 1,
-  //     name: "CardMaster123",
-  //     rank: "#1",
-  //     status: "qualified",
-  //     wins: 3,
-  //     losses: 0,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "AceHunter",
-  //     rank: "#4",
-  //     status: "qualified",
-  //     wins: 2,
-  //     losses: 1,
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "PokerQueen",
-  //     rank: "#2",
-  //     status: "eliminated",
-  //     wins: 1,
-  //     losses: 2,
-  //   },
-  //   // Add more participants...
-  // ];
+  if (loading) {
+    return <ParticipantsSkeleton />;
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -53,23 +66,16 @@ const Participants: React.FC<ParticipantsProps> = ({participants}) => {
               Player
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Rank
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
               Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Record
             </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
-          {participants.map((player) => (
+          {participants?.map((player) => (
             <tr key={player.id} className="hover:bg-gray-750">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                    {/* <span className="text-sm">👤</span> */}
                     {player.image_url ? (
                       <img
                         className="object-cover w-full h-full rounded-full"
@@ -87,9 +93,6 @@ const Participants: React.FC<ParticipantsProps> = ({participants}) => {
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                {player.rank}
-              </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
                   className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -100,9 +103,6 @@ const Participants: React.FC<ParticipantsProps> = ({participants}) => {
                 >
                   {player.status}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                {player.wins}W - {player.losses}L
               </td>
             </tr>
           ))}
