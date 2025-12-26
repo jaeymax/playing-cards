@@ -6,6 +6,8 @@ import RecentGames from "./components/RecentGames";
 //import Announcements from "./components/Announcements";
 import Footer from "@/components/Footer";
 import TournamentBanner from "./components/TournamentBanner";
+//import OnlineFriends from "./components/OnlineFriends";
+//import RecentActivities from "./components/RecentActivities";
 const HomePage: React.FC = () => {
 
 
@@ -20,7 +22,7 @@ const HomePage: React.FC = () => {
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             <TopPlayers />
-          {/*  <OnlineFriends /> */}
+           {/* <OnlineFriends /> */}
            </div>
 
           {/* Main Content */}

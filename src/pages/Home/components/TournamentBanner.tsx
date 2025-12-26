@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TournamentRegistrationModal from "./TournamentRegistrationModal";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
+import { customLog, getToken } from "@/utils/Functions";
 
 interface TournamentData {
   id: number;
@@ -11,7 +12,7 @@ interface TournamentData {
   start_date: string;
   end_date: string;
   status: string;
-  formmat: string;
+  format: string;
   cretaed_at: string;
   updated_at: string;
   winner_id: number | null;
@@ -145,7 +146,7 @@ const TournamentBanner: React.FC = () => {
       });
       if (response.ok) {
         const { data } = await response.json();
-        console.log("Tournament Data:", data);
+        customLog("Tournament Data:", data);
         setTournamentData(data);
       } else {
         console.error("Failed to fetch tournament details");
@@ -158,6 +159,7 @@ const TournamentBanner: React.FC = () => {
   };
 
   useEffect(() => {
+    if(getToken() &&  !user) return;
     getTournamentDetails();
   }, [user]);
 
@@ -171,7 +173,7 @@ const TournamentBanner: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="w-full lg:w-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center lg:text-left">
-              Weekend Tournament
+              {tournamentData?.name}
             </h3>
             <p className="text-gray-300 text-center lg:text-left">
               Prize pool: {tournamentData ? tournamentData.prize : 0} GHC
@@ -216,7 +218,7 @@ const TournamentBanner: React.FC = () => {
                   onClick={handleJoinTournament}
                   className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-medium rounded-lg transform transition hover:scale-105"
                 >
-                  Join
+                  Join Lobby
                 </button>
               </div>
             )}
@@ -230,6 +232,7 @@ const TournamentBanner: React.FC = () => {
         countdown={formatCountdown()}
         registrationFee={tournamentData ? tournamentData.registration_fee : 0}
         getTournamentDetails={getTournamentDetails}
+        prizePool ={tournamentData ? tournamentData.prize : 0}
       />
     </div>
   );

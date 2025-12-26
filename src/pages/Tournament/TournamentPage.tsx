@@ -45,7 +45,7 @@ interface Match {
   id: number;
   player1: Player;
   player2: Player;
-  status: "pending" | "in_progress" | "completed";
+  status: "pending" | "in_progress" | "completed" | "forfeited";
   game_id: number;
   game_code: string;
   winner_id: number | null;
@@ -226,7 +226,7 @@ const TournamentPage: React.FC = () => {
         tournamentStartTime={tournamentStartTime}
         setTournamentStarted={setTournamentStarted}
         tournamentStatus={tournamentData?.tournament.status}
-        Matches={tournamentData?.rounds}
+        matches={tournamentData?.rounds}
         currentRoundNumber={tournamentData?.tournament.current_round_number ?? 0}
         loading={loading}
       />

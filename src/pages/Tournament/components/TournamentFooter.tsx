@@ -9,7 +9,7 @@ const TournamentFooter: React.FC<{
   setTournamentStarted: React.Dispatch<React.SetStateAction<boolean>>;
   tournamentStatus?: string;
   loading?: boolean;
-  Matches?: Round[];
+  matches?: Round[];
   currentRoundNumber: number;
 }> = ({
   tournamentStarted,
@@ -18,7 +18,7 @@ const TournamentFooter: React.FC<{
   currentRoundNumber,
   tournamentStatus,
   loading = false,
-  Matches,
+  matches,
 }) => {
   const [countdown, setCountdown] = useState<string>("");
   const [joinDeadlineCountdown, setJoinDeadlineCountdown] =
@@ -30,7 +30,7 @@ const TournamentFooter: React.FC<{
   const navigate = useNavigate();
   const { user } = useAppContext();
 
-  console.log("currentRoundMatches in Footer:", Matches);
+  console.log("currentRoundMatches in Footer:", matches);
 
   const getMyMatch = (matches: Round[]) => {
     const roundData = matches.find((r) => r.round === currentRoundNumber);
@@ -41,13 +41,14 @@ const TournamentFooter: React.FC<{
     return myMatch;
   };
 
-  const myMatch = Matches ? getMyMatch(Matches) : null;
+  const myMatch = matches ? getMyMatch(matches) : null;
 
   // Determine user status
   const tournamentUpcoming = tournamentStatus === "upcoming";
   const tournamentOngoing = tournamentStatus === "ongoing";
   const tournamentEnded = tournamentStatus === "completed";
   const tournamentCanceled = tournamentStatus === "canceled";
+  const isForfeited = myMatch?.status === "forfeited";
   const isEliminated =
     !myMatch ||
     (myMatch.status === "completed" && myMatch.winner_id !== user?.id);
@@ -223,6 +224,11 @@ const TournamentFooter: React.FC<{
             ) : isEliminated ? (
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
                 Eliminated
+              </div>
+            ) :
+            isForfeited ? (
+              <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-500 text-white-300 border border-red-700/60">
+                Forfeited
               </div>
             ) : isWaitingForNextRound ? (
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">

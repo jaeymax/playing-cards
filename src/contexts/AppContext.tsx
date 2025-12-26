@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 import { baseUrl } from "@/config/api";
-import { getToken, removeToken } from "@/utils/Functions";
+import { customLog, getToken, removeToken } from "@/utils/Functions";
 import mixpanel from "mixpanel-browser";
 
 interface User {
@@ -59,7 +59,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("User in context:", user);
+  customLog("User in context:", user);
 
   useEffect(() => {
     const accessToken = getToken();

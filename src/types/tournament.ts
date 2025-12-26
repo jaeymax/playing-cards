@@ -10,7 +10,7 @@ export interface Match {
   id: number;
   player1: Player;
   player2: Player;
-  status: "pending" | "in_progress" | "completed";
+  status: "pending" | "in_progress" | "completed" | "forfeited";
   game_id: number;
   game_code: string;
   winner_id: number | null;

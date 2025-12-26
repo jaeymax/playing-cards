@@ -10,7 +10,9 @@ interface TournamentRegistrationModalProps {
   onClose: () => void;
   countdown: string;
   registrationFee: number;
+
   getTournamentDetails: () => Promise<void>;
+  prizePool: number;
 }
 
 const TournamentRegistrationModal: React.FC<
@@ -22,6 +24,7 @@ const TournamentRegistrationModal: React.FC<
   id,
   registrationFee,
   getTournamentDetails,
+  prizePool,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -74,7 +77,7 @@ const TournamentRegistrationModal: React.FC<
                 <h3 className="text-sm font-medium text-gray-300">
                   Prize Pool
                 </h3>
-                <p className="text-lg font-bold text-yellow-300">1,000 Gems</p>
+                <p className="text-lg font-bold text-yellow-300">{prizePool} GHC</p>
               </div>
             </div>
           </div>

@@ -22,9 +22,11 @@ import GameMessage from "@/components/GameMessage";
 import PlayerArea from "@/components/PlayerArea";
 import DeckArea from "@/components/DeckArea";
 import ScoresTable from "@/components/ScoresTable";
+import TimerBar from "@/components/TimerBar";
 import { analytics, logEvent } from "@/firebase/config";
 import WinnerModal from "@/components/WinnerModal";
 import SingleEliminationGameOverModal from "@/components/SingleEliminationGameOverModal";
+import MatchForfeitModal from "@/components/MatchForfeitModal";
 
 interface Message {
   user_id: number | undefined;
@@ -62,6 +64,8 @@ const SingleEliminationGame = () => {
   const [gameEnded, setGameEnded] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [matchForfeited, setMatchForfeited] = useState(false);
+  const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -169,9 +173,9 @@ const SingleEliminationGame = () => {
     setGameNotFound(true);
   };
 
-    const gameMessageCallback = (message: string) => {
-      handleGameMessage(message, setMessage);
-    };
+  const gameMessageCallback = (message: string) => {
+    handleGameMessage(message, setMessage);
+  };
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -201,6 +205,14 @@ const SingleEliminationGame = () => {
     }
   }, [game]);
 
+  const matchForfeitCallback = (data: any) => {
+    //setMatchForfeited(true);
+    const forfeiterId = data.loserId;
+    const forfeiter = players.find((player) => player.user.id === forfeiterId);
+    customLog("forfeiter", forfeiter);
+    setMatchForfeiter(forfeiter);
+    console.log("Match forfeit:", data);
+  };
   useEffect(() => {
     if (!user) return;
 
@@ -221,6 +233,7 @@ const SingleEliminationGame = () => {
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
+    socket?.on("matchForfeit", matchForfeitCallback);
     //socket?.on("chatMessage", chatMessageCallback);
 
     //socket?.on("voiceMessage", voiceMessageCallback);
@@ -235,6 +248,7 @@ const SingleEliminationGame = () => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("connect", handleConnect);
       socket?.off("game-not-found", handleGameNotFound);
+      socket?.off("matchForfeit", matchForfeitCallback);
       //socket?.off("chatMessage", chatMessageCallback);
       //socket?.off("voiceMessage", voiceMessageCallback);
     };
@@ -400,13 +414,11 @@ const SingleEliminationGame = () => {
     <div className="relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full">
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
         {remainingSeconds > 0 && game?.current_turn_user_id !== user?.id && (
-          <div
-            className={`text-left text-4xl font-bold pt-4 ${getTimerColor(
-              remainingSeconds
-            )}`}
-          >
-            {remainingSeconds}s
-          </div>
+          <TimerBar
+            remainingSeconds={remainingSeconds}
+            position="top"
+            isCurrentPlayer={false}
+          />
         )}
         <PlayerInfo
           name={firstOpponent?.user.username || "Opponent 1"}
@@ -541,13 +553,11 @@ const SingleEliminationGame = () => {
         />
 
         {remainingSeconds > 0 && game?.current_turn_user_id === user?.id && (
-          <div
-            className={`text-center absolute bottom-5 text-4xl font-bold pb-4 ${getTimerColor(
-              remainingSeconds
-            )}`}
-          >
-            {remainingSeconds}s
-          </div>
+          <TimerBar
+            remainingSeconds={remainingSeconds}
+            position="bottom"
+            isCurrentPlayer={true}
+          />
         )}
 
         <ScoresTable players={players} />
@@ -585,6 +595,16 @@ const SingleEliminationGame = () => {
           onContinue={() => navigate(-1)}
         />
       )}
+
+      <MatchForfeitModal
+        isOpen={matchForfeited}
+        onClose={() => {
+          setMatchForfeited(false);
+          navigate(-1);
+        }}
+        forfeitedPlayer={matchForfeiter}
+        currentPlayer={me}
+      />
     </div>
   );
 };

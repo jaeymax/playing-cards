@@ -429,8 +429,8 @@ export async function ensureGuest() {
 
   const data = await res.json();
   saveToken(data.token);
-  console.log(data.user);
-  console.log("Guest token saved:", data.token);
+  customLog(data.user);
+  customLog("Guest token saved:", data.token);
   return data.user;
 }
 
@@ -575,7 +575,7 @@ export const handlePlayedCard = ({
   const card = gameCards.find((card: any) => card.id === card_id);
   const player = game.players.find((player: any) => player.id === player_id);
 
-  console.log(
+  customLog(
     `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
   );
 
@@ -609,7 +609,7 @@ export const handleGameMessage = (
   message: string,
   setMessage: (message: string) => void
 ) => {
-  console.log("Game message:", message);
+  customLog("Game message:", message);
   setMessage(message);
 };
 

@@ -1,6 +1,6 @@
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
-import { authHeaders } from "@/utils/Functions";
+import { authHeaders, customLog } from "@/utils/Functions";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -27,12 +27,12 @@ const RecentGames: React.FC = () => {
           response.status === 500
             ? "Network error. Please check your internet connection."
             : response.status === 403
-            ? "Please log in to view your recent matches"
+            ? "Log in to view your recent matches"
             : "Failed to fetch games"
         );
       }
       const data = await response.json();
-      console.log("recent games", data);
+      customLog("recent games", data);
       setRecentGames(data);
     } catch (error: any) {
       console.error("Error fetching recent matches:", error);
