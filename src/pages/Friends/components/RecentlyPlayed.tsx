@@ -26,7 +26,7 @@ const RecentlyPlayed: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700">
+    <div className="bg-gray-800 md:rounded-lg md:border md:border-gray-700">
       <div className="p-4 border-b border-gray-700">
         <h2 className="text-lg font-bold text-white">Recently Played</h2>
       </div>

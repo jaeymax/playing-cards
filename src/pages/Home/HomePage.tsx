@@ -5,25 +5,25 @@ import TopPlayers from "./components/TopPlayers";
 import RecentGames from "./components/RecentGames";
 //import Announcements from "./components/Announcements";
 import Footer from "@/components/Footer";
-import TournamentBanner from "./components/TournamentBanner";
-//import OnlineFriends from "./components/OnlineFriends";
-//import RecentActivities from "./components/RecentActivities";
+ import TournamentBanner from "./components/TournamentBanner";
+// import OnlineFriends from "./components/OnlineFriends";
+// import RecentActivities from "./components/RecentActivities";
+ import WeeklyChampions from "./components/WeeklyChampions";
+
 const HomePage: React.FC = () => {
-
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 w-full flex flex-col">
-      <NavBar showSignUps = {true} />
+      <NavBar showSignUps={true} />
       <div className="container mx-auto px-4 py-8 space-y-16 flex-1">
         <HeroSection />
 
-         {/* Main Grid Layout */}
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             <TopPlayers />
-           {/* <OnlineFriends /> */}
-           </div>
+            <WeeklyChampions />
+          </div>
 
           {/* Main Content */}
           <div className="lg:col-span-6 space-y-8">
@@ -33,12 +33,11 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-3">
-            {/* <Announcements /> */}
+      <div className="lg:col-span-3 space-y-8">
+            {/* <OnlineFriends />
+            <Announcements /> */}
           </div>
         </div>
-
-        
       </div>
       <Footer />
     </div>

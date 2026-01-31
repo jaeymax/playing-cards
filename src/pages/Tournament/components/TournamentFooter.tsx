@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Round } from "../../../types/tournament";
 import { useAppContext } from "@/contexts/AppContext";
+import { Match } from "@/types/tournament";
+import { customLog } from "@/utils/Functions";
+
 
 const TournamentFooter: React.FC<{
   tournamentStarted: boolean;
@@ -20,28 +23,39 @@ const TournamentFooter: React.FC<{
   loading = false,
   matches,
 }) => {
-  const [countdown, setCountdown] = useState<string>("");
-  const [joinDeadlineCountdown, setJoinDeadlineCountdown] =
-    useState<string>("");
-  const [joinDeadlineTime] = useState<Date | null>(
-    tournamentStarted ? new Date(Date.now() + 6 * 60 * 1000) : null
-  );
 
-  const navigate = useNavigate();
   const { user } = useAppContext();
-
-  console.log("currentRoundMatches in Footer:", matches);
-
-  const getMyMatch = (matches: Round[]) => {
+  
+  const getMyMatch = (matches: Round[]): Match | undefined => {
     const roundData = matches.find((r) => r.round === currentRoundNumber);
-    if (!roundData) return null;
+    if (!roundData) return undefined;
     const myMatch = roundData.matches.find(
       (match) => match.player1.id === user?.id || match.player2.id === user?.id
     );
+
+    console.log('my Match', myMatch?.turn_ends_at)
     return myMatch;
   };
+  const myMatch: Match | undefined = matches ? getMyMatch(matches) : undefined;
 
-  const myMatch = matches ? getMyMatch(matches) : null;
+  const [countdown, setCountdown] = useState<string>("");
+  const [joinDeadlineCountdown, setJoinDeadlineCountdown] =
+    useState<string>("");
+  const [joinDeadlineTime, setJoinDeadlineTime] = useState<Date | null>(
+   myMatch?.turn_ends_at ? new Date(myMatch.turn_ends_at) : null
+  );
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setJoinDeadlineTime(myMatch?.turn_ends_at ? new Date(myMatch.turn_ends_at) : null);
+  }, [myMatch]);
+  
+
+  //console.log("currentRoundMatches in Footer:", matches);
+  customLog("matches", matches);
+  customLog("joinDeadlineTime", joinDeadlineTime)
+
 
   // Determine user status
   const tournamentUpcoming = tournamentStatus === "upcoming";
@@ -110,7 +124,7 @@ const TournamentFooter: React.FC<{
       const diff = joinDeadlineTime.getTime() - now.getTime();
 
       if (diff <= 0) {
-        setJoinDeadlineCountdown("Time's up!");
+        setJoinDeadlineCountdown("0:00");
         return;
       }
 
@@ -118,7 +132,7 @@ const TournamentFooter: React.FC<{
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
       setJoinDeadlineCountdown(
-        `${minutes}:${seconds.toString().padStart(2, "0")}`
+        `Match forfeits in ${minutes}:${seconds.toString().padStart(2, "0")}`
       );
     };
 
@@ -227,7 +241,7 @@ const TournamentFooter: React.FC<{
               </div>
             ) :
             isForfeited ? (
-              <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-500 text-white-300 border border-red-700/60">
+              <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
                 Forfeited
               </div>
             ) : isWaitingForNextRound ? (

@@ -14,6 +14,7 @@ export interface Match {
   game_id: number;
   game_code: string;
   winner_id: number | null;
+  turn_ends_at: number;
 }
 
 export interface Round {

@@ -9,6 +9,8 @@ const TimelineWidget: React.FC<TimelineWidgetProps> = ({
   status,
   loading = false,
 }) => {
+
+  (status)
   const timeline = [
     { phase: "Registration", status: "completed", time: "Ended 2h ago" },
     { phase: "Group Stage", status: "active", time: "In Progress" },
@@ -18,7 +20,7 @@ const TimelineWidget: React.FC<TimelineWidgetProps> = ({
   ];
 
   const TimelineSkeleton: React.FC = () => (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div className="bg-gray-800 md:rounded-lg border-t border-b md:border border-gray-700 p-4">
       <div className="h-6 bg-gray-700 rounded animate-pulse w-40 mb-4"></div>
       <div className="space-y-4">
         {Array.from({ length: 5 }).map((_, index) => (
@@ -39,7 +41,7 @@ const TimelineWidget: React.FC<TimelineWidgetProps> = ({
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div className="bg-gray-800 md:rounded-lg border-t border-b md:border border-gray-700 p-4">
       <h3 className="text-lg font-bold text-white mb-4">Tournament Timeline</h3>
       <div className="space-y-4">
         {timeline.map((item, index) => (

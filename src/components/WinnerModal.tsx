@@ -1,3 +1,4 @@
+import { customLog } from "@/utils/Functions";
 import Modal from "./Modal";
 
 interface WinnerModalProps {
@@ -19,6 +20,7 @@ const WinnerModal = ({
 }: WinnerModalProps) => {
 
   (onClose)
+ //` customLog('onleave', onLeaveGame)
   
   return (
     <Modal isOpen={isOpen} onClose={()=>{}} title={`Hand ${winningPlayer?.hand_number} Complete!`}>
@@ -42,10 +44,10 @@ const WinnerModal = ({
             {`Won!`}
           </h3>
           <div className="text-gray-400 sm:text-sm text-xs">
-            <p>Score: {winningPlayer?.points} points</p>
-            <p>
+            <p>Score: {winningPlayer?.points}</p>
+            {/* <p>
               Previous Score: {winningPlayer?.score - winningPlayer?.points}
-            </p>
+            </p> */}
             <p>Total Score: {winningPlayer?.score}</p>
           </div>
         </div>

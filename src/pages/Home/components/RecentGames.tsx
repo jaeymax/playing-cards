@@ -5,9 +5,19 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
+interface RecentGame {
+  opponent_name: string;
+  opponent_score: number;
+  player_score: number;
+  ended_at: string;
+  is_rated: boolean;
+  winner: boolean;
+   rating_change:number | null,
+}
+
 const RecentGames: React.FC = () => {
   const { user } = useAppContext();
-  const [recentGames, setRecentGames] = React.useState<any[]>([]);
+  const [recentGames, setRecentGames] = React.useState<RecentGame[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -46,38 +56,38 @@ const RecentGames: React.FC = () => {
     getRecentMatches();
   }, []);
 
-  const recentGamesMapped =
-    recentGames.length > 0
-      ? recentGames.map((game) => {
-          let gameObj = {
-            id: 0,
-            player1: { name: "", score: 0 },
-            player2: { name: "", score: 0 },
-            result: "",
-            time: "",
-            type: "",
-            endedAt: game.ended_at,
-          };
+  // const recentGamesMapped =
+  //   recentGames.length > 0
+  //     ? recentGames.map((game) => {
+  //         let gameObj = {
+  //           id: 0,
+  //           player1: { name: "", score: 0 },
+  //           player2: { name: "", score: 0 },
+  //           result: "",
+  //           time: "",
+  //           type: "",
+  //           endedAt: game.ended_at,
+  //         };
 
-          gameObj.result = game.winnerId === user?.id ? "win" : "loss";
-          gameObj.player1.name = "You";
-          gameObj.player1.score =
-            game.players[0].username === user?.username
-              ? game.players[0].score
-              : game.players[1].score;
-          gameObj.player2.name =
-            game.players[0].username === user?.username
-              ? game.players[1].username
-              : game.players[0].username;
-          gameObj.player2.score =
-            game.players[0].username === user?.username
-              ? game.players[1].score
-              : game.players[0].score;
-          gameObj.type = game?.is_rated ? "Ranked" : "Casual";
-          gameObj.id = game.id;
-          return gameObj;
-        })
-      : [];
+  //         gameObj.result = game.winnerId === user?.id ? "win" : "loss";
+  //         gameObj.player1.name = "You";
+  //         gameObj.player1.score =
+  //           game.players[0].username === user?.username
+  //             ? game.players[0].score
+  //             : game.players[1].score;
+  //         gameObj.player2.name =
+  //           game.players[0].username === user?.username
+  //             ? game.players[1].username
+  //             : game.players[0].username;
+  //         gameObj.player2.score =
+  //           game.players[0].username === user?.username
+  //             ? game.players[1].score
+  //             : game.players[0].score;
+  //         gameObj.type = game?.is_rated ? "Ranked" : "Casual";
+  //         gameObj.id = game.id;
+  //         return gameObj;
+  //       })
+  //     : [];
 
   const GameSkeleton = () => (
     <div className="p-4 animate-pulse">
@@ -130,39 +140,39 @@ const RecentGames: React.FC = () => {
               </button>
             ) : null}
           </div>
-        ) : recentGamesMapped.length === 0 ? (
+        ) : recentGames.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-400 font-semibold">No recent games to display</p>
             <p className="text-gray-500 mt-2">Play a game to see your match history</p>
           </div>
         ) : (
-          recentGamesMapped.map((game) => (
-            <div key={game.id} className="p-4">
+          recentGames.map((game, index) => (
+            <div key={index} className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  {/* <div
+                  <div
                     className={`w-2 h-2 rounded-full ${
-                      game.result === "win" ? "bg-green-500" : "bg-red-500"
+                      game.winner === true ? "bg-green-500" : "bg-red-500"
                     }`}
-                  /> */}
+                  />
                   <span className="text-xs font-medium px-2 py-1 rounded bg-gray-700 text-gray-300">
-                    {game.type}
+                    {game.is_rated ? "Ranked" : "Casual"}
                   </span>
                 </div>
                 <div className="flex-1 text-center">
                   <div className="flex items-center justify-center gap-3">
                     <span className="text-white font-medium">
-                      {game.player1.name}
+                      You
                     </span>
                     <span className="text-gray-400 text-sm">
-                      {game.player1.score} - {game.player2.score}
+                      {game.player_score} - {game.opponent_score}
                     </span>
                     <span className="text-white font-medium">
-                      {game.player2.name}
+                      {game.opponent_name}
                     </span>
                   </div>
                   <span className="text-xs text-gray-500 mt-1 block">
-                    {formatDistanceToNow(new Date(game.endedAt), {
+                    {formatDistanceToNow(new Date(game.ended_at), {
                       addSuffix: true,
                     })}
                   </span>
@@ -176,12 +186,12 @@ const RecentGames: React.FC = () => {
         )}
       </div>
       <div className="p-3 border-t border-gray-700">
-        {recentGamesMapped.length > 0 && ( <Link
+        {/* {recentGamesMapped.length > 0 && ( <Link
           to="/recent-games"
           className="text-sm block text-blue-400 hover:text-blue-300 transition w-full text-center"
         >
           View Match History
-        </Link>)}
+        </Link>)} */}
        
       </div>
     </div>

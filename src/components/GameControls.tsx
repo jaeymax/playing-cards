@@ -2,6 +2,7 @@ interface GameControlsProps {
   showButtons: boolean;
   isDealing: boolean;
   isShuffling: boolean;
+  shuffledAtLeastOnce?:boolean;
   onDeal: () => void;
   onShuffle: () => void;
 }
@@ -10,6 +11,7 @@ const GameControls = ({
   showButtons,
   isDealing,
   isShuffling,
+  shuffledAtLeastOnce,
   onDeal,
   onShuffle,
 }: GameControlsProps) => {
@@ -17,6 +19,7 @@ const GameControls = ({
 
   return (
     <div className="flex hidde absolute w-fit gap-2 borde top-1/2 left-1/2 -translate-x-1/2 button-container z-[1000000000000]">
+      {shuffledAtLeastOnce && (
       <button
         id="deal-cards"
         disabled={isDealing || isShuffling}
@@ -27,6 +30,7 @@ const GameControls = ({
       >
         Deal
       </button>
+      )}
       <button
         id="shuffle"
         disabled={isShuffling || isDealing}

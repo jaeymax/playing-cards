@@ -42,6 +42,8 @@ import { analytics, logEvent } from "./firebase/config";
 import TournamentLobby from "./pages/TournamentLobby/TournamentLobby";
 import TournamentDetailsPage from "./pages/Tournaments/TournamentDetailsPage";
 import PrivateRoute from "./components/PrivateRoute";
+import WalletPage from "./pages/tests/Wallet";
+import DepositSuccessPage from "./pages/tests/DepositSuccess";
 //import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
@@ -77,6 +79,8 @@ function App() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<GameModal />} />
           <Route path="/support" element={<SupportPage />} />
+          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/deposit/success" element={<DepositSuccessPage />} />
           <Route element={<PrivateRoute />}>
             {/* Protected routes go here */}
           <Route path="/profile" element={<ProfilePage />} />

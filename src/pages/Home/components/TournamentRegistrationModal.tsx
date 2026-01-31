@@ -77,7 +77,24 @@ const TournamentRegistrationModal: React.FC<
                 <h3 className="text-sm font-medium text-gray-300">
                   Prize Pool
                 </h3>
-                <p className="text-lg font-bold text-yellow-300">{prizePool} GHC</p>
+                <p className="text-lg font-bold text-yellow-300">
+                  {prizePool} GHC
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Registration Fee */}
+          <div className="bg-gradient-to-r from-orange-700/20 to-orange-500/10 rounded-lg p-4 border border-orange-600/30">
+            <div className="flex items-center gap-3">
+              <Trophy className="text-orange-400" size={20} />
+              <div>
+                <h3 className="text-sm font-medium text-gray-300">
+                  Registration Fee
+                </h3>
+                <p className="text-lg font-bold text-orange-300">
+                  {registrationFee} GHC
+                </p>
               </div>
             </div>
           </div>

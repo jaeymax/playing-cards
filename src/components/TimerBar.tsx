@@ -21,15 +21,17 @@ const TimerBar = ({
 
   const positionClass = position === "top" ? "top-0" : "bottom-0";
 
+  (isCurrentPlayer && true);
+
   return (
     <div
-      className={`fixed z-[100000000000000000000000000000000] ${positionClass} left-0 right-0 h-12 bg-black/20 backdrop-blur- border-b-1 ${
+      className={`fixed z-[100000000000000000000000000000000] ${positionClass} left-0 right-0 h-12 bgblack/20 backdrop-blur- border-b-1 ${
         position === "top" ? "border-b-gray-700" : "border-t-gray-700"
       } flex items-center px-6 z-50`}
     >
       <div className="flex flex-col items-cente gap- w-full">
-        <div className="flex-1">
-          <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden border border-gray-600">
+        <div className="flex-1 hidden">
+          <div className="w-full h-1 bg-gray-700/40 rounded-full overflow-hidden borde border-gray-600">
             <div
               className={`h-full bg-gradient-to-r ${getBarColor()} transition-all duration-100 rounded-full shadow-lg`}
               style={{ width: `${progress}%` }}
@@ -41,12 +43,10 @@ const TimerBar = ({
             {position === "top" ? "" : ""} 
           </span> */}
           <span
-            className={`text-lg font-bold min-w-[3rem] text-right ${
+            className={`text-lg font-bold min-w-[3rem w-10 h-10 p-2 ml-auto grid place-items-center text-right ${
               remainingSeconds <= 5
-                ? "text-red-400 animate-pulse"
-                : remainingSeconds <= 10
-                ? "text-yellow-400"
-                : "text-emerald-300"
+                ? "text-red-500 animate-pulse"
+                : "text-yellow-400"
             }`}
           >
             {remainingSeconds}s

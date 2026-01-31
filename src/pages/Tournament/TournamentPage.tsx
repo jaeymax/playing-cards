@@ -6,11 +6,14 @@ import PrizePool from "./components/PrizePool";
 import TournamentRules from "./components/TournamentRules";
 import TournamentFooter from "./components/TournamentFooter";
 import TimelineWidget from "./components/TimelineWidget";
+import TournamentResults from "./components/TournamentResults";
 import { useParams } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { authHeaders, customLog } from "@/utils/Functions";
 import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/contexts/SocketProvider";
+import NavBar from "@/components/NavBar";
+import { Round } from "@/types/tournament";
 
 interface Tournament {
   id: number;
@@ -33,27 +36,34 @@ interface Participant {
   losses: number;
 }
 
-interface Player {
-  id: number;
-  name: string;
-  image_url: string;
-  score: number;
-  winner: boolean;
-}
+// interface Player {
+//   id: number;
+//   name: string;
+//   image_url: string;
+//   score: number;
+//   winner: boolean;
+// }
 
-interface Match {
-  id: number;
-  player1: Player;
-  player2: Player;
-  status: "pending" | "in_progress" | "completed" | "forfeited";
-  game_id: number;
-  game_code: string;
-  winner_id: number | null;
-}
+// interface Match {
+//   id: number;
+//   player1: Player;
+//   player2: Player;
+//   status: "pending" | "in_progress" | "completed" | "forfeited";
+//   game_id: number;
+//   game_code: string;
+//   winner_id: number | null;
+//   turn_ends_at: number;
+// }
 
-interface Round {
-  round: number;
-  matches: Match[];
+// interface Round {
+//   round: number;
+//   matches: Match[];
+// }
+
+interface Rule{
+  id: number;
+  title:string;
+  content:string;
 }
 
 interface TournamentData {
@@ -61,6 +71,7 @@ interface TournamentData {
   tournament: Tournament;
   participants: Participant[];
   rounds: Round[];
+  rules: Rule[]
 }
 
 const TournamentPage: React.FC = () => {
@@ -79,6 +90,9 @@ const TournamentPage: React.FC = () => {
   );
   const [tournamentStarted, setTournamentStarted] = useState(false);
   const [myGameCode, setMyGameCode] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  (myGameCode && true)
 
   const extractGameCodeFromTournamentData = (data: TournamentData): string => {
     const current_round_number = data.tournament.current_round_number;
@@ -87,9 +101,7 @@ const TournamentPage: React.FC = () => {
     )?.matches;
     customLog("current_round_matches", current_round_matches);
     const myMatch = current_round_matches?.find(
-      (match) =>
-        match.player1.id === user?.id ||
-        match.player2.id === user?.id
+      (match) => match.player1.id === user?.id || match.player2.id === user?.id
     );
     if (myMatch) {
       return myMatch.game_code;
@@ -102,12 +114,26 @@ const TournamentPage: React.FC = () => {
   customLog("tournament data", tournamentData);
 
   const fetchTournamentData = async () => {
+
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch(`${baseUrl}/tournaments/${id}/lobby`, {
         method: "GET",
         headers: { "Content-Type": "application/json", ...authHeaders() },
       });
+
+      if (!response.ok) {
+        if (response.status === 500) {
+          setError(
+            "Network problem: Please check your connection and try again."
+          );
+        } else {
+          setError("Failed to fetch tournament data. Please try again.");
+        }
+        return;
+      }
+
       const data: TournamentData = await response.json();
       setTournamentData(data);
       setMyGameCode(extractGameCodeFromTournamentData(data));
@@ -120,26 +146,26 @@ const TournamentPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching tournament data:", error);
+      setError("Failed to fetch tournament data. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if(!user) return;
+    if (!user) return;
     fetchTournamentData();
   }, [id, user]);
-
 
   const lobbyUpdateCallback = (tournamentData: TournamentData) => {
     customLog("Received tournamentData via socket");
     setTournamentData(tournamentData);
-    console.log('tournamentData via socket', tournamentData);
-  }
+    console.log("tournamentData via socket", tournamentData);
+  };
 
   useEffect(() => {
     if (!user) return;
-    if(!socket) return;
+    if (!socket) return;
     socket?.emit("joinTournamentRoom", {
       tournamentId: id,
       userId: user.id,
@@ -149,87 +175,124 @@ const TournamentPage: React.FC = () => {
     return () => {
       socket?.off("lobbyUpdate", lobbyUpdateCallback);
     };
-
   }, [user, socket]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 pb-32">
-      <TournamentHeader
-        name={tournamentData?.tournament.name}
-        format={tournamentData?.tournament.format}
-        status={tournamentData?.tournament.status}
-        numberOfParticipants={tournamentData?.participants.length}
-        prize={tournamentData?.tournament.prize}
-        current_round_number={tournamentData?.tournament.current_round_number}
-        loading={loading}
-      />
+    <div className="min-h-screen w-full bg-gray-900 text-gray-100 pb-32">
+      <NavBar showSignUps={true} />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-9 space-y-6">
-            {/* Tab Navigation */}
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <div className="flex space-x-4 border-b border-gray-700">
-                {["bracket", "participants", "rules"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab as any)}
-                    className={`px-4 py-2 text-sm font-medium capitalize ${
-                      activeTab === tab
-                        ? "text-blue-400 border-b-2 border-blue-400"
-                        : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
+      {error && (
+        <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-4 m-4 rounded-lg flex justify-between items-center">
+          <span>{error}</span>
+          <button
+            onClick={fetchTournamentData}
+            className="bg-red-700 hover:bg-red-600 px-4 py-2 rounded font-medium text-sm"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!error && (
+        <>
+          <TournamentHeader
+            name={tournamentData?.tournament.name}
+            format={tournamentData?.tournament.format}
+            status={tournamentData?.tournament.status}
+            numberOfParticipants={tournamentData?.participants.length}
+            prize={tournamentData?.tournament.prize}
+            matches={tournamentData?.rounds}
+            current_round_number={
+              tournamentData?.tournament.current_round_number
+            }
+            loading={loading}
+          />
+
+          <div className="md:container mx-auto md:px-4 py-8 borde">
+            {tournamentData?.tournament.status === "completed" && (
+              <div className="mb-8">
+                <TournamentResults
+                  participants={tournamentData?.participants || []}
+                  tournament_status={tournamentData?.tournament?.status}
+                  tournament_id={tournamentData?.tournament?.id}
+                  number_of_rounds={tournamentData?.rounds.length}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 borde w-full">
+              {/* Main Content */}
+              <div className="lg:col-span-9 space-y-6">
+                {/* Tab Navigation */}
+                <div className="bg-gray-800 w-full md:rounded-lg p-4 border-t border-b md:border border-gray-700">
+                  <div className="flex space-x-4 border-b border-gray-700">
+                    {["bracket", "participants", "rules"].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab as any)}
+                        className={`px-4 py-2 text-sm font-medium capitalize ${
+                          activeTab === tab
+                            ? "text-blue-400 border-b-2 border-blue-400"
+                            : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="mt-6 w-full">
+                    {activeTab === "bracket" && (
+                      <TournamentBracket
+                        rounds={tournamentData?.rounds}
+                        numberOfParticipants={
+                          tournamentData?.participants.length
+                        }
+                        loading={loading}
+                      />
+                    )}
+                    {activeTab === "participants" && (
+                      <Participants
+                        participants={tournamentData?.participants}
+                        loading={loading}
+                      />
+                    )}
+                    {activeTab === "rules" && (
+                      <TournamentRules loading={loading} rules = {tournamentData?.rules} />
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Tab Content */}
-              <div className="mt-6">
-                {activeTab === "bracket" && (
-                  <TournamentBracket
-                    rounds={tournamentData?.rounds}
-                    numberOfParticipants={tournamentData?.participants.length}
-                    loading={loading}
-                  />
-                )}
-                {activeTab === "participants" && (
-                  <Participants
-                    participants={tournamentData?.participants}
-                    loading={loading}
-                  />
-                )}
-                {activeTab === "rules" && <TournamentRules loading={loading} />}
+              {/* Sidebar */}
+              <div className="lg:col-span-3 space-y-6">
+                <PrizePool
+                  prize={tournamentData?.tournament.prize}
+                  registrationFee={tournamentData?.tournament.registration_fee}
+                  loading={loading}
+                />
+                <TimelineWidget
+                  status={tournamentData?.tournament.status}
+                  loading={loading}
+                />
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-3 space-y-6">
-            <PrizePool
-              prize={tournamentData?.tournament.prize}
-              registrationFee={tournamentData?.tournament.registration_fee}
-              loading={loading}
-            />
-            <TimelineWidget
-              status={tournamentData?.tournament.status}
-              loading={loading}
-            />
-          </div>
-        </div>
-      </div>
-
-      <TournamentFooter
-        tournamentStarted={tournamentStarted}
-        tournamentStartTime={tournamentStartTime}
-        setTournamentStarted={setTournamentStarted}
-        tournamentStatus={tournamentData?.tournament.status}
-        matches={tournamentData?.rounds}
-        currentRoundNumber={tournamentData?.tournament.current_round_number ?? 0}
-        loading={loading}
-      />
+          <TournamentFooter
+            tournamentStarted={tournamentStarted}
+            tournamentStartTime={tournamentStartTime}
+            setTournamentStarted={setTournamentStarted}
+            tournamentStatus={tournamentData?.tournament.status}
+            matches={tournamentData?.rounds}
+            currentRoundNumber={
+              tournamentData?.tournament.current_round_number ?? 0
+            }
+            loading={loading}
+          />
+        </>
+      )}
     </div>
   );
 };

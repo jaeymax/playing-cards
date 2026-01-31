@@ -32,8 +32,8 @@ const ProfilePage: React.FC = () => {
       <NavBar showSignUps = {true} />
       <ProfileHeader />
 
-      <div className="max-w-2xl w-full borde mx-auto px-4 py-8 ">
-        <div className="bg-gray-800 rounded-lg border border-gray-700">
+      <div className="max-w-2xl w-full borde mx-auto md:px-4 py-8 ">
+        <div className="bg-gray-800 md:rounded-lg md:border md:border-gray-700">
           {/* Tab Navigation */}
           <div className="border-b border-gray-700">
             <div className="flex overflow-x-auto">

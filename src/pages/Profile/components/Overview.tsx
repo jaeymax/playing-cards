@@ -65,7 +65,7 @@ const Overview: React.FC = () => {
 
       {/* Current Season Stats */}
       <div className="bg-gray-750 rounded-lg p-6 borde border-gray-700">
-        <h3 className="text-lg font-bold text-white mb-4">Current Season</h3>
+        {/* <h3 className="text-lg font-bold text-white mb-4">Current Season</h3> */}
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-white">

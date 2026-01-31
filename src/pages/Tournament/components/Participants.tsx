@@ -1,3 +1,4 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 
 interface Participant {
@@ -19,6 +20,9 @@ const Participants: React.FC<ParticipantsProps> = ({
   participants,
   loading = false,
 }) => {
+
+  const {user} = useAppContext();
+
   const ParticipantsSkeleton: React.FC = () => (
     <div className="overflow-x-auto">
       <table className="min-w-full">
@@ -88,7 +92,7 @@ const Participants: React.FC<ParticipantsProps> = ({
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-white">
-                      {player.username}
+                      {user?.id == player.id ? "You" : player.username}
                     </div>
                   </div>
                 </div>

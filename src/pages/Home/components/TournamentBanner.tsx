@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TournamentRegistrationModal from "./TournamentRegistrationModal";
+import LoginRequiredModal from "./LoginRequiredModal";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 import { customLog, getToken } from "@/utils/Functions";
@@ -101,8 +102,9 @@ const TournamentSkeleton: React.FC = () => {
 
 const TournamentBanner: React.FC = () => {
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isRegistered] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
+    useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(
@@ -159,9 +161,17 @@ const TournamentBanner: React.FC = () => {
   };
 
   useEffect(() => {
-    if(getToken() &&  !user) return;
+    if (getToken() && !user) return;
     getTournamentDetails();
   }, [user]);
+
+  const handleRegistration = () => {
+    if (!user || user?.is_guest) {
+      setIsLoginRequiredModalOpen(true);
+    } else {
+      setIsRegistrationModalOpen(true);
+    }
+  };
 
   if (isLoading) {
     return <TournamentSkeleton />;
@@ -187,7 +197,9 @@ const TournamentBanner: React.FC = () => {
               <div className="text-sm text-gray-400">
                 {isExpired
                   ? tournamentData?.registered
-                    ? "Tournament started"
+                    ? tournamentData?.status == "completed"
+                      ? "Tournament ended"
+                      : "Tournament started"
                     : "Registration closed"
                   : tournamentData?.registered
                   ? "Tournament starts in"
@@ -196,7 +208,7 @@ const TournamentBanner: React.FC = () => {
             </div>
             {!tournamentData?.registered ? (
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleRegistration}
                 disabled={!tournamentData || isExpired}
                 className={`w-full sm:w-auto px-6 py-2 ${
                   !tournamentData || isExpired
@@ -208,17 +220,21 @@ const TournamentBanner: React.FC = () => {
               </button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <button
-                  className="w-full sm:w-auto px-6 py-2 bg-gray-600 text-white font-medium rounded-lg"
-                  disabled
-                >
-                  Registered
-                </button>
+                {tournamentData?.status !== "completed" && (
+                  <button
+                    className="w-full sm:w-auto px-6 py-2 bg-gray-600 text-white font-medium rounded-lg"
+                    disabled
+                  >
+                    Registered
+                  </button>
+                )}
                 <button
                   onClick={handleJoinTournament}
                   className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-medium rounded-lg transform transition hover:scale-105"
                 >
-                  Join Lobby
+                  {tournamentData?.status == "completed"
+                    ? "View Results"
+                    : "Join Lobby"}
                 </button>
               </div>
             )}
@@ -227,12 +243,16 @@ const TournamentBanner: React.FC = () => {
       </div>
       <TournamentRegistrationModal
         id={tournamentData ? tournamentData.id : 0}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
         countdown={formatCountdown()}
         registrationFee={tournamentData ? tournamentData.registration_fee : 0}
         getTournamentDetails={getTournamentDetails}
-        prizePool ={tournamentData ? tournamentData.prize : 0}
+        prizePool={tournamentData ? tournamentData.prize : 0}
+      />
+      <LoginRequiredModal
+        isOpen={isLoginRequiredModalOpen}
+        onClose={() => setIsLoginRequiredModalOpen(false)}
       />
     </div>
   );

@@ -49,6 +49,7 @@ const PlayVsComputer = () => {
   const [gameEnded, setGameEnded] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [shuffledAtLeastOnce, setShuffledATLeastOnce] = useState(false); 
 
   const opponentOneHandRef = useRef<HTMLDivElement>(null);
   const opponentTwoHandRef = useRef<HTMLDivElement>(null);
@@ -172,6 +173,7 @@ const PlayVsComputer = () => {
   );
 
   const shuffledDeckCallback = useCallback((cards: any) => {
+    setShuffledATLeastOnce(true);
     console.log("ShuffleCards", cards);
     setGameCards(cards);
     playShuffleSound();
@@ -314,6 +316,7 @@ const PlayVsComputer = () => {
 
   const startNewHandCallback = async (data: any) => {
     console.log("Start new hand:", data);
+    setShuffledATLeastOnce(false);
     logEvent(analytics, "new_hand_started", { handNumber: data.hand_number });
     setGameEnded(false);
     setWinningPlayer(null);
@@ -347,6 +350,7 @@ const PlayVsComputer = () => {
   };
 
   const gameOverCallback = useCallback((winnerData: any) => {
+    setShuffledATLeastOnce(false);
     console.log("Game over");
     logEvent(analytics, "game_ended", {
       winningPlayer: winnerData.winner.user.username,
@@ -358,7 +362,7 @@ const PlayVsComputer = () => {
   }, []);
 
   const rematchCallback = useCallback(
-    (data: any) => {
+    async(data: any) => {
       console.log("Hand rematch:", data);
       setWinningPlayer(null);
       setPlayers(data.players);
@@ -367,6 +371,28 @@ const PlayVsComputer = () => {
       setGame(data);
       setGameCards(data.cards);
       logEvent(analytics, "rematch_started", { players: data.players });
+      const dealer = data.players.find((player: any) => player.is_dealer);
+      if (dealer.user.is_bot) {
+        console.log(`${firstOpponent?.user?.username} is the dealer`);
+        let shuffleTimes = Math.floor(Math.random() * 3) + 1;
+        console.log("shuffle times", shuffleTimes);
+  
+        const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+  
+        async function shuffleLoop(shuffleTimes: number) {
+          while (shuffleTimes > 0) {
+            handleShuffle(); // your shuffle logic
+            shuffleTimes--;
+  
+            await sleep(5000); // pause 5 seconds before next shuffle
+          }
+        }
+        await shuffleLoop(shuffleTimes);
+        // handleShuffle();
+        setTimeout(() => {
+          handleDeal();
+        }, 1000);
+      }
     },
     [user]
   );
@@ -523,6 +549,7 @@ const PlayVsComputer = () => {
         <GameControls
           showButtons={showDealButton && showShuffleButton}
           isDealing={isDealing}
+          shuffledAtLeastOnce = {shuffledAtLeastOnce}
           isShuffling={isShuffling}
           onDeal={handleDeal}
           onShuffle={handleShuffle}

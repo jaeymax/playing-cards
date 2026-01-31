@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePlayerTimer } from "../../../hooks/usePlayerTimer";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSocket } from "@/contexts/SocketProvider";
 import { useAppContext } from "@/contexts/AppContext";
-import { baseUrl } from "@/config/api";
 import {
   customLog,
   dealCards,
@@ -21,33 +19,34 @@ import OpponentArea from "@/components/OpponentArea";
 import GameMessage from "@/components/GameMessage";
 import PlayerArea from "@/components/PlayerArea";
 import DeckArea from "@/components/DeckArea";
-import ScoresTable from "@/components/ScoresTable";
+//import ScoresTable from "@/components/ScoresTable";
 import TimerBar from "@/components/TimerBar";
 import { analytics, logEvent } from "@/firebase/config";
 import WinnerModal from "@/components/WinnerModal";
 import SingleEliminationGameOverModal from "@/components/SingleEliminationGameOverModal";
 import MatchForfeitModal from "@/components/MatchForfeitModal";
+import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 
-interface Message {
-  user_id: number | undefined;
-  username: string | undefined;
-  avatar: string | undefined;
-  message: string;
-  type: "text" | "audio";
-  timestamp: string;
-  mime_type?: string;
-  audio?: ArrayBuffer;
-}
+// interface Message {
+//   user_id: number | undefined;
+//   username: string | undefined;
+//   avatar: string | undefined;
+//   message: string;
+//   type: "text" | "audio";
+//   timestamp: string;
+//   mime_type?: string;
+//   audio?: ArrayBuffer;
+// }
 
 const SingleEliminationGame = () => {
   const { code } = useParams();
   const { socket } = useSocket();
-  const { user, updateUser } = useAppContext();
+  const { user } = useAppContext();
 
   // const [current_turn_user_id, setCurrentTurnUserId] = useState<number | null>(null);
-  const [turn_ends_at, setTurnEndsAt] = useState<string | null>(null);
+  const [turn_ends_at, setTurnEndsAt] = useState<number>(0);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
-  const [messages, setMessages] = useState<Message[]>([]);
+ // const [messages, setMessages] = useState<Message[]>([]);
   const [game, setGame] = useState<any>(null);
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
@@ -61,11 +60,16 @@ const SingleEliminationGame = () => {
   const [message, setMessage] = useState<string>("");
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
+  const [shuffledAtLeastOnce, setShuffledATLeastOnce] = useState(false); 
   const [gameEnded, setGameEnded] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [losingPlayer, setLosingPlayer] = useState<any>(null);
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
+
+  (gameNotFound && true);
+  
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -78,12 +82,20 @@ const SingleEliminationGame = () => {
   const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
   const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
 
+  const getPlayerByPosition = (player_position: number) => {
+    return players.find((player) => player.position === player_position);
+  };
+
+  const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+    const player = getPlayerByPosition(player_position);
+
+    return cards.find((card) => card.player_id === player?.id);
+  };
+
+  //customLog('players', players);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch timeout value from server
-    // setServerTimeout(response.timeoutDuration);
-  }, []);
 
   const handleDeal = () => {
     socket?.emit("dealCards", code);
@@ -93,16 +105,23 @@ const SingleEliminationGame = () => {
     socket?.emit("shuffleDeck", code);
   };
 
-  const getTimerColor = (time: number) => {
-    if (time <= 5) return "text-red-500";
-    if (time <= 10) return "text-yellow-500";
-    return "text-green-500";
-  };
+  const handleMatchForfeitClose = () =>{
+    setMatchForfeited(false);
+    if(game?.is_final_match){
+        const winningPlayer = game.players.find((player:any)=>player.user.id != game.current_turn_user_id);
+        const losingPlayer = game.players.find((player:any)=>player.user.id == game.current_turn_user_id);
+        setWinningPlayer(winningPlayer);
+        setLosingPlayer(losingPlayer);
+        setGameOver(true);
+    }else{
+       navigate(-1);
+    }
+  }
 
   const getGameDataCallback = (data: any) => {
     console.log("Game data received:", data);
     setGame(data);
-
+    setTurnEndsAt(data.turn_ends_at)
     setPlayers(data.players);
     data.cards.forEach((card: any, i: number) => {
       card.pos_x = card.pos_x * i;
@@ -135,10 +154,20 @@ const SingleEliminationGame = () => {
   const getUpdatedGameData = (data: any) => {
     console.log("Updated game data received:", data);
     setGame(data);
+    setTurnEndsAt(data.turn_ends_at);
     const myData = data.players.find(
       (player: any) => player.user.id === user?.id
     );
-    setMe(myData);
+   // setMe(myData);
+    console.log('my Data', myData)
+    setMe((prevState:any)=>(
+       {
+        ...prevState,
+        score: myData.score,
+        is_dealer: myData.is_dealer,
+        games_won: myData.games_won
+       }
+    ))
     getOpponentsData(data.players);
   };
 
@@ -181,9 +210,9 @@ const SingleEliminationGame = () => {
     if (game?.current_player_position === me?.position) {
       if (game?.cards.every((card: any) => card.status === "in_deck")) {
         if (me?.is_dealer) {
-          setMessage("");
+          setMessage("Click to shuffle and deal");
         } else {
-          setMessage("Waiting for dealer to shuffle and deal");
+          setMessage("");
         }
       } else {
         setMessage("Your turn! Click to play");
@@ -194,9 +223,9 @@ const SingleEliminationGame = () => {
       );
       if (game?.cards.every((card: any) => card.status === "in_deck")) {
         if (me?.is_dealer) {
-          setMessage("Click to shuffle or deal");
-        } else {
           setMessage("");
+        } else {
+          setMessage("Waiting for dealer to shuffle and deal");
         }
       } else {
         setMessage(`${player?.user.username}'s turn`);
@@ -206,9 +235,11 @@ const SingleEliminationGame = () => {
   }, [game]);
 
   const matchForfeitCallback = (data: any) => {
-    //setMatchForfeited(true);
+    setMatchForfeited(true);
     const forfeiterId = data.loserId;
-    const forfeiter = players.find((player) => player.user.id === forfeiterId);
+    customLog("forfeiterId", forfeiterId);
+    customLog("players", players);
+    const forfeiter = players.find((player) => player.user.id == forfeiterId);
     customLog("forfeiter", forfeiter);
     setMatchForfeiter(forfeiter);
     console.log("Match forfeit:", data);
@@ -233,7 +264,6 @@ const SingleEliminationGame = () => {
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
-    socket?.on("matchForfeit", matchForfeitCallback);
     //socket?.on("chatMessage", chatMessageCallback);
 
     //socket?.on("voiceMessage", voiceMessageCallback);
@@ -248,7 +278,6 @@ const SingleEliminationGame = () => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("connect", handleConnect);
       socket?.off("game-not-found", handleGameNotFound);
-      socket?.off("matchForfeit", matchForfeitCallback);
       //socket?.off("chatMessage", chatMessageCallback);
       //socket?.off("voiceMessage", voiceMessageCallback);
     };
@@ -271,6 +300,7 @@ const SingleEliminationGame = () => {
       socket?.on("gameEnded", gameEndedCallback);
       socket?.on("startNewHand", startNewHandCallback);
       socket?.on("gameOver", gameOverCallback);
+      socket?.on("matchForfeit", matchForfeitCallback);
       //socket?.on("rematch", rematchCallback);
     }
 
@@ -280,6 +310,7 @@ const SingleEliminationGame = () => {
       socket?.off("gameEnded", gameEndedCallback);
       socket?.off("startNewHand", startNewHandCallback);
       socket?.off("gameOver", gameOverCallback);
+      socket?.off("matchForfeit", matchForfeitCallback);
       //socket?.off("rematch", rematchCallback);
     };
   }, [socket, game, gameCards]);
@@ -304,9 +335,10 @@ const SingleEliminationGame = () => {
     return () => clearInterval(interval);
   }, [turn_ends_at]);
 
+  
   const turnStartedCallback = (data: {
     current_turn_user_id: number;
-    turn_ends_at: string;
+    turn_ends_at: number;
   }) => {
     customLog("data", data);
     //setCurrentTurnUserId(data.current_turn_user_id);
@@ -322,7 +354,11 @@ const SingleEliminationGame = () => {
     getMyData(data.players, data.cards);
     getOpponentsData(data.players);
     setGame(data);
+    setTurnEndsAt(data.turn_ends_at);
     setGameCards(data.cards);
+    if(me?.is_dealer){
+      setShuffledATLeastOnce(false);
+    }
   };
 
   const gameEndedCallback = (data: any) => {
@@ -336,14 +372,18 @@ const SingleEliminationGame = () => {
   };
 
   const gameOverCallback = (winnerData: any) => {
+    setGameOver(true);
+    setTurnEndsAt(0);
     console.log("Game over");
     logEvent(analytics, "game_ended", {
       winningPlayer: winnerData.winner.user.username,
       winningPosition: winnerData.winner.position,
     });
-    setGameOver(true);
     setWinningPlayer(winnerData.winner);
+    const losingPlayer = players.find((player:any)=>player.user.id !== winnerData.winner.user.id);
+    setLosingPlayer(losingPlayer);
     console.log("Winner data:", winnerData);
+    console.log('losing player in gameovercallback', losingPlayer)
   };
 
   const playedCardCallback = ({
@@ -380,6 +420,9 @@ const SingleEliminationGame = () => {
     setGameCards(cards);
     playShuffleSound();
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
+    if(me?.is_dealer){
+      setShuffledATLeastOnce(true);
+    }
   };
 
   const dealtCardsCallback = useCallback(
@@ -410,6 +453,8 @@ const SingleEliminationGame = () => {
     [me, firstOpponent, secondOpponent, thirdOpponent]
   );
 
+  //customLog('losing player', losingPlayer);
+
   return (
     <div className="relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full">
       <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
@@ -424,6 +469,8 @@ const SingleEliminationGame = () => {
           name={firstOpponent?.user.username || "Opponent 1"}
           player_position={firstOpponent?.position || 0}
           current_player_position={game?.current_player_position || 0}
+          remaining_time={remainingSeconds}
+          total_time={game?.turn_timeout_seconds}
           avatar={
             firstOpponent?.user.image_url ||
             "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
@@ -449,6 +496,7 @@ const SingleEliminationGame = () => {
             name={thirdOpponent?.user.username || "Opponent 3"}
             player_position={thirdOpponent?.position || 0}
             current_player_position={game?.current_player_position || 0}
+
             avatar={
               thirdOpponent?.user.image_url ||
               "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
@@ -460,6 +508,7 @@ const SingleEliminationGame = () => {
 
         <GameControls
           showButtons={showDealButton && showShuffleButton}
+          shuffledAtLeastOnce = {shuffledAtLeastOnce}
           isDealing={isDealing}
           isShuffling={isShuffling}
           onDeal={handleDeal}
@@ -552,6 +601,8 @@ const SingleEliminationGame = () => {
           className="container absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
         />
 
+
+
         {remainingSeconds > 0 && game?.current_turn_user_id === user?.id && (
           <TimerBar
             remainingSeconds={remainingSeconds}
@@ -560,12 +611,20 @@ const SingleEliminationGame = () => {
           />
         )}
 
-        <ScoresTable players={players} />
+        {/* <ScoresTable players={players} /> */}
+        
+        <LeadingPlayerInfo
+          game={game}
+          getPlayerByPosition={getPlayerByPosition}
+          getCardByPlayerPosition={getCardByPlayerPosition}
+        />
 
         <PlayerInfo
           name={me?.user.username || "Player"}
           player_position={me?.position || 0}
           current_player_position={game?.current_player_position || 0}
+          remaining_time={remainingSeconds}
+          total_time={game?.turn_timeout_seconds}
           avatar={
             me?.user.image_url ||
             "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
@@ -583,7 +642,7 @@ const SingleEliminationGame = () => {
           setGameEnded(false);
           socket?.emit("readyForNextHand", { code, winningPlayer });
         }}
-        onLeaveGame={() => navigate("/")}
+        onLeaveGame={() => {}}
       />
 
       {gameOver && (
@@ -593,18 +652,19 @@ const SingleEliminationGame = () => {
           winningPlayer={winningPlayer}
           currentPlayer={me}
           onContinue={() => navigate(-1)}
+          losingPlayer={losingPlayer}
+          isFinalMatch = {game?.is_final_match}
         />
       )}
 
-      <MatchForfeitModal
-        isOpen={matchForfeited}
-        onClose={() => {
-          setMatchForfeited(false);
-          navigate(-1);
-        }}
-        forfeitedPlayer={matchForfeiter}
-        currentPlayer={me}
-      />
+      {matchForfeited && (
+        <MatchForfeitModal
+          isOpen={matchForfeited}
+          onClose={handleMatchForfeitClose}
+          forfeitedPlayer={matchForfeiter}
+          currentPlayer={me}
+        />
+      )}
     </div>
   );
 };

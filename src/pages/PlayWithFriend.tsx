@@ -48,6 +48,7 @@ interface Message {
 const PlayWithFriend = () => {
   const [showShareOverlay, setShowShareOverlay] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [shuffledAtLeastOnce, setShuffledAtLeastOnce] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [firstOpponent, setFirstOpponent] = useState<any>(null);
@@ -318,7 +319,8 @@ const PlayWithFriend = () => {
     setMe(myData);
     getOpponentsData(data.players);
   };
-
+  
+  
   const getGameDataCallback = (data: any) => {
     console.log("Game data received:", data);
     setGame(data);
@@ -381,6 +383,7 @@ const PlayWithFriend = () => {
   );
 
   const shuffledDeckCallback = (cards: any) => {
+    setShuffledAtLeastOnce(true);
     console.log("ShuffleCards", cards);
     setGameCards(cards);
     playShuffleSound();
@@ -398,6 +401,7 @@ const PlayWithFriend = () => {
   };
 
   const gameOverCallback = (winnerData: any) => {
+    setShuffledAtLeastOnce(false);
     console.log("Game over");
     logEvent(analytics, "game_ended", {
       winningPlayer: winnerData.winner.user.username,
@@ -450,6 +454,7 @@ const PlayWithFriend = () => {
   };
 
   const startNewHandCallback = (data: any) => {
+    setShuffledAtLeastOnce(false);
     console.log("Start new hand:", data);
     logEvent(analytics, "new_hand_started", { handNumber: data.hand_number });
     setGameEnded(false);
@@ -586,6 +591,7 @@ const PlayWithFriend = () => {
             showButtons={showDealButton && showShuffleButton}
             isDealing={isDealing}
             isShuffling={isShuffling}
+            shuffledAtLeastOnce = {shuffledAtLeastOnce}
             onDeal={handleDeal}
             onShuffle={handleShuffle}
           />
@@ -787,7 +793,7 @@ const PlayWithFriend = () => {
         >
           <div className="p-4">
             <h2 className="text-lg font-bold mb-4">Game Not Found</h2>
-            <p className="mb-4">
+            <p className="mb-4 text-sm">
               The game with this code is not found or has expired. Please check
               the code and try again.
             </p>

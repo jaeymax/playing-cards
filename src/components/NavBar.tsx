@@ -3,7 +3,7 @@ import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import { removeToken } from "@/utils/Functions";
+import { customLog, removeToken } from "@/utils/Functions";
 import { Home, Info, ScrollText, Mail } from "lucide-react";
 
 // Add Message type
@@ -17,17 +17,15 @@ type Message = {
 };
 
 interface NavBarProps {
-   showSignUps:boolean;
+  showSignUps: boolean;
 }
 
-
-const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
+const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   // Add new loading state
   //const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   //const [isDarkMode, setIsDarkMode] = useState(true);
-  const [notificationCount] = useState(3);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -41,7 +39,11 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
   const { isLoading } = useAppContext();
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
-  notificationCount;
+  const { notifications } = useAppContext();
+  customLog("NavBar Notifications:", notifications);
+  const notificationCount = notifications.filter((n) => !n.is_read).length;
+
+  (notificationCount && true);
 
   const navigate = useNavigate();
 
@@ -418,10 +420,16 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                   <img src="./cards.png" className="object-contain" alt="" />
                 </div>
                 <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
-                  <span style={{fontFamily:"Great Vibes"}} className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent">
+                  <span
+                    style={{ fontFamily: "Great Vibes" }}
+                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent"
+                  >
                     Spar
                   </span>
-                  <span style={{fontFamily:"Great Vibes"}} className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent">
+                  <span
+                    style={{ fontFamily: "Great Vibes" }}
+                    className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent"
+                  >
                     play
                   </span>
                   <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent"></span>
@@ -468,7 +476,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
             </div>
 
             {/* Right side - adjusted with additional spacing */}
-            <div className="flex items-center gap- borde">
+            <div className="flex items-center gap-3">
               {isLoading ? (
                 <LoadingBubbles />
               ) : user ? (
@@ -495,11 +503,33 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                     </button>
                   </div> */}
 
+                  {/* Wallet Icon */}
+                  {/* <div className="relative">
+                    <button
+                      onClick={() => navigate("/wallet")}
+                      className="mt-3 rounded-lg text-gray-400 hover:text-white"
+                    >
+                      <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V5a3 3 0 00-3-3H6a3 3 0 00-3 3v11a3 3 0 003 3z"
+                        />
+                      </svg>
+                    </button>
+                  </div> */}
+
                   {/* Friends Icon */}
                   {/* <div className="relative">
                     <button
                       onClick={() => navigate("/friends")}
-                      className="p-2 rounded-lg text-gray-400 hover:text-white"
+                      className="mt-2 rounded-lg text-gray-400 hover:text-white"
                     >
                       <svg
                         className="h-6 w-6"
@@ -520,11 +550,11 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                   {/* Notification Bell */}
                   {/* <div className="relative">
                     <button
-                      className="p-2 rounded-lg text-gray-400 hover:text-white"
+                      className="borde mt-2 rounded-lg text-gray-400 hover:text-white"
                       onClick={() => navigate("/notifications")}
                     >
                       <svg
-                        className="h-6 w-6"
+                        className="h-7 w-7"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -537,7 +567,7 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                         />
                       </svg>
                       {notificationCount > 0 && (
-                        <span className="absolute top-3 right-3 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        <span className="absolute top-3 right-2 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                           {notificationCount}
                         </span>
                       )}
@@ -705,20 +735,20 @@ const NavBar: React.FC<NavBarProps> = ({showSignUps}) => {
                 </>
               ) : (
                 showSignUps && (
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => navigate("/signin")}
-                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => navigate("/signup")}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                  >
-                    Sign Up
-                  </button>
-                </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => navigate("/signin")}
+                      className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => navigate("/signup")}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
                 )
               )}
             </div>

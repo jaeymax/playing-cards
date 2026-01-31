@@ -1,26 +1,30 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
+import { Round } from "@/types/tournament";
+import { Player } from "@/types/tournament";
 
-interface Player {
-  name: string;
-  image_url: string;
-  score: number;
-  winner: boolean;
-}
+// interface Player {
+//   id:number;
+//   name: string;
+//   image_url: string;
+//   score: number;
+//   winner: boolean;
+// }
 
-interface Match {
-  id: number;
-  player1: Player;
-  player2: Player;
-  status: string;
-  game_id: number;
-  game_code: string;
-  winner_id: number | null;
-}
+// interface Match {
+//   id: number;
+//   player1: Player;
+//   player2: Player;
+//   status: string;
+//   game_id: number;
+//   game_code: string;
+//   winner_id: number | null;
+// }
 
-interface Round {
-  round: number;
-  matches: Match[];
-}
+// interface Round {
+//   round: number;
+//   matches: Match[];
+// }
 
 interface TournamentBracketProps {
   rounds?: Round[];
@@ -49,34 +53,48 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     return "Round " + round;
   };
 
+  const {user} = useAppContext();
+
+
+
+
   const PlayerRow: React.FC<{ player: Player; isWinner: boolean }> = ({
     player,
     isWinner,
   }) => (
     <div
-      className={`flex items-center justify-between p-2 rounded-md transition-colors ${
-        isWinner ? "bg-gray-700 border border-amber-500/30" : "bg-transparent"
+      className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+        isWinner
+          ? "bg-gradient-to-r from-blue-500/70 to-blue-800/40 border border-blue-500/90 shadow-md shadow-blue-900/30"
+          : "bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/60"
       }`}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 border border-blue-400/30 shadow-lg">
           {player.image_url ? (
             <img
               className="object-cover w-full h-full rounded-full"
               src={player.image_url}
-              alt={player.name}
+              alt={""}
             />
           ) : (
-            <span className="text-sm text-white">👤</span>
+            <span className="text-lg">👤</span>
           )}
         </div>
-        <span className="text-white font-medium text-sm truncate">
-          {player.name}
-        </span>
+        <div className="min-w-0">
+          <span className="text-white font-semibold text-sm truncate block">
+            {
+              user?.id == player.id? "You": player.name
+            }
+          </span>
+          {isWinner && (
+            <span className="text-amber-400 text-xs font-medium">Winner</span>
+          )}
+        </div>
       </div>
       <span
-        className={`text-sm font-semibold flex-shrink-0 ml-2 ${
-          isWinner ? "text-amber-400" : "text-gray-400"
+        className={`text-sm font-bold flex-shrink-0 ml-3 ${
+          isWinner ? "text-amber-300" : "text-slate-400"
         }`}
       >
         {player.score}
@@ -88,23 +106,27 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     const statusConfig = {
       pending: {
         label: "Pending",
-        bgColor: "bg-gray-500/10",
-        textColor: "text-gray-400",
+        bgColor: "bg-slate-500/20",
+        textColor: "text-slate-400",
+        dotColor: "bg-slate-400",
       },
       in_progress: {
         label: "In Progress",
-        bgColor: "bg-blue-500/10",
-        textColor: "text-blue-400",
+        bgColor: "bg-blue-500/20",
+        textColor: "text-blue-300",
+        dotColor: "bg-blue-400",
       },
       completed: {
         label: "Completed",
-        bgColor: "bg-green-500/10",
-        textColor: "text-green-400",
+        bgColor: "bg-green-500/20",
+        textColor: "text-green-300",
+        dotColor: "bg-green-400",
       },
       forfeited: {
         label: "Forfeited",
-        bgColor: "bg-red-500/10",
-        textColor: "text-red-400",
+        bgColor: "bg-red-500/20",
+        textColor: "text-red-300",
+        dotColor: "bg-red-400",
       },
     };
 
@@ -112,23 +134,32 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
       statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
 
     return (
-      <span
-        className={`px-2 py-1 text-xs font-medium ${config.bgColor} ${config.textColor} rounded`}
-      >
-        {config.label}
-      </span>
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-2 h-2 rounded-full ${config.dotColor} animate-pulse`}
+        ></div>
+        <span
+          className={`px-3 py-1 text-xs font-semibold ${config.bgColor} ${config.textColor} rounded-md`}
+        >
+          {config.label}
+        </span>
+      </div>
     );
   };
 
   const WaitingPlaceholder: React.FC = () => (
-    <div className="bg-gray-750 rounded-lg border border-dashed border-gray-600 p-4">
+    <div className="bg-slate-800/30 rounded-lg border border-dashed border-slate-600/50 p-4 backdrop-blur-sm">
       <div className="space-y-3">
-        <div className="flex items-center justify-center h-8 rounded-md bg-gray-700/50">
-          <span className="text-gray-500 text-xs font-medium">Waiting...</span>
+        <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
+          <span className="text-slate-500 text-xs font-medium tracking-wide">
+            Waiting for next round...
+          </span>
         </div>
-        <div className="border-t border-gray-700"></div>
-        <div className="flex items-center justify-center h-8 rounded-md bg-gray-700/50">
-          <span className="text-gray-500 text-xs font-medium">Waiting...</span>
+        <div className="border-t border-slate-700/50"></div>
+        <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
+          <span className="text-slate-500 text-xs font-medium tracking-wide">
+            Waiting for next round...
+          </span>
         </div>
       </div>
     </div>
@@ -138,18 +169,18 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     <div className="space-y-8 px-2">
       {Array.from({ length: 3 }).map((_, roundIndex) => (
         <div key={roundIndex} className="space-y-4">
-          <div className="h-4 bg-gray-700 rounded animate-pulse w-24 mx-auto"></div>
+          <div className="h-5 bg-gradient-to-r from-slate-700 to-transparent rounded animate-pulse w-32 mx-auto"></div>
           <div className="space-y-4">
             {Array.from({ length: 2 }).map((_, matchIndex) => (
               <div
                 key={matchIndex}
-                className="bg-gray-750 rounded-lg border border-gray-700 p-4"
+                className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm"
               >
-                <div className="mb-3 h-6 bg-gray-700 rounded animate-pulse w-16"></div>
+                <div className="mb-4 h-5 bg-slate-700 rounded animate-pulse w-24"></div>
                 <div className="space-y-3">
-                  <div className="h-8 bg-gray-700 rounded animate-pulse"></div>
-                  <div className="border-t border-gray-700"></div>
-                  <div className="h-8 bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                  <div className="border-t border-slate-700/50"></div>
+                  <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -169,20 +200,20 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
 
         {/* Desktop View */}
         <div className="hidden lg:block overflow-x-auto">
-          <div className="min-w-[800px] p-4">
-            <div className="flex justify-between gap-4">
+          <div className="min-w-[900px] p-6">
+            <div className="flex justify-between gap-6">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div key={index} className="flex-1">
-                  <div className="h-4 bg-gray-700 rounded animate-pulse w-24 mx-auto mb-6"></div>
-                  <div className="space-y-8">
+                  <div className="h-5 bg-gradient-to-r from-slate-700 to-transparent rounded animate-pulse w-32 mx-auto mb-8"></div>
+                  <div className="space-y-10">
                     {Array.from({ length: 2 }).map((_, matchIndex) => (
                       <div key={matchIndex} className="px-2">
-                        <div className="bg-gray-750 rounded-lg border border-gray-700 p-4">
-                          <div className="mb-3 h-6 bg-gray-700 rounded animate-pulse w-16"></div>
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-5 backdrop-blur-sm">
+                          <div className="mb-4 h-5 bg-slate-700 rounded animate-pulse w-24"></div>
                           <div className="space-y-3">
-                            <div className="h-8 bg-gray-700 rounded animate-pulse"></div>
-                            <div className="border-t border-gray-700"></div>
-                            <div className="h-8 bg-gray-700 rounded animate-pulse"></div>
+                            <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                            <div className="border-t border-slate-700/50"></div>
+                            <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
                           </div>
                         </div>
                       </div>
@@ -200,24 +231,24 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   return (
     <div className="relative">
       {/* Mobile View */}
-      <div className="lg:hidden space-y-8">
+      <div className="lg:hidden space-y-8 px-2 py-4">
         {Array.from({ length: totalRounds }).map((_, index) => {
           const roundNumber = index + 1;
           const roundData = roundsMap.get(roundNumber);
 
           return (
             <div key={roundNumber} className="w-full">
-              <h3 className="text-sm font-medium text-gray-400 mb-4 text-center">
+              <h3 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r text-white fromblue-400 topurple-400 mb-5 text-center tracking-wide uppercase text-sm">
                 {renderRoundName(roundNumber)}
               </h3>
-              <div className="space-y-4 px-2">
+              <div className="space-y-4">
                 {roundData ? (
                   roundData.matches.map((match) => (
                     <div
                       key={match.id}
-                      className="bg-gray-750 rounded-lg border border-gray-700 p-4 shadow-lg hover:border-gray-600 transition-colors"
+                      className="bg-slate-800/50 rounded-sm border border-slate-700/50 p-4 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm"
                     >
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <MatchStatus status={match.status} />
                       </div>
                       <div className="space-y-3">
@@ -227,7 +258,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                         />
                         {match.player2?.name && (
                           <>
-                            <div className="border-t border-gray-700"></div>
+                            <div className="border-t border-slate-700/50"></div>
                             <PlayerRow
                               player={match.player2}
                               isWinner={match.player2.winner}
@@ -247,25 +278,25 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
       </div>
 
       {/* Desktop View */}
-      <div className="hidden lg:block overflow-x-auto">
-        <div className="min-w-[800px] p-4">
-          <div className="flex justify-between gap-4">
+      <div className="hidden lg:block overflow-x-auto scrollbar-thin">
+        <div className="min-w-[900px] p-6">
+          <div className="flex justify-between gap-6">
             {Array.from({ length: totalRounds }).map((_, index) => {
               const roundNumber = index + 1;
               const roundData = roundsMap.get(roundNumber);
 
               return (
                 <div key={roundNumber} className="flex-1">
-                  <h3 className="text-center text-sm font-medium text-gray-400 mb-6">
+                  <h3 className="text-center font-bold text-transparent bg-clip-text bg-gradient-to-r text-white fromblue-400 topurple-400 mb-8 tracking-wide uppercase text-sm">
                     {renderRoundName(roundNumber)}
                   </h3>
 
-                  <div className="space-y-8">
+                  <div className="space-y-10">
                     {roundData ? (
                       roundData.matches.map((match) => (
                         <div key={match.id} className="px-2">
-                          <div className="bg-gray-750 rounded-lg border border-gray-700 p-4 shadow-lg hover:border-gray-600 transition-colors">
-                            <div className="mb-3">
+                          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm">
+                            <div className="mb-4">
                               <MatchStatus status={match.status} />
                             </div>
                             <div className="space-y-3">
@@ -275,11 +306,11 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                               />
                               {match.player2?.name && (
                                 <>
-                                <div className="border-t border-gray-700"></div>
-                              <PlayerRow
-                                player={match.player2}
-                                isWinner={match.player2.winner}
-                              />
+                                  <div className="border-t border-slate-700/50"></div>
+                                  <PlayerRow
+                                    player={match.player2}
+                                    isWinner={match.player2.winner}
+                                  />
                                 </>
                               )}
                             </div>

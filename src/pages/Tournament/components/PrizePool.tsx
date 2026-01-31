@@ -33,7 +33,7 @@ const PrizePool: React.FC<PrizePoolProps> = ({
   ];
 
   const PrizePoolSkeleton: React.FC = () => (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div className="bg-gray-800 md:rounded-lg border-t border-b md:border border-gray-700 p-4">
       <div className="h-6 bg-gray-700 rounded animate-pulse w-32 mb-4"></div>
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, index) => (
@@ -58,7 +58,7 @@ const PrizePool: React.FC<PrizePoolProps> = ({
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div className="bg-gray-800 md:rounded-lg border-t border-b md:border border-gray-700 p-4">
       <h3 className="text-lg font-bold text-white mb-4">Prize Pool</h3>
       <div className="space-y-4">
         {prizes.map((prize, index) => (

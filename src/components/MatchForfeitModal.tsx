@@ -17,7 +17,7 @@ const MatchForfeitModal: React.FC<MatchForfeitModalProps> = ({
   onClose;
 
   const isCurrentPlayerForfeited =
-    forfeitedPlayer?.user.id === currentPlayer?.user.id;
+    forfeitedPlayer?.user?.id == currentPlayer?.user?.id;
 
   return (
     <Modal isOpen={isOpen} onClose={() => {}} title="Match Forfeited">
@@ -27,7 +27,7 @@ const MatchForfeitModal: React.FC<MatchForfeitModalProps> = ({
             {forfeitedPlayer?.user?.image_url ? (
               <img
                 src={forfeitedPlayer?.user?.image_url}
-                alt={forfeitedPlayer?.user.username}
+                alt={forfeitedPlayer?.user?.username}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
@@ -44,7 +44,7 @@ const MatchForfeitModal: React.FC<MatchForfeitModalProps> = ({
           <h3 className="text-2xl font-bold text-red-400">
             {isCurrentPlayerForfeited
               ? "You Forfeited"
-              : `${forfeitedPlayer?.user.username} Forfeited`}
+              : `${forfeitedPlayer?.user?.username} Forfeited`}
           </h3>
           <div className="text-gray-400 sm:text-sm text-xs">
             <p>

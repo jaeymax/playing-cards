@@ -1,105 +1,153 @@
-import NavBar from '@/components/NavBar';
-import  { useState } from 'react';
+import NavBar from "@/components/NavBar";
+import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
+import { authHeaders } from "@/utils/Functions";
+import { useState } from "react";
 
 const NotificationsPage = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'challenge',
-      read: false,
-      title: 'Challenge Received',
-      message: 'Player TitanSlayer99 has challenged you to a duel!',
-      time: '2 minutes ago',
-      action: 'Accept Challenge'
-    },
-    {
-      id: 2,
-      type: 'friend',
-      read: false,
-      title: 'Friend Request',
-      message: 'NeonKnight42 wants to add you as a friend',
-      time: '15 minutes ago',
-      action: 'Accept Request'
-    },
-    {
-      id: 3,
-      type: 'reward',
-      read: false,
-      title: 'Daily Reward',
-      message: 'You\'ve earned 5 premium card packs! Claim them now.',
-      time: '1 hour ago',
-      action: 'Claim Reward'
-    },
-    {
-      id: 4,
-      type: 'tournament',
-      read: true,
-      title: 'Tournament Registration',
-      message: 'The Cosmic Showdown tournament starts in 24 hours. Complete your deck registration.',
-      time: '3 hours ago',
-      action: 'Register Now'
-    },
-    {
-      id: 5,
-      type: 'system',
-      read: true,
-      title: 'System Update',
-      message: 'New cards and balance changes have been added to the game.',
-      time: '1 day ago',
-      action: 'View Details'
-    }
-  ]);
+  const [activeTab, setActiveTab] = useState("all");
+  //   {
+  //     id: 1,
+  //     type: "challenge",
+  //     read: false,
+  //     title: "Challenge Received",
+  //     message: "Player TitanSlayer99 has challenged you to a duel!",
+  //     time: "2 minutes ago",
+  //     action: "Accept Challenge",
+  //   },
+  //   {
+  //     id: 2,
+  //     type: "friend",
+  //     read: false,
+  //     title: "Friend Request",
+  //     message: "NeonKnight42 wants to add you as a friend",
+  //     time: "15 minutes ago",
+  //     action: "Accept Request",
+  //   },
+  //   {
+  //     id: 3,
+  //     type: "reward",
+  //     read: false,
+  //     title: "Daily Reward",
+  //     message: "You've earned 5 premium card packs! Claim them now.",
+  //     time: "1 hour ago",
+  //     action: "Claim Reward",
+  //   },
+  //   {
+  //     id: 4,
+  //     type: "tournament",
+  //     read: true,
+  //     title: "Tournament Registration",
+  //     message:
+  //       "The Cosmic Showdown tournament starts in 24 hours. Complete your deck registration.",
+  //     time: "3 hours ago",
+  //     action: "Register Now",
+  //   },
+  //   {
+  //     id: 5,
+  //     type: "system",
+  //     read: true,
+  //     title: "System Update",
+  //     message: "New cards and balance changes have been added to the game.",
+  //     time: "1 day ago",
+  //     action: "View Details",
+  //   },
+  //   {
+  //     id: 6,
+  //     type: "tournament",
+  //     read: false,
+  //     title: "Tournament Champion 🏆",
+  //     message: "Congratulations! You emerged victorious in the Weekend Tournament. Your skill and strategy paid off — enjoy your rewards!",
+  //     time: "1 hour ago",
+  //     action: "Claim Prize",
+  //   },
+  //   {
+  //     id: 7,
+  //     type: "tournament",
+  //     read: false,
+  //     title: "Second Place Finish 🥈",
+  //     message: "Great job! You secured second place in the Weekend Tournament. An impressive run — victory is within reach next time!",
+  //     time: "Just now",
+  //     action: "View Tournament Results"
+  //   },
+  //   {
+  //     id: 8,
+  //     type: "tournament",
+  //     read: false,
+  //     title: "Third Place Finish 🥉",
+  //     message: "Well played! You earned third place in the Weekend Tournament. A solid performance — keep improving and aim higher next time!",
+  //     time: "Just now",
+  //     action: "View Tournament Results"
+  //   }
+  // ]);
+  const { notifications, notificationsLoading, notificationsError, setNotifications } = useAppContext();
 
-  const markAsRead = (id: number) => {
+  (notificationsLoading && notificationsError)
+
+  const markAsRead = async (id: number) => {
     setNotifications(
-      notifications.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
+      notifications.map((notification) =>
+        notification.id === id
+          ? { ...notification, is_read: true }
+          : notification
       )
     );
+
+    // Optionally, make an API call to update the notification status on the server
+    try {
+      await fetch(`${baseUrl}/notifications/mark-as-read/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
+      });
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
   };
 
   const getFilteredNotifications = () => {
-    if (activeTab === 'all') return notifications;
-    if (activeTab === 'unread') return notifications.filter(n => !n.read);
-    return notifications.filter(n => n.type === activeTab);
+    if (activeTab === "all") return notifications;
+    if (activeTab === "unread") return notifications.filter((n) => !n.is_read);
+    return notifications.filter((n) => n.type === activeTab);
   };
 
   const getTypeIcon = (type: string) => {
-    switch(type) {
-      case 'challenge':
-        return '⚔️';
-      case 'friend':
-        return '👤';
-      case 'reward':
-        return '🎁';
-      case 'tournament':
-        return '🏆';
-      case 'system':
-        return '⚙️';
+    switch (type) {
+      case "challenge":
+        return "⚔️";
+      case "friend":
+        return "👤";
+      case "reward":
+        return "🎁";
+      case "tournament":
+        return "🏆";
+      case "system":
+        return "⚙️";
       default:
-        return '📩';
+        return "📩";
     }
   };
 
   const getTypeColor = (type: string) => {
-    switch(type) {
-      case 'challenge':
-        return 'bg-blue-600';
-      case 'friend':
-        return 'bg-green-500';
-      case 'reward':
-        return 'bg-yellow-500';
-      case 'tournament':
-        return 'bg-purple-600';
-      case 'system':
-        return 'bg-gray-500';
+    switch (type) {
+      case "challenge":
+        return "bg-blue-600";
+      case "friend":
+        return "bg-green-500";
+      case "reward":
+        return "bg-yellow-500";
+      case "tournament":
+        return "bg-purple-600";
+      case "system":
+        return "bg-gray-500";
       default:
-        return 'bg-blue-500';
+        return "bg-blue-500";
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -130,55 +178,92 @@ const NotificationsPage = () => {
           </div>
         </div>
       </header> */}
-      <NavBar showSignUps = {true} />
+      <NavBar showSignUps={true} />
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-6">
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
+      <main className="w-full lg:max-w-3xl lg:mx-auto px-0 lg:px-4 py-0 lg:py-6">
+        <div className="bg-gray-800 lg:rounded-lg shadow-xl overflow-hidden lg:border lg:border-gray-700">
           {/* Notifications Header */}
           <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700">
             <h2 className="text-xl font-bold text-white flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mr-2 text-blue-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
               </svg>
               Notifications
-              <span className="ml-2 text-sm bg-blue-600 text-white px-2 py-1 rounded-full">{notifications.length}</span>
+              {notifications.length > 0 && (
+                <span className="ml-2 text-sm bg-blue-600 text-white px-2 py-1 rounded-full">
+                  {notifications.length}
+                </span>
+              )}
             </h2>
           </div>
 
           {/* Tabs */}
           <div className="bg-gray-900 border-b border-gray-700">
-            <div className="flex overflow-x-auto scrollbar-none">
-              <button 
-                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${activeTab === 'all' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('all')}
+            <div className="flex overflow-x-auto scrollbar-hide md:scrollbar-auto">
+              <button
+                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
+                  activeTab === "all"
+                    ? "text-blue-400 border-b-2 border-blue-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                onClick={() => setActiveTab("all")}
               >
                 All
               </button>
-              <button 
-                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${activeTab === 'unread' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('unread')}
+              <button
+                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
+                  activeTab === "unread"
+                    ? "text-blue-400 border-b-2 border-blue-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                onClick={() => setActiveTab("unread")}
               >
                 Unread
                 {unreadCount > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">{unreadCount}</span>
+                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                    {unreadCount}
+                  </span>
                 )}
               </button>
-              <button 
-                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${activeTab === 'challenge' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('challenge')}
+              <button
+                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
+                  activeTab === "challenge"
+                    ? "text-blue-400 border-b-2 border-blue-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                onClick={() => setActiveTab("challenge")}
               >
                 Challenges
               </button>
-              <button 
-                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${activeTab === 'tournament' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('tournament')}
+              <button
+                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
+                  activeTab === "tournament"
+                    ? "text-blue-400 border-b-2 border-blue-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                onClick={() => setActiveTab("tournament")}
               >
                 Tournaments
               </button>
-              <button 
-                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${activeTab === 'reward' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('reward')}
+              <button
+                className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
+                  activeTab === "reward"
+                    ? "text-blue-400 border-b-2 border-blue-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                onClick={() => setActiveTab("reward")}
               >
                 Rewards
               </button>
@@ -188,29 +273,41 @@ const NotificationsPage = () => {
           {/* Notification List */}
           <div className="divide-y divide-gray-700">
             {getFilteredNotifications().length > 0 ? (
-              getFilteredNotifications().map(notification => (
-                <div 
-                  key={notification.id} 
-                  className={`p-4 transition-colors hover:bg-gray-750 ${notification.read ? 'opacity-80' : 'bg-gray-750'}`}
+              getFilteredNotifications().map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 transition-colors hover:bg-gray-750 ${
+                    notification.is_read ? "opacity-80" : "bg-gray-750"
+                  }`}
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex items-start">
-                    <div className={`flex-shrink-0 h-10 w-10 rounded-md ${getTypeColor(notification.type)} flex items-center justify-center text-xl`}>
+                    <div
+                      className={`flex-shrink-0 h-10 w-10 rounded-md ${getTypeColor(
+                        notification.type
+                      )} flex items-center justify-center text-xl`}
+                    >
                       {getTypeIcon(notification.type)}
                     </div>
                     <div className="ml-4 flex-1">
                       <div className="flex justify-between">
-                        <p className="font-medium text-gray-100">{notification.title}</p>
-                        <span className="text-xs text-gray-400">{notification.time}</span>
+                        <p className="font-medium text-gray-100">
+                          {notification.title}
+                        </p>
+                        <span className="text-xs text-gray-400">
+                          {notification.time}
+                        </span>
                       </div>
-                      <p className="mt-1 text-sm text-gray-300">{notification.message}</p>
+                      <p className="mt-1 text-sm text-gray-300">
+                        {notification.message}
+                      </p>
                       <div className="mt-2">
                         <button className="px-4 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition">
                           {notification.action}
                         </button>
                       </div>
                     </div>
-                    {!notification.read && (
+                    {!notification.is_read && (
                       <div className="ml-2 flex-shrink-0">
                         <div className="h-2 w-2 rounded-full bg-blue-500"></div>
                       </div>
@@ -220,8 +317,19 @@ const NotificationsPage = () => {
               ))
             ) : (
               <div className="p-8 text-center text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 mx-auto mb-4 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                  />
                 </svg>
                 <p className="font-medium">No notifications to display</p>
                 <p className="text-sm mt-1">Check back later for updates</p>
