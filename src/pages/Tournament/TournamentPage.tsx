@@ -7,6 +7,8 @@ import TournamentRules from "./components/TournamentRules";
 import TournamentFooter from "./components/TournamentFooter";
 import TimelineWidget from "./components/TimelineWidget";
 import TournamentResults from "./components/TournamentResults";
+import TournamentEndedModal from "./components/TournamentEndedModal";
+import MatchForfeitedModal from "./components/MatchForfeitedModal";
 import { useParams } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { authHeaders, customLog } from "@/utils/Functions";
@@ -36,34 +38,10 @@ interface Participant {
   losses: number;
 }
 
-// interface Player {
-//   id: number;
-//   name: string;
-//   image_url: string;
-//   score: number;
-//   winner: boolean;
-// }
-
-// interface Match {
-//   id: number;
-//   player1: Player;
-//   player2: Player;
-//   status: "pending" | "in_progress" | "completed" | "forfeited";
-//   game_id: number;
-//   game_code: string;
-//   winner_id: number | null;
-//   turn_ends_at: number;
-// }
-
-// interface Round {
-//   round: number;
-//   matches: Match[];
-// }
-
-interface Rule{
+interface Rule {
   id: number;
-  title:string;
-  content:string;
+  title: string;
+  content: string;
 }
 
 interface TournamentData {
@@ -71,7 +49,7 @@ interface TournamentData {
   tournament: Tournament;
   participants: Participant[];
   rounds: Round[];
-  rules: Rule[]
+  rules: Rule[];
 }
 
 const TournamentPage: React.FC = () => {
@@ -91,8 +69,50 @@ const TournamentPage: React.FC = () => {
   const [tournamentStarted, setTournamentStarted] = useState(false);
   const [myGameCode, setMyGameCode] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [showTournamentEndedModal, setShowTournamentEndedModal] =
+    useState<boolean>(false);
+  const [showMatchForfeitedModal, setShowMatchForfeitedModal] =
+    useState<boolean>(false);
+  const [matchForfeitedMessage, setMatchForfeitedMessage] =
+    useState<string>("");
 
-  (myGameCode && true)
+  myGameCode && true;
+
+  const tournamentEndedCallback = () => {
+    customLog("Tournament ended event received via socket");
+    setShowTournamentEndedModal(true);
+    //fetchTournamentData();
+  };
+
+  const matchForfeitedCallback = (data: {
+    loserId: number;
+    reason: string;
+  }) => {
+    customLog("Match forfeited event received via socket", data);
+    setShowMatchForfeitedModal(true);
+    if (user?.id === data.loserId) {
+      setMatchForfeitedMessage(
+        "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
+      );
+    } else {
+      setMatchForfeitedMessage(
+        "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."
+      );
+    }
+
+    // fetchTournamentData();
+  };
+
+  // useEffect(() => {
+  //   if (!socket || !user) return;
+  //   socket.on("tournamentEnded", tournamentEndedCallback);
+  //   socket.on("matchForfeited", matchForfeitedCallback);
+
+  //   return () => {
+  //     socket.off("tournamentEnded", tournamentEndedCallback);
+  //     socket.off("matchForfeited", matchForfeitedCallback);
+  //   };
+  // }, [socket, user]);
 
   const extractGameCodeFromTournamentData = (data: TournamentData): string => {
     const current_round_number = data.tournament.current_round_number;
@@ -114,7 +134,6 @@ const TournamentPage: React.FC = () => {
   customLog("tournament data", tournamentData);
 
   const fetchTournamentData = async () => {
-
     try {
       setLoading(true);
       setError(null);
@@ -171,15 +190,35 @@ const TournamentPage: React.FC = () => {
       userId: user.id,
     });
     socket?.on("lobbyUpdate", lobbyUpdateCallback);
+    socket.on("tournamentEnded", tournamentEndedCallback);
+    socket.on("matchForfeited", matchForfeitedCallback);
 
     return () => {
       socket?.off("lobbyUpdate", lobbyUpdateCallback);
+      socket.off("tournamentEnded", tournamentEndedCallback);
+      socket.off("matchForfeited", matchForfeitedCallback);
     };
   }, [user, socket]);
+
+  const handleTournamentEndedModalClose = () => {
+    setShowTournamentEndedModal(false);
+    fetchTournamentData();
+  }
 
   return (
     <div className="min-h-screen w-full bg-gray-900 text-gray-100 pb-32">
       <NavBar showSignUps={true} />
+
+      <TournamentEndedModal
+        isOpen={showTournamentEndedModal}
+        onClose={handleTournamentEndedModalClose}
+      />
+
+      <MatchForfeitedModal
+        isOpen={showMatchForfeitedModal}
+        onClose={() => setShowMatchForfeitedModal(false)}
+        message={matchForfeitedMessage}
+      />
 
       {error && (
         <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-4 m-4 rounded-lg flex justify-between items-center">
@@ -259,7 +298,10 @@ const TournamentPage: React.FC = () => {
                       />
                     )}
                     {activeTab === "rules" && (
-                      <TournamentRules loading={loading} rules = {tournamentData?.rules} />
+                      <TournamentRules
+                        loading={loading}
+                        rules={tournamentData?.rules}
+                      />
                     )}
                   </div>
                 </div>
