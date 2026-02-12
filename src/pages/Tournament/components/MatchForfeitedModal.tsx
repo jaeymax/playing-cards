@@ -17,8 +17,8 @@ const MatchForfeitedModal: React.FC<MatchForfeitedModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-8 max-w-sm mx-4 border border-gray-700">
-        <div className="flex items-center justify-center mb-4">
+      <div className="bg-gray-800 rounded-lg p-10 max-w-sm mx-4 border border-gray-700">
+        {/* <div className="flex items-center justify-center mb-4">
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center ${
               isUserForfeited ? "bg-red-900" : "bg-green-900"
@@ -26,13 +26,13 @@ const MatchForfeitedModal: React.FC<MatchForfeitedModalProps> = ({
           >
             <span className="text-2xl">{isUserForfeited ? "⚠️" : "✓"}</span>
           </div>
-        </div>
+        </div> */}
 
         <h2 className="text-2xl font-bold text-white mb-4 text-center">
           {isUserForfeited ? "Match Forfeited" : "Match Won"}
         </h2>
 
-        <p className="text-gray-300 mb-6 text-center leading-relaxed">
+        <p className="text-gray-300 mb-6 text-center text-sm md:text-base leading-relaxed">
           {isUserForfeited
             ? "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
             : "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."}

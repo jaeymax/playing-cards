@@ -90,7 +90,6 @@ const PlayWithFriend = () => {
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
   const navigate = useNavigate();
 
-
   const getPlayerByPosition = (player_position: number) => {
     return players.find((player) => player.position === player_position);
   };
@@ -260,11 +259,6 @@ const PlayWithFriend = () => {
   useEffect(() => {
     if (user) {
       socket?.emit("playerJoin", { userId: user.id, gameCode: code });
-      // } else {
-      //   const state = window.history.state?.usr?.state;
-      //   if (state?.from) {
-      //     navigate(state.from); // Redirect back to the page we came from
-      //   }
     }
   }, [user, socket]);
 
@@ -319,8 +313,7 @@ const PlayWithFriend = () => {
     setMe(myData);
     getOpponentsData(data.players);
   };
-  
-  
+
   const getGameDataCallback = (data: any) => {
     console.log("Game data received:", data);
     setGame(data);
@@ -522,7 +515,7 @@ const PlayWithFriend = () => {
   };
 
   return (
-    <div className="relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full">
+    <div className="relative borde bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
       {notification && !showChat && (
         <ChatNotification
           message={notification}
@@ -591,7 +584,7 @@ const PlayWithFriend = () => {
             showButtons={showDealButton && showShuffleButton}
             isDealing={isDealing}
             isShuffling={isShuffling}
-            shuffledAtLeastOnce = {shuffledAtLeastOnce}
+            shuffledAtLeastOnce={shuffledAtLeastOnce}
             onDeal={handleDeal}
             onShuffle={handleShuffle}
           />

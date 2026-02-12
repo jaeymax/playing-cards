@@ -1,5 +1,5 @@
 import { baseUrl } from "@/config/api";
-import { useAppContext } from "@/contexts/AppContext";
+//import { useAppContext } from "@/contexts/AppContext";
 import { authHeaders, customLog } from "@/utils/Functions";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -16,7 +16,7 @@ interface RecentGame {
 }
 
 const RecentGames: React.FC = () => {
-  const { user } = useAppContext();
+ // const { user } = useAppContext();
   const [recentGames, setRecentGames] = React.useState<RecentGame[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);

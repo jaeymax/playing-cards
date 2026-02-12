@@ -44,6 +44,7 @@ import TournamentDetailsPage from "./pages/Tournaments/TournamentDetailsPage";
 import PrivateRoute from "./components/PrivateRoute";
 import WalletPage from "./pages/tests/Wallet";
 import DepositSuccessPage from "./pages/tests/DepositSuccess";
+import SpectatePage from "./components/SpectatePage";
 //import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
@@ -78,6 +79,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<GameModal />} />
+          <Route path = "/game/:code/spectate" element = {<SpectatePage/>} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/deposit/success" element={<DepositSuccessPage />} />

@@ -107,9 +107,10 @@ const SingleEliminationGame = () => {
 
   const handleMatchForfeitClose = () =>{
     setMatchForfeited(false);
+    customLog("matchforfeiter", matchForfeiter);
     if(game?.is_final_match){
-        const winningPlayer = game.players.find((player:any)=>player.user.id != game.current_turn_user_id);
-        const losingPlayer = game.players.find((player:any)=>player.user.id == game.current_turn_user_id);
+        const winningPlayer = game.players.find((player:any)=>player.user.id != matchForfeiter.user.id);
+        const losingPlayer = game.players.find((player:any)=>player.user.id == matchForfeiter.user.id);
         setWinningPlayer(winningPlayer);
         setLosingPlayer(losingPlayer);
         setGameOver(true);
@@ -456,8 +457,8 @@ const SingleEliminationGame = () => {
   //customLog('losing player', losingPlayer);
 
   return (
-    <div className="relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full">
-      <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
+    <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
+      <div className="min-h-screen relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
         {remainingSeconds > 0 && game?.current_turn_user_id !== user?.id && (
           <TimerBar
             remainingSeconds={remainingSeconds}

@@ -3,11 +3,11 @@ import Modal from "./Modal";
 
 interface WinnerModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   winningPlayer: any;
   currentPlayer: any;
   onPlayNextHand: () => void;
-  onLeaveGame: () => void;
+  onLeaveGame?: () => void;
 }
 
 const WinnerModal = ({
@@ -16,11 +16,13 @@ const WinnerModal = ({
   winningPlayer,
   currentPlayer,
   onPlayNextHand,
-  onLeaveGame,
+  onLeaveGame
 }: WinnerModalProps) => {
 
-  (onClose)
- //` customLog('onleave', onLeaveGame)
+  if(false){
+    (onClose)
+    customLog('onleave', onLeaveGame)
+  }
   
   return (
     <Modal isOpen={isOpen} onClose={()=>{}} title={`Hand ${winningPlayer?.hand_number} Complete!`}>

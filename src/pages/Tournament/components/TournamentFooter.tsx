@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Round } from "../../../types/tournament";
+import type { Round } from "@/types/tournament";
 import { useAppContext } from "@/contexts/AppContext";
 import { Match } from "@/types/tournament";
-import { customLog } from "@/utils/Functions";
+//import { customLog } from "@/utils/Functions";
 
 
 const TournamentFooter: React.FC<{
@@ -33,7 +33,7 @@ const TournamentFooter: React.FC<{
       (match) => match.player1.id === user?.id || match.player2.id === user?.id
     );
 
-    console.log('my Match', myMatch?.turn_ends_at)
+    //console.log('my Match', myMatch?.turn_ends_at)
     return myMatch;
   };
   const myMatch: Match | undefined = matches ? getMyMatch(matches) : undefined;
@@ -53,8 +53,8 @@ const TournamentFooter: React.FC<{
   
 
   //console.log("currentRoundMatches in Footer:", matches);
-  customLog("matches", matches);
-  customLog("joinDeadlineTime", joinDeadlineTime)
+  //customLog("matches", matches);
+  //customLog("joinDeadlineTime", joinDeadlineTime)
 
 
   // Determine user status
@@ -124,7 +124,7 @@ const TournamentFooter: React.FC<{
       const diff = joinDeadlineTime.getTime() - now.getTime();
 
       if (diff <= 0) {
-        setJoinDeadlineCountdown("0:00");
+        setJoinDeadlineCountdown("");
         return;
       }
 
@@ -240,11 +240,16 @@ const TournamentFooter: React.FC<{
                 Eliminated
               </div>
             ) :
-            isForfeited ? (
-              <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
-                Forfeited
+            isForfeited ? 
+              myMatch?.forfeiter_user_id === user?.id ? (<div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
+                Eliminated
+              </div>):(
+                <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
+                Waiting For Next Round
               </div>
-            ) : isWaitingForNextRound ? (
+              )
+              
+             : isWaitingForNextRound ? (
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
                 Waiting For Next Round
               </div>

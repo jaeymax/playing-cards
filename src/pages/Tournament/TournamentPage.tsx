@@ -114,7 +114,8 @@ const TournamentPage: React.FC = () => {
   //   };
   // }, [socket, user]);
 
-  const extractGameCodeFromTournamentData = (data: TournamentData): string => {
+  const extractGameCodeFromTournamentData = (data: TournamentData | null): string => {
+    if(!data)return "";
     const current_round_number = data.tournament.current_round_number;
     const current_round_matches = data.rounds.find(
       (round) => round.round === current_round_number
@@ -180,25 +181,51 @@ const TournamentPage: React.FC = () => {
     customLog("Received tournamentData via socket");
     setTournamentData(tournamentData);
     console.log("tournamentData via socket", tournamentData);
+    
+    // const current_round_number = tournamentData.tournament.current_round_number;
+    // const current_round_matches = tournamentData.rounds.find(
+    //   (round) => round.round === current_round_number
+    // )?.matches;
+
+    //customLog("current_round_matches", current_round_matches);
+    // const myMatch = current_round_matches?.find(
+    //   (match) => match.player1.id === user?.id || match.player2.id === user?.id
+    // );
+
+  //   if(myMatch && myMatch.status === 'forfeited' ){
+  //   setShowMatchForfeitedModal(true);
+  //   if (myMatch?.forfeiter_user_id === user?.id) {
+  //     setMatchForfeitedMessage(
+  //       "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
+  //     );
+  //   } else {
+  //     setMatchForfeitedMessage(
+  //       "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."
+  //     );
+  //   }
+  // }
   };
 
   useEffect(() => {
     if (!user) return;
     if (!socket) return;
-    socket?.emit("joinTournamentRoom", {
+    if(!tournamentData)return;
+    socket.emit("joinTournamentRoom", {
       tournamentId: id,
-      userId: user.id,
+      userId: user?.id,
+      gameCode: extractGameCodeFromTournamentData(tournamentData)
     });
-    socket?.on("lobbyUpdate", lobbyUpdateCallback);
+    //socket?.emit('')
+    socket.on("lobbyUpdate", lobbyUpdateCallback);
     socket.on("tournamentEnded", tournamentEndedCallback);
-    socket.on("matchForfeited", matchForfeitedCallback);
+    socket.on("matchForfeit", matchForfeitedCallback);
 
     return () => {
       socket?.off("lobbyUpdate", lobbyUpdateCallback);
       socket.off("tournamentEnded", tournamentEndedCallback);
-      socket.off("matchForfeited", matchForfeitedCallback);
+      socket.off("matchForfeit", matchForfeitedCallback);
     };
-  }, [user, socket]);
+  }, [user, socket, tournamentData]);
 
   const handleTournamentEndedModalClose = () => {
     setShowTournamentEndedModal(false);

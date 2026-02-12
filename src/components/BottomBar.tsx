@@ -45,7 +45,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
 
   const { user } = useAppContext();
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [time, setTime] = useState(0);
   const [audioSent, setAudioSent] = useState(false);
 
@@ -115,7 +115,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
       // Stop recording
       mediaRecorderRef.current?.stop();
       setRecording(false);
-      clearInterval(timerRef.current as NodeJS.Timeout | undefined);
+      clearInterval(timerRef.current as ReturnType<typeof setInterval> | undefined);
       setTime(0);
     }
   };

@@ -24,7 +24,7 @@ const TournamentResults: React.FC<TournamentResultsProps> = ({
   number_of_rounds
 }) => {
   
-  (participants && true)
+  (participants && true && number_of_rounds)
 
   const [winners, setWinners] = useState<Participant[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,12 +107,12 @@ const TournamentResults: React.FC<TournamentResultsProps> = ({
                 <th className="text-center py-4 px-4 md:px-6 text-gray-400 font-semibold text-xs md:text-sm uppercase tracking-wider">
                   Wins
                 </th>
-                <th className="text-center py-4 px-4 md:px-6 text-gray-400 font-semibold text-xs md:text-sm uppercase tracking-wider">
+                {/* <th className="text-center py-4 px-4 md:px-6 text-gray-400 font-semibold text-xs md:text-sm uppercase tracking-wider">
                   Losses
                 </th>
                 <th className="text-center py-4 px-4 md:px-6 text-gray-400 font-semibold text-xs md:text-sm uppercase tracking-wider">
                   Record
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
@@ -160,20 +160,20 @@ const TournamentResults: React.FC<TournamentResultsProps> = ({
                       </div>
                     </td>
                     <td className="py-5 px-4 md:px-6 text-center">
-                      <span className="text-green-500 font-bold text-sm md:text-base">
+                      <span className="text-gray-100 font-bold text-sm md:text-base">
                         {participant.wins}
                       </span>
                     </td>
-                    <td className="py-5 px-4 md:px-6 text-center">
+                    {/* <td className="py-5 px-4 md:px-6 text-center">
                       <span className="text-red-400 font-bold text-sm md:text-base">
                         {number_of_rounds - participant.wins}
                       </span>
-                    </td>
-                    <td className="py-5 px-4 md:px-6 text-center">
+                    </td> */}
+                    {/* <td className="py-5 px-4 md:px-6 text-center">
                       <span className="text-gray-300 text-sm md:text-base">
                         {participant.wins}W-{number_of_rounds - participant.wins}L
                       </span>
-                    </td>
+                    </td> */}
                   </tr>
                 );
               })}

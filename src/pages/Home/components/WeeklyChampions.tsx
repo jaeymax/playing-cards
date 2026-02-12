@@ -147,7 +147,7 @@ const WeeklyChampions: React.FC = () => {
                   </div>
 
                   {/* Avatar */}
-                  <div className="w-9 h-9 grid place-items-center rounded-full border border-gray-600 flex-shrink-0" >
+                  <div className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-600 flex-shrink-0" >
                   {
                     champion.image_url?(
                       <img

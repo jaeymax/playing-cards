@@ -368,6 +368,13 @@ export const dealCards = async (
   if (isDealing || isShuffling) return;
   setIsDealing(true);
 
+  console.log(
+    "current_player_id",
+    current_player_id,
+    "first_opponent",
+    first_opponent_id
+  );
+
   let cardIndex = 0;
 
   for (const sequence of extractDealingSequence(
@@ -630,6 +637,20 @@ export const getPlayerIds = (players: any, currentUser: any) => {
   return { meId, firstOpponentId, secondOpponentId, thirdOpponentId };
 };
 
+export const getPlayerIdsForSpectator = (players: any) => {
+  let playerOneId;
+  let playerTwoId;
+  let playerThreeId;
+  let playerFourId;
+
+  playerOneId = players[0].id;
+  playerTwoId = players[1].id;
+  if (players.length > 2) playerThreeId = players[2].id;
+  if (players.length > 3) playerFourId = players[3].id;
+
+  return { playerOneId, playerTwoId, playerThreeId, playerFourId };
+};
+
 export const reconcileCards = (
   cards: any,
   setGameCards: any,
@@ -641,11 +662,11 @@ export const reconcileCards = (
   playerHandRef: any,
   opponentOneHandRef: any,
   opponentTwoHandRef: any,
-  opponentThreeHandRef:any,
+  opponentThreeHandRef: any,
   playerPlayAreaRef: any,
   opponentOnePlayAreaRef: any,
-  opponentTwoPlayAreaRef:any,
-  opponentThreePlayAreaRef:any
+  opponentTwoPlayAreaRef: any,
+  opponentThreePlayAreaRef: any
 ) => {
   console.log("reconciling game cards");
 
@@ -686,8 +707,7 @@ export const reconcileCards = (
           pos_y: yOffset,
           z_index: card.trick_number,
         };
-      }
-      else if(card.player_id == secondOpponentId){
+      } else if (card.player_id == secondOpponentId) {
         const targetArea = opponentTwoPlayAreaRef.current;
         const slot = targetArea?.children[5 - slot_position - 1];
         const slotRect = slot?.getBoundingClientRect();
@@ -704,8 +724,7 @@ export const reconcileCards = (
           pos_y: yOffset,
           z_index: card.trick_number,
         };
-      }
-      else if(card.player_id == thirdOpponentId){
+      } else if (card.player_id == thirdOpponentId) {
         const targetArea = opponentThreePlayAreaRef.current;
         const slot = targetArea?.children[slot_position];
         const slotRect = slot?.getBoundingClientRect();
@@ -813,14 +832,73 @@ interface Division {
 }
 
 const divisions: Division[] = [
-  { name: "Rookie", min: 0, max: 1199, emoji: "🃏", color: "#9CA3AF", badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full" }, // gray
-  { name: "Contender", min: 1200, max: 1399, emoji: "⚔️", color: "#6B7280", badgeClasses: "px-3 py-1 text-sm bg-green-500/10 text-green-400 rounded-full" }, 
-  { name: "Strategist", min: 1400, max: 1599, emoji: "🔥", color: "#F97316", badgeClasses: "px-3 py-1 text-sm bg-cyan-500/10 text-cyan-400 rounded-full" },
-  { name: "Pro Player", min: 1600, max: 1799, emoji: "🏆", color: "#FACC15", badgeClasses: "px-3 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full" }, // blue
-  { name: "Card Wizard", min: 1800, max: 1999, emoji: "🦈", color: "#10B981", badgeClasses: "px-3 py-1 text-sm bg-purple-500/10 text-purple-400 rounded-full" },
-  { name: "Card Master", min: 2000, max: 2199, emoji: "👑", color: "#3B82F6", badgeClasses: "px-3 py-1 text-sm bg-yellow-500/10 text-yellow-400 rounded-full" },
-  { name: "Card Veteran", min: 2200, max: 2399, emoji: "🌟", color: "#8B5CF6", badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-400 rounded-full" },
-  { name: "Card Legend", min: 2400, max: Infinity, emoji: "🐉", color: "#EF4444", badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-500 rounded-full" },
+  {
+    name: "Rookie",
+    min: 0,
+    max: 1199,
+    emoji: "🃏",
+    color: "#9CA3AF",
+    badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full",
+  }, // gray
+  {
+    name: "Contender",
+    min: 1200,
+    max: 1399,
+    emoji: "⚔️",
+    color: "#6B7280",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-green-500/10 text-green-400 rounded-full",
+  },
+  {
+    name: "Strategist",
+    min: 1400,
+    max: 1599,
+    emoji: "🔥",
+    color: "#F97316",
+    badgeClasses: "px-3 py-1 text-sm bg-cyan-500/10 text-cyan-400 rounded-full",
+  },
+  {
+    name: "Pro Player",
+    min: 1600,
+    max: 1799,
+    emoji: "🏆",
+    color: "#FACC15",
+    badgeClasses: "px-3 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full",
+  }, // blue
+  {
+    name: "Card Wizard",
+    min: 1800,
+    max: 1999,
+    emoji: "🦈",
+    color: "#10B981",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-purple-500/10 text-purple-400 rounded-full",
+  },
+  {
+    name: "Card Master",
+    min: 2000,
+    max: 2199,
+    emoji: "👑",
+    color: "#3B82F6",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-yellow-500/10 text-yellow-400 rounded-full",
+  },
+  {
+    name: "Card Veteran",
+    min: 2200,
+    max: 2399,
+    emoji: "🌟",
+    color: "#8B5CF6",
+    badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-400 rounded-full",
+  },
+  {
+    name: "Card Legend",
+    min: 2400,
+    max: Infinity,
+    emoji: "🐉",
+    color: "#EF4444",
+    badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-500 rounded-full",
+  },
 ];
 
 export function getDivision(rating: number) {
@@ -830,15 +908,15 @@ export function getDivision(rating: number) {
       name: "Unranked",
       emoji: "❔",
       color: "#6B7280",
-      badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full"
+      badgeClasses:
+        "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full",
     };
   }
   return division;
 }
 
-
 export function customLog(...args: any[]) {
- if(import.meta.env.VITE_ENV === 'development') {
+  if (import.meta.env.VITE_ENV === "development") {
     console.log(...args);
   }
 }

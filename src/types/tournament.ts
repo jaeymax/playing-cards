@@ -15,6 +15,7 @@ export interface Match {
   game_code: string;
   winner_id: number | null;
   turn_ends_at: number;
+  forfeiter_user_id?: number | null;
 }
 
 export interface Round {

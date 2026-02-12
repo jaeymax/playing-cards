@@ -6,8 +6,8 @@ const PlayerInfo = ({
   player_position,
   current_player_position,
   points,
-  remaining_time = 30,
-  total_time = 30,
+  remaining_time = 60,
+  total_time = 60,
   styles,
 }: {
   name: string;
@@ -26,6 +26,8 @@ const PlayerInfo = ({
 
   const progress = remaining_time / total_time;
   //const dashOffset = CIRCUMFERENCE * (1 - progress);
+
+  
 
   return (
     <div

@@ -17,17 +17,17 @@ const PrizePool: React.FC<PrizePoolProps> = ({
   const prizes = [
     {
       position: "1st Place",
-      reward: "50 GHC",
+      reward: "🥇",
       extra: "Championship Qualifier",
     },
     {
       position: "2nd Place",
-      reward: "30 GHC",
+      reward: "🥈",
       extra: "Championship Qualifier",
     },
     {
       position: "3rd Place",
-      reward: "20 GHC",
+      reward: "🥉",
       extra: "Championship Qualifier",
     },
   ];
@@ -64,7 +64,7 @@ const PrizePool: React.FC<PrizePoolProps> = ({
         {prizes.map((prize, index) => (
           <div
             key={index}
-            className="flex items-start gap-4 p-3 bg-gray-750 rounded-lg"
+            className="flex items-center gap-4 borde p-3 bg-gray-750 rounded-lg"
           >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -77,9 +77,9 @@ const PrizePool: React.FC<PrizePoolProps> = ({
             >
               {index + 1}
             </div>
-            <div>
+            <div className = 'flex gap-5'>
               <p className="text-white font-medium">{prize.position}</p>
-              <p className="text-sm text-blue-400">{prize.reward}</p>
+              <p className="text-2xl text-blue-400">{prize.reward}</p>
               {/* <p className="text-xs text-gray-400">{prize.extra}</p> */}
             </div>
           </div>

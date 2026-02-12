@@ -53,10 +53,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     return "Round " + round;
   };
 
-  const {user} = useAppContext();
-
-
-
+  const { user } = useAppContext();
 
   const PlayerRow: React.FC<{ player: Player; isWinner: boolean }> = ({
     player,
@@ -83,9 +80,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
         </div>
         <div className="min-w-0">
           <span className="text-white font-semibold text-sm truncate block">
-            {
-              user?.id == player.id? "You": player.name
-            }
+            {user?.id == player.id ? "You" : player.name}
           </span>
           {isWinner && (
             <span className="text-amber-400 text-xs font-medium">Winner</span>
@@ -147,20 +142,34 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     );
   };
 
+  const SpectateButton: React.FC<{ matchId: number }> = ({ matchId }) => {
+    
+     if(matchId){
+      return;
+     }
+
+      return(
+    <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2">
+      {/* <span>📺</span> */}
+      <span>Spectate</span>
+    </button>
+      )
+  };
+
   const WaitingPlaceholder: React.FC = () => (
-    <div className="bg-slate-800/30 rounded-lg border border-dashed border-slate-600/50 p-4 backdrop-blur-sm">
+    <div className="bg-slate-800/30 rounded-lg border border-dashed border-slate-600/50 p-6 backdrop-blur-sm">
       <div className="space-y-3">
-        <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
+        <div className="flex items-center justify-center h-24 rounded-lg bg-slate-700/30 border border-slate-600/30">
           <span className="text-slate-500 text-xs font-medium tracking-wide">
             Waiting for next round...
           </span>
         </div>
-        <div className="border-t border-slate-700/50"></div>
-        <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
+        {/* <div className="border-t border-slate-700/50"></div> */}
+        {/* <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
           <span className="text-slate-500 text-xs font-medium tracking-wide">
             Waiting for next round...
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -248,8 +257,10 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                       key={match.id}
                       className="bg-slate-800/50 rounded-sm border border-slate-700/50 p-4 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm"
                     >
-                      <div className="mb-4">
+                      <div className="mb-4 flex items-center justify-between">
                         <MatchStatus status={match.status} />
+                       {match.status == 'in_progress' && <SpectateButton matchId={match.id} />}
+                        
                       </div>
                       <div className="space-y-3">
                         <PlayerRow
@@ -296,8 +307,9 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                       roundData.matches.map((match) => (
                         <div key={match.id} className="px-2">
                           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm">
-                            <div className="mb-4">
+                            <div className="mb-4 flex items-center justify-between">
                               <MatchStatus status={match.status} />
+                              {match.status == 'in_progress' && <SpectateButton matchId={match.id} />}
                             </div>
                             <div className="space-y-3">
                               <PlayerRow

@@ -71,9 +71,9 @@ const TournamentHeader: React.FC<TournamentHeaderProps> = ({
   const forfeitedMatches = current_round_matches?.matches.filter(
     (match: Match) => match.status == "forfeited"
   ).length;
-  const upcommingMatches = current_round_matches?.matches.filter(
-    (match: Match) => match.status == "pending"
-  ).length;
+  // const upcommingMatches = current_round_matches?.matches.filter(
+  //   (match: Match) => match.status == "pending"
+  // ).length;
 
   console.log("total matches", totalMatches);
 

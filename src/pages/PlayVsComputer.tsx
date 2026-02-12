@@ -515,7 +515,7 @@ const PlayVsComputer = () => {
 
   return (
     <>
-      <div className="min-h-screen relative bg-green-800 bg-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
+      <div className="min-h-screen relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full flex flex-col justify-between">
         <PlayerInfo
           name={"Computer"}
           player_position={firstOpponent?.position || 0}
