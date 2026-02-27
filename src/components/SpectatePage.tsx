@@ -1,5 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState, memo } from "react";
 import { useSocket } from "@/contexts/SocketProvider";
 import MatchHeader from "./MatchHeader";
 import MainLayout from "./MainLayout";
@@ -7,12 +7,10 @@ import GameBoard from "./GameBoard";
 import SidePanel from "./SidePanel";
 import MatchStats from "./MatchStats";
 import ShareButtons from "./ShareButtons";
-import BottomBar from "./SpectateMatchBottomBar";
-import SpectatorChat from "./SpectatorChat";
+import GameNotFoundPage from "./GameNotFoundPage";
 import {
   dealCards,
   ensureGuest,
-  getPlayerIds,
   getPlayerIdsForSpectator,
   getToken,
   handlePlayedCard,
@@ -22,11 +20,14 @@ import {
   shuffleCards,
 } from "@/utils/Functions";
 import { useAppContext } from "@/contexts/AppContext";
+import GameForfeitedPage from "./GameForfeitedPage";
+import GameEndedPage from "./GameEndedPage";
+
+const MemoizedMatchHeader = memo(MatchHeader);
 
 const SpectatePage = () => {
   const { code } = useParams();
   const { socket } = useSocket();
-  const navigate = useNavigate();
 
   const [game, setGame] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
@@ -40,8 +41,11 @@ const SpectatePage = () => {
   const [playerThree, setPlayerThree] = useState<any | null>({});
   const [playerFour, setPlayerFour] = useState<any | null>({});
   const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-
+ // const [newMessage, setNewMessage] = useState("");
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [gameForfeited, setGameForfeited] = useState(false);
+  
+  (chatMessages)
   // Refs for card positions (same as PlayWithFriend)
   const deckRef = useRef<HTMLDivElement>(null);
   const playerOneHandRef = useRef<HTMLDivElement>(null);
@@ -52,6 +56,11 @@ const SpectatePage = () => {
   const playerTwoPlayAreaRef = useRef<HTMLDivElement>(null);
   const playerThreePlayAreaRef = useRef<HTMLDivElement>(null);
   const playerFourPlayAreaRef = useRef<HTMLDivElement>(null);
+
+  const location = useLocation();
+
+  const eventName = location?.state?.name || "";
+  const roundName = location?.state?.roundName || "";
 
   const { user, updateUser } = useAppContext();
 
@@ -70,6 +79,17 @@ const SpectatePage = () => {
       socket?.off("updatedGameData", handleUpdatedGameData);
       socket?.off("game-not-found", handleGameNotFound);
       socket?.off("chatMessage", handleChatMessage);
+      socket?.emit("leave-room", code);
+  //alert('You are leaving the game room');
+//console.log('leaving room ....')
+//alert('You are leaving the game room');
+//console.log('leaving room ....')
+    //alert('You are leaving the game room');
+      //console.log('leaving room ....')
+    //alert('You are leaving the game room');
+      //console.log('leaving room ....')
+    //alert('You are leaving the game room');
+      //console.log('leaving room ....')
     };
   }, [socket, user]);
 
@@ -79,6 +99,7 @@ const SpectatePage = () => {
       socket?.on("gameEnded", handleGameEnded);
       socket?.on("gameOver", handleGameOver);
       socket?.on("startNewHand", startNewHandCallback);
+      socket?.on("matchForfeit", matchForfeitCallback);
     }
 
     return () => {
@@ -86,6 +107,7 @@ const SpectatePage = () => {
       socket?.off("gameEnded", handleGameEnded);
       socket?.off("gameOver", handleGameOver);
       socket?.off("startNewHand", startNewHandCallback);
+      socket?.off('matchForfeit', matchForfeitCallback);
     };
   }, [socket, game, gameCards]);
 
@@ -104,6 +126,11 @@ const SpectatePage = () => {
     socket?.emit("getGameData", code);
   };
 
+  const matchForfeitCallback = (data:any)=>{
+    console.log('data (spectator) matchforfeit', data);
+    setGameForfeited(true);
+  }
+
   const startNewHandCallback = (data: any) => {
     console.log("Start new hand:", data);
     setPlayers(data.players);
@@ -113,6 +140,8 @@ const SpectatePage = () => {
 
   const handleGameData = (data: any) => {
     console.log("Game data received (spectator):", data);
+    if(data.status == 'completed')setGameCompleted(true);
+    if(data.status == 'forfeited')setGameForfeited(true);
     setGame(data);
     setPlayers(data.players);
     setGameCards(data.cards);
@@ -144,6 +173,8 @@ const SpectatePage = () => {
 
   const handleUpdatedGameData = (data: any) => {
     console.log("Updated game data received (spectator):", data);
+    if(data.status == 'completed')setGameCompleted(true);
+    if(data.status == 'forfeited')setGameForfeited(true);
     setGame(data);
   };
 
@@ -227,6 +258,7 @@ const SpectatePage = () => {
 
   const handleGameOver = (data: any) => {
     console.log("Game over (spectator):", data);
+    setGameCompleted(true);
   };
 
   const handleChatMessage = (data: any) => {
@@ -234,18 +266,18 @@ const SpectatePage = () => {
     setChatMessages((prev) => [...prev, data]);
   };
 
-  const sendChatMessage = () => {
-    if (!newMessage.trim()) return;
+  // const sendChatMessage = () => {
+  //   if (!newMessage.trim()) return;
 
-    socket?.emit("sendChat", {
-      gameCode: code,
-      message: newMessage,
-      username: user?.username,
-      timestamp: new Date(),
-    });
+  //   socket?.emit("sendChat", {
+  //     gameCode: code,
+  //     message: newMessage,
+  //     username: user?.username,
+  //     timestamp: new Date(),
+  //   });
 
-    setNewMessage("");
-  };
+  //   setNewMessage("");
+  // };
 
   useEffect(() => {
     console.log("checking user");
@@ -254,7 +286,7 @@ const SpectatePage = () => {
       const user = await ensureGuest();
       if (user) {
         updateUser(user);
-      }
+      } 
     };
 
     if (!authToken) {
@@ -263,22 +295,15 @@ const SpectatePage = () => {
   }, [user]);
 
   if (gameNotFound) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-green-800">
-        <div className="text-center text-white">
-          <h1 className="text-4xl font-bold mb-4">Game Not Found</h1>
-          <p className="mb-6">
-            The game with code "{code}" was not found or has expired.
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
-    );
+    return <GameNotFoundPage gameCode={code} />;
+  }
+
+  if(gameCompleted){
+    return <GameEndedPage gameCode={code} />
+  }
+
+  if(gameForfeited){
+    return <GameForfeitedPage gameCode={code} />
   }
 
   if (loading) {
@@ -293,13 +318,13 @@ const SpectatePage = () => {
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover min-h-screen flex flex-col">
-      <MatchHeader
+      <MemoizedMatchHeader
         gameCode={code}
         player1={game?.players[0]}
         player2={game?.players[1]}
         player3={game?.players[2]}
         player4={game?.players[3]}
-        eventName="UG Spar Championship – Semi Final"
+        eventName={`${eventName} - ${roundName}`}
         viewers={27}
       />
       <MainLayout
@@ -328,11 +353,11 @@ const SpectatePage = () => {
         }
       />
 
-      <SpectatorChat
+      {/* <SpectatorChat
         socket={socket}
         gameCode={code}
         username={user?.username}
-      />
+      /> */}
     </div>
   );
 };

@@ -1,0 +1,130 @@
+import { useNavigate } from "react-router-dom";
+
+interface GameEndedPageProps {
+  gameCode?: string;
+  winner?: string;
+  winnerRating?: number;
+  onReturnHome?: () => void;
+  onGoBack?: () => void;
+}
+
+const GameEndedPage = ({
+  gameCode,
+  winner,
+  winnerRating,
+  onReturnHome,
+  onGoBack,
+}: GameEndedPageProps) => {
+  const navigate = useNavigate();
+
+  const handleReturnHome = () => {
+    onReturnHome ? onReturnHome() : navigate("/");
+  };
+
+  const handleGoBack = () => {
+    onGoBack ? onGoBack() : navigate(-1);
+  };
+
+  return (
+    <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover min-h-screen flex flex-col items-center justify-center p-4">
+      {/* Animated background blur elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div
+          className="absolute bottom-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-md w-full">
+        <div className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-8 lg:p-12 border border-blue-400/20 shadow-2xl text-center">
+          {/* Success Icon */}
+          <div className="mb-6 flex justify-center">
+            <div className="p-4 bg-green-500/20 border border-green-400/50 rounded-full backdrop-blur-sm">
+              <svg
+                className="w-12 h-12 text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3">
+            Match Completed
+          </h1>
+
+          {/* Winner Information */}
+          {winner && (
+            <div className="mb-8">
+              <p className="text-gray-300 mb-2">
+                <span className="text-green-400 font-semibold text-lg">
+                  {winner}
+                </span>
+                <span className="text-gray-400"> wins the match!</span>
+              </p>
+              {winnerRating && (
+                <p className="text-gray-400 text-sm">
+                  Rating:{" "}
+                  <span className="text-blue-300 font-semibold">
+                    {winnerRating}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Game Information */}
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 mb-8 border border-gray-700/30">
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-3">
+              Match Details
+            </p>
+            <ul className="text-left space-y-2 text-sm text-gray-300">
+              <li className="flex items-center justify-between">
+                <span className="text-gray-400">Game Code:</span>
+                <span className="font-mono font-semibold text-blue-300">
+                  {gameCode || "N/A"}
+                </span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-gray-400">Status:</span>
+                <span className="text-green-400 font-semibold">Completed</span>
+              </li>
+              {/* <li className="flex items-center justify-between">
+                <span className="text-gray-400">Recorded:</span>
+                <span className="text-gray-300">Yes</span>
+              </li> */}
+            </ul>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleReturnHome}
+              className="w-full px-6 py-3 bg-blue-600/80 hover:bg-blue-600 backdrop-blur-sm rounded-lg text-white font-semibold transition shadow-lg hover:shadow-xl"
+            >
+              Return Home
+            </button>
+            <button
+              onClick={handleGoBack}
+              className="w-full px-6 py-3 bg-slate-800/50 hover:bg-slate-800 backdrop-blur-sm rounded-lg text-gray-300 font-semibold transition border border-gray-700/30"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GameEndedPage;

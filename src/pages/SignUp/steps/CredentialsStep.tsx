@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface CredentialsStepProps {
-  onSubmit: (username: string, password: string, setIsLoading:any) => void;
+  onSubmit: (username: string, password: string, setIsLoading: any) => void;
 }
 
 const CredentialsStep: React.FC<CredentialsStepProps> = ({ onSubmit }) => {
@@ -20,7 +20,7 @@ const CredentialsStep: React.FC<CredentialsStepProps> = ({ onSubmit }) => {
     setError("");
     setIsLoading(true);
 
-     onSubmit(username, password, setIsLoading);
+    onSubmit(username, password, setIsLoading);
 
     // Simulate API call
     // setTimeout(() => {
@@ -80,6 +80,18 @@ const CredentialsStep: React.FC<CredentialsStepProps> = ({ onSubmit }) => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
+            </div>
+            <div className="mt-2 space-y-1">
+              <p className="text-xs text-gray-400">
+                <span className="font-semibold text-gray-300">
+                  Visible to everyone
+                </span>{" "}
+                — Your username will be displayed on your profile and can't be
+                changed later.
+              </p>
+              <p className="text-xs text-gray-500">
+                Consider using a casual or gaming name that represents you.
+              </p>
             </div>
           </div>
 

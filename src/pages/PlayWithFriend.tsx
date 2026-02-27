@@ -33,6 +33,7 @@ import Modal from "@/components/Modal";
 import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 //import AudioRecorder from "@/components/AudioRecorder";
 import BottomBar from "@/components/BottomBar";
+import GameNotFoundPage from "@/components/GameNotFoundPage";
 
 interface Message {
   user_id: number | undefined;
@@ -72,6 +73,7 @@ const PlayWithFriend = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [gameNotFound, setGameNotFound] = useState(false);
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -499,6 +501,7 @@ const PlayWithFriend = () => {
     socket?.emit("sendMessage", messageData);
   };
 
+  
   const handleLeaveRoom = () => {
     logEvent(analytics, "leave_game_initiated", { gameCode: code });
     setShowLeaveConfirmation(true);
@@ -513,6 +516,10 @@ const PlayWithFriend = () => {
   const handleCancelLeave = () => {
     setShowLeaveConfirmation(false);
   };
+
+  if (gameNotFound) {
+    return <GameNotFoundPage gameCode={code} />;
+  }
 
   return (
     <div className="relative borde bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
@@ -772,33 +779,6 @@ const PlayWithFriend = () => {
                 onClick={handlePlayAsGuest}
               >
                 Play as Guest
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {gameNotFound && (
-        <Modal
-          title=""
-          isOpen={gameNotFound}
-          onClose={() => setGameNotFound(false)}
-        >
-          <div className="p-4">
-            <h2 className="text-lg font-bold mb-4">Game Not Found</h2>
-            <p className="mb-4 text-sm">
-              The game with this code is not found or has expired. Please check
-              the code and try again.
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={() => {
-                  setGameNotFound(false);
-                  navigate("/");
-                }}
-              >
-                Return Home
               </button>
             </div>
           </div>

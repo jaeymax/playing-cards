@@ -1,23 +1,127 @@
 import React from "react";
+import { Round } from "@/types/tournament";
 
 interface TimelineWidgetProps {
   status?: string;
   loading?: boolean;
+  tournamentData: TournamentData | null;
+}
+
+interface Tournament {
+  id: number;
+  name: string;
+  start_date: string;
+  status: "upcoming" | "ongoing" | "completed";
+  format: string;
+  prize: string;
+  registration_fee: string;
+  current_round_number: number;
+}
+
+interface Participant {
+  id: number;
+  username: string;
+  image_url: string;
+  rank: string;
+  status: string;
+  wins: number;
+  losses: number;
+}
+
+interface Rule {
+  id: number;
+  title: string;
+  content: string;
+}
+
+interface TournamentData {
+  success: boolean;
+  tournament: Tournament;
+  participants: Participant[];
+  rounds: Round[];
+  rules: Rule[];
 }
 
 const TimelineWidget: React.FC<TimelineWidgetProps> = ({
   status,
   loading = false,
+  tournamentData,
 }) => {
+  const generateTimeLine = (tournamentData: TournamentData) => {
+    if (!tournamentData) return [];
 
-  (status)
-  const timeline = [
-    { phase: "Registration", status: "completed", time: "Ended 2h ago" },
-    { phase: "Group Stage", status: "active", time: "In Progress" },
-    { phase: "Quarter Finals", status: "upcoming", time: "Starts in 2h" },
-    { phase: "Semi Finals", status: "upcoming", time: "Mar 15, 2:00 PM" },
-    { phase: "Finals", status: "upcoming", time: "Mar 15, 4:00 PM" },
-  ];
+    const rounds = tournamentData.rounds;
+    const currentRound = tournamentData.tournament.current_round_number;
+    const numberOfParticipants = tournamentData.participants.length;
+
+    const calculateTotalRounds = (participants: number): number => {
+      if (participants <= 1) return 0;
+      return Math.ceil(Math.log2(participants));
+    };
+
+    (status)
+
+    const totalRounds = calculateTotalRounds(numberOfParticipants);
+    const roundsMap = new Map(rounds.map((r) => [r.round, r]));
+
+    const renderRoundName = (round: number) => {
+      const roundsFromEnd = totalRounds - round;
+      if (roundsFromEnd === 0) return "Finals";
+      if (roundsFromEnd === 1) return "Semi Finals";
+      if (roundsFromEnd === 2) return "Quarter Finals";
+      return "Round " + round;
+    };
+
+    const isRoundCompleted = (roundData: Round): boolean => {
+      return roundData.matches.length > 0 && roundData.matches.every((match) => match.winner_id !== null);
+    };
+
+    const isRoundPending = (roundData: Round): boolean => {
+      return roundData.matches.every((match) => match.status === 'pending');
+    }
+
+    const timelineItems = [];
+
+    for (let roundNumber = 1; roundNumber <= totalRounds; roundNumber++) {
+      let roundStatus: "completed" | "active" | "upcoming" = "upcoming";
+      let timeLabel = "Upcoming";
+
+      const roundData = roundsMap.get(roundNumber);
+
+      if (roundData) {
+        const isCompleted = isRoundCompleted(roundData);
+        const isPending = isRoundPending(roundData);
+
+        if(isPending) {
+          roundStatus = "upcoming";
+          timeLabel = "Upcoming";
+        }
+        else if (isCompleted) {
+          roundStatus = "completed";
+          timeLabel = "Completed";
+        } else if (roundNumber === currentRound) {
+          roundStatus = "active";
+          timeLabel = "In Progress";
+        }
+      } else if (roundNumber < currentRound) {
+        roundStatus = "completed";
+        timeLabel = "Completed";
+      } else if (roundNumber === currentRound) {
+        roundStatus = "upcoming";
+        timeLabel = "Upcoming";
+      }
+
+      timelineItems.push({
+        phase: renderRoundName(roundNumber),
+        status: roundStatus,
+        time: timeLabel,
+      });
+    }
+
+    return timelineItems;
+  };
+
+  const timeline = tournamentData ? generateTimeLine(tournamentData) : [];
 
   const TimelineSkeleton: React.FC = () => (
     <div className="bg-gray-800 md:rounded-lg border-t border-b md:border border-gray-700 p-4">
@@ -51,7 +155,7 @@ const TimelineWidget: React.FC<TimelineWidgetProps> = ({
                 item.status === "completed"
                   ? "bg-green-500"
                   : item.status === "active"
-                  ? "bg-blue-500"
+                  ? "bg-blue-500 animate-pulse"
                   : "bg-gray-600"
               }`}
             />

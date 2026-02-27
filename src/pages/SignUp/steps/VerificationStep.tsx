@@ -1,3 +1,4 @@
+import { baseUrl } from "@/config/api";
 import React, { useState, useEffect } from "react";
 
 interface VerificationStepProps {
@@ -51,7 +52,7 @@ const VerificationStep: React.FC<VerificationStepProps> = ({
 
     try {
       const response = await fetch(
-        "https://playing-cards-api.onrender.com/api/auth/verify-otp",
+        `${baseUrl}/auth/verify-otp`,
         {
           method: "POST",
           headers: {

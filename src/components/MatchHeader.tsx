@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { memo } from "react";
 
 interface MatchHeaderProps {
   gameCode?: string;
@@ -50,7 +51,10 @@ const MatchHeader = ({
   }) => (
     <div className="text-center flex flex-col items-center">
       <img
-        src={player?.user.image_url}
+        src={
+          player?.user.image_url ||
+          "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+        }
         alt={player?.user.username}
         className="w-12 h-12 lg:w-20 lg:h-20 rounded-full object-cover mb-2 lg:mb-3 border-2 border-blue-400 shadow-lg"
       />
@@ -64,14 +68,14 @@ const MatchHeader = ({
   );
 
   return (
-    <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-black text-white px-4 py-4 lg:px-8 lg:py-6 shadow-2xl border-b border-blue-500/30">
+    <header className="bg-slate-900/40 backdrop-blur-s text-white px-4 py-4 lg:px-8 lg:py-6 shadow-2xl border- border-blue-400/20">
       {/* Top row - Title and Spectator Badge */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4 lg:mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-lg lg:text-2xl font-bold">
             {eventName || "Live Match"}
           </h1>
-          <div className="flex items-center gap-1 px-2 py-1 bg-amber-500/20 border border-amber-400/50 rounded-full">
+          <div className="flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-400/30 rounded-full backdrop-blur-sm">
             <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
             <span className="text-xs lg:text-sm font-semibold text-amber-300">
               SPECTATING
@@ -79,8 +83,8 @@ const MatchHeader = ({
           </div>
         </div>
         <button
-          onClick={() => navigate("/")}
-          className="px-3 py-2 lg:px-5 lg:py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition text-sm lg:text-base shadow-lg hover:shadow-xl w-full lg:w-auto"
+          onClick={() => navigate(-1)}
+          className="px-3 py-2 lg:px-5 lg:py-2 bg-red-600/80 hover:bg-red-600 backdrop-blur-sm rounded-lg font-semibold transition text-sm lg:text-base shadow-lg hover:shadow-xl w-full lg:w-auto"
         >
           Exit
         </button>
@@ -114,7 +118,7 @@ const MatchHeader = ({
       </div>
 
       {/* Event details and viewers */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-700/30">
         <div className="flex items-center gap-2">
           <span className="text-xs lg:text-sm text-gray-400">Game Code:</span>
           <span className="text-xs lg:text-sm font-mono font-bold text-blue-300">
@@ -139,4 +143,4 @@ const MatchHeader = ({
   );
 };
 
-export default MatchHeader;
+export default memo(MatchHeader);

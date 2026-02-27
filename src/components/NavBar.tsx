@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { customLog, removeToken } from "@/utils/Functions";
-import { Home, Info, ScrollText, Mail } from "lucide-react";
+import { Home, Info, ScrollText, Mail,  Medal } from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -447,13 +447,13 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                 className="text-gray-300 hover:text-white px-3 py-2"
               >
                 Tournaments
-              </Link>
+              </Link> */}
               <Link
                 to="/leaderboard"
                 className="text-gray-300 hover:text-white px-3 py-2"
               >
                 Leaderboard
-              </Link> */}
+              </Link>
               <Link
                 to="/about"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -548,7 +548,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   </div> */}
 
                   {/* Notification Bell */}
-                  {/* <div className="relative">
+                  <div className="relative">
                     <button
                       className="borde mt-2 rounded-lg text-gray-400 hover:text-white"
                       onClick={() => navigate("/notifications")}
@@ -568,16 +568,16 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                       </svg>
                       {notificationCount > 0 && (
                         <span className="absolute top-3 right-2 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                          {notificationCount}
+                          {notificationCount > 9 ? "9+" : notificationCount}
                         </span>
                       )}
                     </button>
-                  </div> */}
+                  </div>
 
                   {/* Profile Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
+                      onClick={() => navigate('/profile')}
                       className="flex items-center space-x-3 focus:outline-none"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[0px]">
@@ -784,14 +784,14 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                 >
                   <Trophy className="w-5 h-5" />
                   Tournaments
-                </Link>
+                </Link> */}
                 <Link
                   to="/leaderboard"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
                   <Medal className="w-5 h-5" />
                   Leaderboard
-                </Link> */}
+                </Link>
                 <Link
                   to="/rules"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"

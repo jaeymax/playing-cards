@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TournamentRegistrationModal from "./TournamentRegistrationModal";
 import LoginRequiredModal from "./LoginRequiredModal";
+import PhoneNumberRequiredModal from "./PhoneNumberRequiredModal";
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 import { customLog, getToken } from "@/utils/Functions";
@@ -106,6 +107,8 @@ const TournamentBanner: React.FC = () => {
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [phoneNumberRequiredModalOpen, setPhoneNumberRequiredModalOpen] =
+    useState(false);
 
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(
     null
@@ -166,10 +169,14 @@ const TournamentBanner: React.FC = () => {
   }, [user]);
 
   const handleRegistration = () => {
-    if (!user || user?.is_guest) {
+  if (!user || user?.is_guest) {
       setIsLoginRequiredModalOpen(true);
     } else {
-      setIsRegistrationModalOpen(true);
+      if (!user?.phone) {
+        setPhoneNumberRequiredModalOpen(true);
+      } else {
+        setIsRegistrationModalOpen(true);
+      }
     }
   };
 
@@ -249,6 +256,14 @@ const TournamentBanner: React.FC = () => {
         registrationFee={tournamentData ? tournamentData.registration_fee : 0}
         getTournamentDetails={getTournamentDetails}
         prizePool={tournamentData ? tournamentData.prize : 0}
+      />
+      <PhoneNumberRequiredModal
+        isOpen={phoneNumberRequiredModalOpen}
+        onClose={() => setPhoneNumberRequiredModalOpen(false)}
+        onPhoneNumberAdded={() => {
+          setPhoneNumberRequiredModalOpen(false);
+          setIsRegistrationModalOpen(true);
+        }}
       />
       <LoginRequiredModal
         isOpen={isLoginRequiredModalOpen}

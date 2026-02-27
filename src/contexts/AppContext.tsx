@@ -16,6 +16,9 @@ interface User {
   image_url: string;
   games_played:number;
   games_won:number;
+  is_rated:boolean;
+  tournaments_played:number;
+  tournaments_won:number;
   rank:number;
   is_guest:boolean;
   rating:number;
@@ -59,7 +62,7 @@ interface Notification {
   is_read: boolean;
   title: string;
   message: string;
-  time: string;
+  created_at: string;
   action: string;
 }
 
@@ -87,7 +90,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setNotificationsLoading(true);
         setNotificationsError(null);
         try{
-          const fetchedNotifications = await fetch(`${baseUrl}/notifications/user/${user.id}`,  {
+          const fetchedNotifications = await fetch(`${baseUrl}/notifications/user/${user?.id}`,  {
             method: "GET",
             headers: {
               "Content-Type": "application/json", 
@@ -115,6 +118,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       fetchNotifications();
     }, [user]);
 
+
+
+    
   useEffect(() => {
     const accessToken = getToken();
     

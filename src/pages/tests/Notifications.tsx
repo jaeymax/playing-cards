@@ -80,9 +80,14 @@ const NotificationsPage = () => {
   //     action: "View Tournament Results"
   //   }
   // ]);
-  const { notifications, notificationsLoading, notificationsError, setNotifications } = useAppContext();
+  const {
+    notifications,
+    notificationsLoading,
+    notificationsError,
+    setNotifications,
+  } = useAppContext();
 
-  (notificationsLoading && notificationsError)
+  notificationsLoading && notificationsError;
 
   const markAsRead = async (id: number) => {
     setNotifications(
@@ -294,18 +299,36 @@ const NotificationsPage = () => {
                         <p className="font-medium text-gray-100">
                           {notification.title}
                         </p>
-                        <span className="text-xs text-gray-400">
-                          {notification.time}
+                        <span className="text-xs text-gray-400 flex gap-1">
+                          <p>
+                            {new Date(notification.created_at).toLocaleString(
+                              "default",
+                              { month: "short" }
+                            )}
+                          </p>
+                          <p>
+                            {new Date(notification.created_at).getDate()} at
+                          </p>
+                          <p>
+                            {new Date(
+                              notification.created_at
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
                         </span>
                       </div>
                       <p className="mt-1 text-sm text-gray-300">
                         {notification.message}
                       </p>
-                      <div className="mt-2">
-                        <button className="px-4 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition">
-                          {notification.action}
-                        </button>
-                      </div>
+                      {!notification.is_read && (
+                        <div className="mt-2">
+                          <button className="px-4 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition">
+                            Mark as Read
+                          </button>
+                        </div>
+                      )}
                     </div>
                     {!notification.is_read && (
                       <div className="ml-2 flex-shrink-0">

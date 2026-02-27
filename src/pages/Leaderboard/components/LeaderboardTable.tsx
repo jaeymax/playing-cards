@@ -1,38 +1,23 @@
-import { baseUrl } from "@/config/api";
-import React, { useEffect } from "react";
+import React from "react";
 
 interface LeaderboardTableProps {
   currentFilter: string;
   searchQuery: string;
+  players: any[];
+  loading: boolean;
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   currentFilter,
   searchQuery,
+  players,
+  loading,
 }) => {
   currentFilter;
   searchQuery;
 
-  const [players, setPlayers] = React.useState<any>([]);
-  const [loading, setLoading] = React.useState<boolean>(true);
 
-  useEffect(() => {
-    // Fetch player data from the API
-    const fetchPlayers = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/leaderboard`);
-        const data = await response.json();
-        setPlayers(data);
-        setLoading(false);
-        console.log("players", data);
-      } catch (error) {
-        console.error("Error fetching players:", error);
-        setLoading(false);
-      }
-    };
 
-    fetchPlayers();
-  }, []);
 
   // const players = [
   //   {
@@ -55,7 +40,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   // ];
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700">
+    <div className="bg-gray-800 md:rounded-lg md:border border-gray-700">
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
@@ -69,9 +54,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th className="px-1 py-4 text-left text-xs font-medium text-gray-400 uppercase">
                 Points
               </th>
-              {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">
                 Win Rate
-              </th> */}
+              </th>
               {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">
                 Games
               </th> */}
@@ -122,16 +107,18 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                           )}
                         </div>
                         <span className="ml-3 text-white">
-                          {player.username}
+                          {player.username.length > 10
+                            ? player.username.slice(0, 10) + "..."
+                            : player.username}
                         </span>
                       </div>
                     </td>
                     <td className="px-1 py-4 whitespace-nowrap text-sm text-gray-300">
                       {player.rating}
                     </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {player.winRate}
-                  </td> */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {Math.round(player.win_rate)}%
+                  </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {player.games}
                   </td> */}

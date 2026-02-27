@@ -181,29 +181,7 @@ const TournamentPage: React.FC = () => {
     customLog("Received tournamentData via socket");
     setTournamentData(tournamentData);
     console.log("tournamentData via socket", tournamentData);
-    
-    // const current_round_number = tournamentData.tournament.current_round_number;
-    // const current_round_matches = tournamentData.rounds.find(
-    //   (round) => round.round === current_round_number
-    // )?.matches;
-
-    //customLog("current_round_matches", current_round_matches);
-    // const myMatch = current_round_matches?.find(
-    //   (match) => match.player1.id === user?.id || match.player2.id === user?.id
-    // );
-
-  //   if(myMatch && myMatch.status === 'forfeited' ){
-  //   setShowMatchForfeitedModal(true);
-  //   if (myMatch?.forfeiter_user_id === user?.id) {
-  //     setMatchForfeitedMessage(
-  //       "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
-  //     );
-  //   } else {
-  //     setMatchForfeitedMessage(
-  //       "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."
-  //     );
-  //   }
-  // }
+ 
   };
 
   useEffect(() => {
@@ -224,6 +202,11 @@ const TournamentPage: React.FC = () => {
       socket?.off("lobbyUpdate", lobbyUpdateCallback);
       socket.off("tournamentEnded", tournamentEndedCallback);
       socket.off("matchForfeit", matchForfeitedCallback);
+      socket.emit('leaveTournamentRoom', {
+        tournamentId:id,
+        userId: user?.id,
+        gameCode: extractGameCodeFromTournamentData(tournamentData)
+      })
     };
   }, [user, socket, tournamentData]);
 
@@ -296,13 +279,15 @@ const TournamentPage: React.FC = () => {
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
-                        className={`px-4 py-2 text-sm font-medium capitalize ${
+                        className={`px-4 gap-3 flex py-2 text-sm font-medium capitalize ${
                           activeTab === tab
                             ? "text-blue-400 border-b-2 border-blue-400"
                             : "text-gray-400 hover:text-white"
                         }`}
                       >
                         {tab}
+                        {tab === "participants" && (<span className="bg-blue-400 w-6 rounded-full text-gray-800" >{tournamentData?.participants.length}</span>)}
+                        
                       </button>
                     ))}
                   </div>
@@ -344,6 +329,7 @@ const TournamentPage: React.FC = () => {
                 <TimelineWidget
                   status={tournamentData?.tournament.status}
                   loading={loading}
+                  tournamentData={tournamentData}
                 />
               </div>
             </div>

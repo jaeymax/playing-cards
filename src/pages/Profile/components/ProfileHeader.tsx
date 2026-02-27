@@ -189,7 +189,7 @@ const ProfileHeader: React.FC = () => {
                 </h1>
                 <div className="flex gap-2">
                   <span className={`${division.badgeClasses}`}>
-                    {division.name}
+                    {user?.is_rated ? division.name : "Unrated"}
                   </span>
                   {/* <span className="px-3 py-1 text-sm bg-purple-500/10 text-purple-400 rounded-full">
                     Tournament Winner
@@ -204,7 +204,9 @@ const ProfileHeader: React.FC = () => {
             {/* Quick Stats */}
             <div className="flex gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">#{user?.rank}</div>
+                <div className="text-2xl font-bold text-white"> 
+                  {user?.is_rated ? `#${user.rank}` : "Unrated"}
+                 </div>
                 <div className="text-sm text-gray-400">Global Rank</div>
               </div>
               <div className="text-center">
@@ -230,7 +232,7 @@ const ProfileHeader: React.FC = () => {
         message={toast.message}
         // type={toast.type}
         isVisible={toast.isVisible}
-        //onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        onClose={() =>{}}
       />
     </>
   );

@@ -1,30 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface ToastProps {
   message: string;
   isVisible: boolean;
+  onClose: () => void;
+  duration?: number;
 }
 
-const Toast: React.FC<ToastProps> = ({ message, isVisible }) => {
-  if (!isVisible) return null;
+const Toast: React.FC<ToastProps> = ({
+  message,
+  isVisible,
+  onClose,
+  duration = 3000,
+}) => {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(onClose, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, duration, onClose]);
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90% max-w-md">
-      <div className="animate-toast-fade bg-gray-800 border border-gray-700 text-gray-100 px-4 sm:px-6 py-3 rounded-full shadow-xl flex items-center gap-3 whitespace-nowrap">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 sm:h-5 sm:w-5 flex-shrink-0 text-blue-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clipRule="evenodd"
-          />
-        </svg>
-        <span className="text-sm sm:text-base">{message}</span>
-      </div>
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg shadow-lg transition-transform duration-300 flex items-center gap-3 whitespace-nowrap ${
+        isVisible ? "translate-y-0" : "-translate-y-20 pointer-events-none"
+      }`}
+    >
+      <svg
+        className="w-5 h-5 text-green-500 flex-shrink-0"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clipRule="evenodd"
+        />
+      </svg>
+      <span>{message}</span>
     </div>
   );
 };

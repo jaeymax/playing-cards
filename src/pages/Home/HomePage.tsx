@@ -34,8 +34,8 @@ const HomePage: React.FC = () => {
 
           {/* Right Sidebar */}
       <div className="lg:col-span-3 space-y-8">
-            {/* <OnlineFriends />
-            <Announcements /> */}
+            {/* <OnlineFriends /> */}
+            {/* <Announcements /> */}
           </div>
         </div>
       </div>

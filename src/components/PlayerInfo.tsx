@@ -77,13 +77,13 @@ const PlayerInfo = ({
 
           {/* Avatar */}
           <Avatar className="md:w-12 md:h-12 w-8 h-8 avatar-image">
-            <AvatarImage src={avatar} />
+            <AvatarImage src={avatar} className="object-cover" />
             <AvatarFallback>{name[0]}</AvatarFallback>
           </Avatar>
         </div>
       ) : (
         <Avatar className="md:w-12 md:h-12 w-8 h-8 avatar-image">
-          <AvatarImage src={avatar} />
+          <AvatarImage src={avatar} className="object-cover" />
           <AvatarFallback>{name[0]}</AvatarFallback>
         </Avatar>
       )}

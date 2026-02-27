@@ -97,7 +97,7 @@ const TournamentDetailsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <NavBar showSignUps = {false} />
-      <Toast message="Please Register or Sign in" isVisible={showToast} />
+      <Toast message="Please Register or Sign in" isVisible={showToast} onClose={()=>{}} />
       <div className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="mb-8">

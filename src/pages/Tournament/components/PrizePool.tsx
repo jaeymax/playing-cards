@@ -17,7 +17,7 @@ const PrizePool: React.FC<PrizePoolProps> = ({
   const prizes = [
     {
       position: "1st Place",
-      reward: "🥇",
+      reward: "🥇 + ₵50",
       extra: "Championship Qualifier",
     },
     {
@@ -75,11 +75,11 @@ const PrizePool: React.FC<PrizePoolProps> = ({
                   : "bg-orange-600"
               }`}
             >
-              {index + 1}
+            {index + 1}
             </div>
-            <div className = 'flex gap-5'>
+            <div className = 'fle gap-5'>
               <p className="text-white font-medium">{prize.position}</p>
-              <p className="text-2xl text-blue-400">{prize.reward}</p>
+              <p className="text-l text-gray-300">{prize.reward}</p>
               {/* <p className="text-xs text-gray-400">{prize.extra}</p> */}
             </div>
           </div>

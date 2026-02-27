@@ -2,6 +2,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 import { Round } from "@/types/tournament";
 import { Player } from "@/types/tournament";
+import { useNavigate } from "react-router-dom";
 
 // interface Player {
 //   id:number;
@@ -142,14 +143,19 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     );
   };
 
-  const SpectateButton: React.FC<{ matchId: number }> = ({ matchId }) => {
-    
-     if(matchId){
-      return;
-     }
+  const SpectateButton: React.FC<{ matchCode: string, roundName:string }> = ({ matchCode, roundName }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () =>{
+        navigate(`/game/${matchCode}/spectate`, {state:{roundName, name:'Weekend Championship'}});
+    }
+
+    //  if(matchId){
+    //   return;
+    //  }
 
       return(
-    <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2">
+    <button onClick={handleClick} className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2">
       {/* <span>📺</span> */}
       <span>Spectate</span>
     </button>
@@ -240,7 +246,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   return (
     <div className="relative">
       {/* Mobile View */}
-      <div className="lg:hidden space-y-8 px-2 py-4">
+      <div className=" hidden lg:hidden space-y-8 px-2 py-4">
         {Array.from({ length: totalRounds }).map((_, index) => {
           const roundNumber = index + 1;
           const roundData = roundsMap.get(roundNumber);
@@ -259,7 +265,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                     >
                       <div className="mb-4 flex items-center justify-between">
                         <MatchStatus status={match.status} />
-                       {match.status == 'in_progress' && <SpectateButton matchId={match.id} />}
+                       {match.status == 'in_progress' && <SpectateButton matchCode={match.game_code} roundName = {renderRoundName(roundNumber)} />}
                         
                       </div>
                       <div className="space-y-3">
@@ -289,7 +295,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
       </div>
 
       {/* Desktop View */}
-      <div className="hidden lg:block overflow-x-auto scrollbar-thin">
+      <div className="hidde lg:block overflow-x-auto scrollbar-thin">
         <div className="min-w-[900px] p-6">
           <div className="flex justify-between gap-6">
             {Array.from({ length: totalRounds }).map((_, index) => {
@@ -309,7 +315,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm">
                             <div className="mb-4 flex items-center justify-between">
                               <MatchStatus status={match.status} />
-                              {match.status == 'in_progress' && <SpectateButton matchId={match.id} />}
+                              {match.status == 'in_progress' && <SpectateButton matchCode={match.game_code} roundName={renderRoundName(roundNumber)} />}
                             </div>
                             <div className="space-y-3">
                               <PlayerRow

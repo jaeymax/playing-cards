@@ -26,6 +26,7 @@ import WinnerModal from "@/components/WinnerModal";
 import SingleEliminationGameOverModal from "@/components/SingleEliminationGameOverModal";
 import MatchForfeitModal from "@/components/MatchForfeitModal";
 import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
+import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 
 // interface Message {
 //   user_id: number | undefined;
@@ -46,7 +47,7 @@ const SingleEliminationGame = () => {
   // const [current_turn_user_id, setCurrentTurnUserId] = useState<number | null>(null);
   const [turn_ends_at, setTurnEndsAt] = useState<number>(0);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
- // const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
   const [game, setGame] = useState<any>(null);
   const [gameCards, setGameCards] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
@@ -60,16 +61,16 @@ const SingleEliminationGame = () => {
   const [message, setMessage] = useState<string>("");
   const [isDealing, setIsDealing] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
-  const [shuffledAtLeastOnce, setShuffledATLeastOnce] = useState(false); 
+  const [shuffledAtLeastOnce, setShuffledATLeastOnce] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
   const [losingPlayer, setLosingPlayer] = useState<any>(null);
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
+  const [processingForfeit, setProcessingForfeit] = useState<any>(null);
 
-  (gameNotFound && true);
-  
+  gameNotFound && true;
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -96,7 +97,6 @@ const SingleEliminationGame = () => {
 
   const navigate = useNavigate();
 
-
   const handleDeal = () => {
     socket?.emit("dealCards", code);
   };
@@ -105,24 +105,28 @@ const SingleEliminationGame = () => {
     socket?.emit("shuffleDeck", code);
   };
 
-  const handleMatchForfeitClose = () =>{
+  const handleMatchForfeitClose = () => {
     setMatchForfeited(false);
     customLog("matchforfeiter", matchForfeiter);
-    if(game?.is_final_match){
-        const winningPlayer = game.players.find((player:any)=>player.user.id != matchForfeiter.user.id);
-        const losingPlayer = game.players.find((player:any)=>player.user.id == matchForfeiter.user.id);
-        setWinningPlayer(winningPlayer);
-        setLosingPlayer(losingPlayer);
-        setGameOver(true);
-    }else{
-       navigate(-1);
+    if (game?.is_final_match) {
+      const winningPlayer = game.players.find(
+        (player: any) => player.user.id != matchForfeiter.user.id
+      );
+      const losingPlayer = game.players.find(
+        (player: any) => player.user.id == matchForfeiter.user.id
+      );
+      setWinningPlayer(winningPlayer);
+      setLosingPlayer(losingPlayer);
+      setGameOver(true);
+    } else {
+      navigate(-1);
     }
-  }
+  };
 
   const getGameDataCallback = (data: any) => {
     console.log("Game data received:", data);
     setGame(data);
-    setTurnEndsAt(data.turn_ends_at)
+    setTurnEndsAt(data.turn_ends_at);
     setPlayers(data.players);
     data.cards.forEach((card: any, i: number) => {
       card.pos_x = card.pos_x * i;
@@ -159,16 +163,14 @@ const SingleEliminationGame = () => {
     const myData = data.players.find(
       (player: any) => player.user.id === user?.id
     );
-   // setMe(myData);
-    console.log('my Data', myData)
-    setMe((prevState:any)=>(
-       {
-        ...prevState,
-        score: myData.score,
-        is_dealer: myData.is_dealer,
-        games_won: myData.games_won
-       }
-    ))
+    // setMe(myData);
+    console.log("my Data", myData);
+    setMe((prevState: any) => ({
+      ...prevState,
+      score: myData.score,
+      is_dealer: myData.is_dealer,
+      games_won: myData.games_won,
+    }));
     getOpponentsData(data.players);
   };
 
@@ -236,6 +238,9 @@ const SingleEliminationGame = () => {
   }, [game]);
 
   const matchForfeitCallback = (data: any) => {
+    const b = players.find(player=>player.user.id == user?.id);
+    if(!b)return;
+    setProcessingForfeit(false);
     setMatchForfeited(true);
     const forfeiterId = data.loserId;
     customLog("forfeiterId", forfeiterId);
@@ -245,6 +250,7 @@ const SingleEliminationGame = () => {
     setMatchForfeiter(forfeiter);
     console.log("Match forfeit:", data);
   };
+
   useEffect(() => {
     if (!user) return;
 
@@ -329,14 +335,16 @@ const SingleEliminationGame = () => {
       setRemainingSeconds(remaining);
 
       if (remaining === 0) {
+        if(!matchForfeiter){
+          setProcessingForfeit(true);
+        }
         clearInterval(interval);
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [turn_ends_at]);
+  }, [turn_ends_at, matchForfeiter]);
 
-  
   const turnStartedCallback = (data: {
     current_turn_user_id: number;
     turn_ends_at: number;
@@ -357,7 +365,7 @@ const SingleEliminationGame = () => {
     setGame(data);
     setTurnEndsAt(data.turn_ends_at);
     setGameCards(data.cards);
-    if(me?.is_dealer){
+    if (me?.is_dealer) {
       setShuffledATLeastOnce(false);
     }
   };
@@ -381,10 +389,12 @@ const SingleEliminationGame = () => {
       winningPosition: winnerData.winner.position,
     });
     setWinningPlayer(winnerData.winner);
-    const losingPlayer = players.find((player:any)=>player.user.id !== winnerData.winner.user.id);
+    const losingPlayer = players.find(
+      (player: any) => player.user.id !== winnerData.winner.user.id
+    );
     setLosingPlayer(losingPlayer);
     console.log("Winner data:", winnerData);
-    console.log('losing player in gameovercallback', losingPlayer)
+    console.log("losing player in gameovercallback", losingPlayer);
   };
 
   const playedCardCallback = ({
@@ -421,7 +431,7 @@ const SingleEliminationGame = () => {
     setGameCards(cards);
     playShuffleSound();
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
-    if(me?.is_dealer){
+    if (me?.is_dealer) {
       setShuffledATLeastOnce(true);
     }
   };
@@ -497,7 +507,6 @@ const SingleEliminationGame = () => {
             name={thirdOpponent?.user.username || "Opponent 3"}
             player_position={thirdOpponent?.position || 0}
             current_player_position={game?.current_player_position || 0}
-
             avatar={
               thirdOpponent?.user.image_url ||
               "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
@@ -509,7 +518,7 @@ const SingleEliminationGame = () => {
 
         <GameControls
           showButtons={showDealButton && showShuffleButton}
-          shuffledAtLeastOnce = {shuffledAtLeastOnce}
+          shuffledAtLeastOnce={shuffledAtLeastOnce}
           isDealing={isDealing}
           isShuffling={isShuffling}
           onDeal={handleDeal}
@@ -602,8 +611,6 @@ const SingleEliminationGame = () => {
           className="container absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
         />
 
-
-
         {remainingSeconds > 0 && game?.current_turn_user_id === user?.id && (
           <TimerBar
             remainingSeconds={remainingSeconds}
@@ -613,7 +620,7 @@ const SingleEliminationGame = () => {
         )}
 
         {/* <ScoresTable players={players} /> */}
-        
+
         <LeadingPlayerInfo
           game={game}
           getPlayerByPosition={getPlayerByPosition}
@@ -654,7 +661,7 @@ const SingleEliminationGame = () => {
           currentPlayer={me}
           onContinue={() => navigate(-1)}
           losingPlayer={losingPlayer}
-          isFinalMatch = {game?.is_final_match}
+          isFinalMatch={game?.is_final_match}
         />
       )}
 
@@ -666,6 +673,8 @@ const SingleEliminationGame = () => {
           currentPlayer={me}
         />
       )}
+
+      <ProcessingForfeitModal isOpen={processingForfeit} />
     </div>
   );
 };

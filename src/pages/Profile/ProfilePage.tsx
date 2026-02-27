@@ -23,7 +23,7 @@ const ProfilePage: React.FC = () => {
     { id: "matches", label: "Match History" },
     // { id: "statistics", label: "Statistics" },
     // { id: "achievements", label: "Achievements" },
-    // { id: "settings", label: "Settings" },
+    { id: "settings", label: "Settings" },
   ];
 
 

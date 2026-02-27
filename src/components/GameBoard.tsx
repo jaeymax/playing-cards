@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import PlayerInfo from "./PlayerInfo";
 import DeckArea from "./DeckArea";
 import OpponentArea from "./OpponentArea";
@@ -33,15 +33,15 @@ const GameBoard = ({
   playerTwoPlayAreaRef,
   playerThreePlayAreaRef,
   playerFourPlayAreaRef,
-  readonly = true,
+  
 }: GameBoardProps) => {
 
-  const playersByPosition = useMemo(() => {
-    return players.reduce((acc, player) => {
-      acc[player.position] = player;
-      return acc;
-    }, {});
-  }, [players]);
+  // const playersByPosition = useMemo(() => {
+  //   return players.reduce((acc, player) => {
+  //     acc[player.position] = player;
+  //     return acc;
+  //   }, {});
+  // }, [players]);
 
   const playerOne = players[0];
   const playerTwo = players[1];
@@ -54,7 +54,7 @@ const GameBoard = ({
     <div className="relative borde border-yellow-500 h-[100px gap-4 bg-center w-full">
 
 
-      <div className="min-h-screen h-full relative  gap-4 bg-center w-full flex flex-col justify-between pb-24">
+      <div className="min-h-screen h-full relativ  gap-4 bg-center w-full flex flex-col justify-between pb-24">
 
 
 
