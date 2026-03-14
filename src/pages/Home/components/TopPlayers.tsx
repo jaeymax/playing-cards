@@ -101,6 +101,17 @@ const TopPlayers: React.FC = () => {
           ))
         )}
       </div>
+      {/* CTA Button View Leaderboared */}
+      {!loading && !error && (
+        <div className="p-3 border-t border-gray-700 text-center">
+          <a
+            href="/leaderboard"
+            className="inline-block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-lg hover:bg-blue-900"
+          >
+            View Leaderboard
+          </a>
+        </div>
+      )}
     </div>
   );
 };

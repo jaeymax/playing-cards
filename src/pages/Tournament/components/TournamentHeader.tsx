@@ -42,11 +42,18 @@ const TournamentHeader: React.FC<TournamentHeaderProps> = ({
   loading,
 }) => {
   const currentRoundName = () => {
+    if(format == "Swiss") {
+      return "Round " + current_round_number;
+    }
+
     const totalRounds = Math.ceil(Math.log2(numberOfParticipants!)); // Assuming a fixed total rounds for simplicity
     const roundsFromEnd = totalRounds - current_round_number!;
     if (roundsFromEnd === 0) return "Finals";
     if (roundsFromEnd === 1) return "Semi Finals";
     if (roundsFromEnd === 2) return "Quarter Finals";
+    if (roundsFromEnd === 3) return "Round of 16";
+    if (roundsFromEnd === 4) return "Round of 32";
+    if (roundsFromEnd === 5) return "Round of 64";
     return "Round " + current_round_number;
   };
 

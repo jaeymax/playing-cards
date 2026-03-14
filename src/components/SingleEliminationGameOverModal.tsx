@@ -8,7 +8,7 @@ interface SingleEliminationGameOverModalProps {
   isOpen: boolean;
   onClose: () => void;
   winningPlayer: any;
-  losingPlayer:any;
+  losingPlayer: any;
   currentPlayer: any;
   onContinue: () => void;
   isFinalMatch: boolean;
@@ -27,18 +27,18 @@ const SingleEliminationGameOverModal = ({
   const isFinalWinner = isFinalMatch && isCurrentPlayerWinner;
   const isFinalRunnerUp = isFinalMatch && !isCurrentPlayerWinner;
 
-  (onClose)
+  onClose;
 
   useEffect(() => {
     if (!isOpen || !isFinalWinner) return;
-  
+
     // Fire confetti burst
     confetti({
       particleCount: 160,
       spread: 80,
       origin: { y: 0.6 },
       colors: ["#facc15", "#eab308", "#fde047", "#ffffff"],
-    })
+    });
     // Optional second burst (feels premium)
     setTimeout(() => {
       confetti({
@@ -49,33 +49,23 @@ const SingleEliminationGameOverModal = ({
     }, 300);
   }, [isOpen, isFinalWinner]);
 
-  customLog('losingPlayer', losingPlayer)
+  customLog("losingPlayer", losingPlayer);
   return (
     <Modal isOpen={isOpen} onClose={() => {}} title="">
       <div className="flex flex-col items-center space-y-6 py-8">
-        <div className={`w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-1 ${isFinalWinner?"shadow-[0_0_30px_rgba(250,204,21,0.6)]":""} `}>
+        <div
+          className={`w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-1 ${
+            isFinalWinner ? "shadow-[0_0_30px_rgba(250,204,21,0.6)]" : ""
+          } `}
+        >
           <div className="w-full relative h-full rounded-full bg-gray-800 flex items-center justify-center">
-          {isFinalWinner && (
-                  <div className="absolute -top-3 -right-3 bg-yellow-400 text-black rounded-full p-1">
-                    👑
-                  </div>
+            {isFinalWinner && (
+              <div className="absolute -top-3 -right-3 bg-yellow-400 text-black rounded-full p-1">
+                👑
+              </div>
             )}
-            {
-              !isFinalMatch? (
-                winningPlayer?.user?.image_url ? (
-                  <img
-                    src={winningPlayer?.user?.image_url}
-                    alt=""
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
-                    alt=""
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                )
-              ):isFinalWinner?(winningPlayer?.user?.image_url ? (
+            {!isFinalMatch ? (
+              winningPlayer?.user?.image_url ? (
                 <img
                   src={winningPlayer?.user?.image_url}
                   alt=""
@@ -87,9 +77,11 @@ const SingleEliminationGameOverModal = ({
                   alt=""
                   className="w-full h-full object-cover rounded-full"
                 />
-              )):(losingPlayer?.user?.image_url ? (
+              )
+            ) : isFinalWinner ? (
+              winningPlayer?.user?.image_url ? (
                 <img
-                  src={losingPlayer?.user?.image_url}
+                  src={winningPlayer?.user?.image_url}
                   alt=""
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -99,8 +91,20 @@ const SingleEliminationGameOverModal = ({
                   alt=""
                   className="w-full h-full object-cover rounded-full"
                 />
-              ))
-            }
+              )
+            ) : losingPlayer?.user?.image_url ? (
+              <img
+                src={losingPlayer?.user?.image_url}
+                alt=""
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <img
+                src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                alt=""
+                className="w-full h-full object-cover rounded-full"
+              />
+            )}
 
             {/* // {winningPlayer?.user?.image_url ? (
             //   <img
@@ -141,8 +145,8 @@ const SingleEliminationGameOverModal = ({
               </h3>
               <p className="text-gray-300 text-sm">
                 You finished <span className="font-semibold">2nd place</span> in
-                the tournament. A strong run all the way to the finals — better
-                luck next time!
+                the tournament. A strong run all the way to the finals — return
+                to the lobby to view your performance in the standings.
               </p>
             </>
           )}
@@ -197,11 +201,7 @@ const SingleEliminationGameOverModal = ({
                 />
               </svg>
               <span>
-                {isFinalMatch
-                  ? "Return to Lobby"
-                  : isCurrentPlayerWinner
-                  ? "Continue to Next Match"
-                  : "Return to Lobby"}
+                {isFinalMatch ? "Return to Lobby" : "Continue to Next Match"}
               </span>
             </>
           ) : (
@@ -219,13 +219,7 @@ const SingleEliminationGameOverModal = ({
                   d="M3 12a9 9 0 0110 0m6.293-6.293a1 1 0 011.414 1.414l-12 12a1 1 0 01-1.414-1.414l12-12z"
                 />
               </svg>
-              <span>
-                {isFinalMatch
-                  ? "Return to Lobby"
-                  : isCurrentPlayerWinner
-                  ? "Continue to Next Match"
-                  : "Return to Lobby"}
-              </span>
+              <span>Return to Lobby</span>
             </>
           )}
         </button>

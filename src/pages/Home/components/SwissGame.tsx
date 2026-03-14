@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useAppContext } from "@/contexts/AppContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSocket } from "@/contexts/SocketProvider";
-import { useAppContext } from "@/contexts/AppContext";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   customLog,
   dealCards,
@@ -13,38 +13,27 @@ import {
   reconcileCards,
   shuffleCards,
 } from "@/utils/Functions";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/firebase/config";
+import TimerBar from "@/components/TimerBar";
 import PlayerInfo from "@/components/PlayerInfo";
 import GameControls from "@/components/GameControls";
 import OpponentArea from "@/components/OpponentArea";
+import DeckArea from "@/components/DeckArea";
 import GameMessage from "@/components/GameMessage";
 import PlayerArea from "@/components/PlayerArea";
-import DeckArea from "@/components/DeckArea";
-//import ScoresTable from "@/components/ScoresTable";
-import TimerBar from "@/components/TimerBar";
-import { analytics, logEvent } from "@/firebase/config";
-import WinnerModal from "@/components/WinnerModal";
-import SingleEliminationGameOverModal from "@/components/SingleEliminationGameOverModal";
-import MatchForfeitModal from "@/components/MatchForfeitModal";
 import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
+import WinnerModal from "@/components/WinnerModal";
+import SwissGameOverModal from "@/components/SwissGameOverModal";
+import MatchForfeitModal from "@/components/MatchForfeitModal";
 import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 
-
-// interface Message {
-//   user_id: number | undefined;
-//   username: string | undefined;
-//   avatar: string | undefined;
-//   message: string;
-//   type: "text" | "audio";
-//   timestamp: string;
-//   mime_type?: string;
-//   audio?: ArrayBuffer;
-// }
-
-interface SingleEliminationGameProps {
+interface SwissGameProps {
   tournamentId: number;
 }
 
-const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournamentId}) => {
+
+const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   const { code } = useParams();
   const { socket } = useSocket();
   const { user } = useAppContext();
@@ -73,10 +62,10 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
   const [losingPlayer, setLosingPlayer] = useState<any>(null);
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
-  const [processingForfeit, setProcessingForfeit] = useState<any>(false);
-
+  const [processingForfeit, setProcessingForfeit] = useState<any>(null);
 
   gameNotFound && true;
+  losingPlayer && true;
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -111,22 +100,30 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     socket?.emit("shuffleDeck", code);
   };
 
+  const handleSwissGameOverModalClose = () => {
+    if(game?.is_final_match) {
+      // if the game is final match navigate back to the lobby and set the current tab to standings
+      navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
+      return;
+    }
+    navigate(-1);
+  }
+
   const handleMatchForfeitClose = () => {
     setMatchForfeited(false);
     customLog("matchforfeiter", matchForfeiter);
-    const winningPlayer = game.players.find(
-      (player: any) => player.user.id != matchForfeiter.user.id
-    );
-    const losingPlayer = game.players.find(
-      (player: any) => player.user.id == matchForfeiter.user.id
-    );
     if (game?.is_final_match) {
+      const winningPlayer = game.players.find(
+        (player: any) => player.user.id != matchForfeiter.user.id
+      );
+      const losingPlayer = game.players.find(
+        (player: any) => player.user.id == matchForfeiter.user.id
+      );
       setWinningPlayer(winningPlayer);
       setLosingPlayer(losingPlayer);
       setGameOver(true);
     } else {
       navigate(-1);
-   
     }
   };
 
@@ -244,19 +241,9 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     }
   }, [game]);
 
-
-  const handleSingleEliminationGameOverModalClose = () => {
-    if(game?.is_final_match) {
-    navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
-    return;
-    }
-    return navigate(-1);
-  }
-
-
   const matchForfeitCallback = (data: any) => {
-    const currentUsersGame = players.find(player=>player.user.id == user?.id);
-    if(!currentUsersGame)return;
+    const b = players.find((player) => player.user.id == user?.id);
+    if (!b) return;
     setProcessingForfeit(false);
     setMatchForfeited(true);
     const forfeiterId = data.loserId;
@@ -266,7 +253,6 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     customLog("forfeiter", forfeiter);
     setMatchForfeiter(forfeiter);
     console.log("Match forfeit:", data);
-  //  setLoserTimeouts(data.loserTimeouts);
   };
 
   useEffect(() => {
@@ -353,7 +339,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
       setRemainingSeconds(remaining);
 
       if (remaining === 0) {
-        if(!matchForfeiter){
+        if (!matchForfeiter) {
           setProcessingForfeit(true);
         }
         clearInterval(interval);
@@ -481,8 +467,6 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     },
     [me, firstOpponent, secondOpponent, thirdOpponent]
   );
-
-  //customLog('losing player', losingPlayer);
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
@@ -672,14 +656,13 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
       />
 
       {gameOver && (
-        <SingleEliminationGameOverModal
+        <SwissGameOverModal
           isOpen={gameOver}
           onClose={() => setGameOver(false)}
           winningPlayer={winningPlayer}
           currentPlayer={me}
-          onContinue={handleSingleEliminationGameOverModalClose}
-          losingPlayer={losingPlayer}
-          isFinalMatch={game?.is_final_match}
+          isFinalMatch = {game?.is_final_match}
+          onContinue={handleSwissGameOverModalClose}
         />
       )}
 
@@ -697,4 +680,4 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
   );
 };
 
-export default SingleEliminationGame;
+export default SwissGame;

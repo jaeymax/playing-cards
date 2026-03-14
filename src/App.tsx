@@ -11,7 +11,6 @@ import NotificationsPage from "./pages/tests/Notifications";
 import EventsPage from "./pages/tests/Events";
 import DashboardPage from "./pages/admin/DashboardPage";
 import SettingsPage from "./pages/tests/Settings";
-import TournamentPage from "./pages/Tournament/TournamentPage";
 import AboutPage from "./pages/About/AboutPage";
 import HelpPage from "./pages/tests/Help";
 import RulesPage from "./pages/tests/Rules";
@@ -45,6 +44,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import WalletPage from "./pages/tests/Wallet";
 import DepositSuccessPage from "./pages/tests/DepositSuccess";
 import SpectatePage from "./components/SpectatePage";
+import TournamentLobbyPage from "./pages/Tournament/TournamentLobbyPage";
 //import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
@@ -105,7 +105,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/tournaments/lobby/:id" element={<TournamentPage />} />
+          <Route path="/tournaments/lobby/:id" element={<TournamentLobbyPage />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/contact" element={<ContactPage />} />

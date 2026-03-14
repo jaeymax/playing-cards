@@ -153,6 +153,9 @@ const NotificationsPage = () => {
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const challengesCount = notifications.filter((n) => n.type === "challenge" && !n.is_read).length;
+  const tournamentsCount = notifications.filter((n) => n.type === "tournament" && !n.is_read).length;
+  const rewardsCount = notifications.filter((n) => n.type === "reward" && !n.is_read).length;
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -251,6 +254,11 @@ const NotificationsPage = () => {
                 onClick={() => setActiveTab("challenge")}
               >
                 Challenges
+                {challengesCount > 0 && (
+                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                    {challengesCount}
+                  </span>
+                )}
               </button>
               <button
                 className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
@@ -261,6 +269,11 @@ const NotificationsPage = () => {
                 onClick={() => setActiveTab("tournament")}
               >
                 Tournaments
+                {tournamentsCount > 0 && (
+                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                    {tournamentsCount}
+                  </span>
+                )}
               </button>
               <button
                 className={`px-6 py-3 font-medium text-sm focus:outline-none transition ${
@@ -271,6 +284,11 @@ const NotificationsPage = () => {
                 onClick={() => setActiveTab("reward")}
               >
                 Rewards
+                {rewardsCount > 0 && (
+                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                    {rewardsCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>

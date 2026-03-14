@@ -31,11 +31,13 @@ interface TournamentBracketProps {
   rounds?: Round[];
   numberOfParticipants?: number;
   loading?: boolean;
+  tournamentFormat?: string;
 }
 
 const TournamentBracket: React.FC<TournamentBracketProps> = ({
   rounds = [],
   numberOfParticipants = 0,
+  tournamentFormat,
   loading = false,
 }) => {
   const calculateTotalRounds = (participants: number): number => {
@@ -47,10 +49,16 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   const roundsMap = new Map(rounds.map((r) => [r.round, r]));
 
   const renderRoundName = (round: number) => {
+    if (tournamentFormat == "Swiss") {
+      return "Round " + round;
+    }
     const roundsFromEnd = totalRounds - round;
     if (roundsFromEnd === 0) return "Finals";
     if (roundsFromEnd === 1) return "Semi Finals";
     if (roundsFromEnd === 2) return "Quarter Finals";
+    if (roundsFromEnd === 3) return "Round of 16";
+    if (roundsFromEnd === 4) return "Round of 32";
+    if (roundsFromEnd === 5) return "Round of 64";
     return "Round " + round;
   };
 
@@ -76,7 +84,13 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
               alt={""}
             />
           ) : (
-            <span className="text-lg">👤</span>
+            <img
+            className="rounded-full w-full h-full object-cover"
+            src={
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
+            alt=""
+          />
           )}
         </div>
         <div className="min-w-0">
@@ -143,23 +157,31 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     );
   };
 
-  const SpectateButton: React.FC<{ matchCode: string, roundName:string }> = ({ matchCode, roundName }) => {
+  const SpectateButton: React.FC<{ matchCode: string; roundName: string }> = ({
+    matchCode,
+    roundName,
+  }) => {
     const navigate = useNavigate();
 
-    const handleClick = () =>{
-        navigate(`/game/${matchCode}/spectate`, {state:{roundName, name:'Weekend Championship'}});
-    }
+    const handleClick = () => {
+      navigate(`/game/${matchCode}/spectate`, {
+        state: { roundName, name: "Weekend Championship" },
+      });
+    };
 
     //  if(matchId){
     //   return;
     //  }
 
-      return(
-    <button onClick={handleClick} className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2">
-      {/* <span>📺</span> */}
-      <span>Spectate</span>
-    </button>
-      )
+    return (
+      <button
+        onClick={handleClick}
+        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2"
+      >
+        {/* <span>📺</span> */}
+        <span>Spectate</span>
+      </button>
+    );
   };
 
   const WaitingPlaceholder: React.FC = () => (
@@ -246,7 +268,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   return (
     <div className="relative">
       {/* Mobile View */}
-      <div className=" hidden lg:hidden space-y-8 px-2 py-4">
+      <div className="lg:hidden space-y-8 py-4">
         {Array.from({ length: totalRounds }).map((_, index) => {
           const roundNumber = index + 1;
           const roundData = roundsMap.get(roundNumber);
@@ -256,38 +278,46 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
               <h3 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r text-white fromblue-400 topurple-400 mb-5 text-center tracking-wide uppercase text-sm">
                 {renderRoundName(roundNumber)}
               </h3>
-              <div className="space-y-4">
-                {roundData ? (
-                  roundData.matches.map((match) => (
-                    <div
-                      key={match.id}
-                      className="bg-slate-800/50 rounded-sm border border-slate-700/50 p-4 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm"
-                    >
-                      <div className="mb-4 flex items-center justify-between">
-                        <MatchStatus status={match.status} />
-                       {match.status == 'in_progress' && <SpectateButton matchCode={match.game_code} roundName = {renderRoundName(roundNumber)} />}
-                        
-                      </div>
-                      <div className="space-y-3">
-                        <PlayerRow
-                          player={match.player1}
-                          isWinner={match.player1.winner}
-                        />
-                        {match.player2?.name && (
-                          <>
-                            <div className="border-t border-slate-700/50"></div>
-                            <PlayerRow
-                              player={match.player2}
-                              isWinner={match.player2.winner}
+              <div className="overflow-x-auto scrollbar-hide py-2">
+                <div className="flex gap-4 px-2 min-w-min">
+                  {roundData ? (
+                    roundData.matches.map((match) => (
+                      <div
+                        key={match.id}
+                        className="flex-shrink-0 w-72 bg-slate-800/50 rounded-sm border border-slate-700/50 p-4 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm"
+                      >
+                        <div className="mb-4 flex items-center justify-between">
+                          <MatchStatus status={match.status} />
+                          {match.status == "in_progress" && (
+                            <SpectateButton
+                              matchCode={match.game_code}
+                              roundName={renderRoundName(roundNumber)}
                             />
-                          </>
-                        )}
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                          <PlayerRow
+                            player={match.player1}
+                            isWinner={match.player1.winner}
+                          />
+                          {match.player2?.name && (
+                            <>
+                              <div className="border-t border-slate-700/50"></div>
+                              <PlayerRow
+                                player={match.player2}
+                                isWinner={match.player2.winner}
+                              />
+                            </>
+                          )}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="flex-shrink-0 w-full">
+                      <WaitingPlaceholder />
                     </div>
-                  ))
-                ) : (
-                  <WaitingPlaceholder />
-                )}
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -295,7 +325,7 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
       </div>
 
       {/* Desktop View */}
-      <div className="hidde lg:block overflow-x-auto scrollbar-thin">
+      <div className="hidden lg:block overflow-x-auto scrollbar-thin">
         <div className="min-w-[900px] p-6">
           <div className="flex justify-between gap-6">
             {Array.from({ length: totalRounds }).map((_, index) => {
@@ -315,7 +345,12 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
                           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm">
                             <div className="mb-4 flex items-center justify-between">
                               <MatchStatus status={match.status} />
-                              {match.status == 'in_progress' && <SpectateButton matchCode={match.game_code} roundName={renderRoundName(roundNumber)} />}
+                              {match.status == "in_progress" && (
+                                <SpectateButton
+                                  matchCode={match.game_code}
+                                  roundName={renderRoundName(roundNumber)}
+                                />
+                              )}
                             </div>
                             <div className="space-y-3">
                               <PlayerRow

@@ -7,19 +7,23 @@ import { Match } from "@/types/tournament";
 
 
 const TournamentFooter: React.FC<{
+  tournamentId: number | undefined;
   tournamentStarted: boolean;
   tournamentStartTime: Date | null;
   setTournamentStarted: React.Dispatch<React.SetStateAction<boolean>>;
   tournamentStatus?: string;
+  tournamentFormat?: string;
   loading?: boolean;
   matches?: Round[];
   currentRoundNumber: number;
 }> = ({
+  tournamentId,
   tournamentStarted,
   tournamentStartTime,
   setTournamentStarted,
   currentRoundNumber,
   tournamentStatus,
+  tournamentFormat,
   loading = false,
   matches,
 }) => {
@@ -62,12 +66,29 @@ const TournamentFooter: React.FC<{
   const tournamentOngoing = tournamentStatus === "ongoing";
   const tournamentEnded = tournamentStatus === "completed";
   const tournamentCanceled = tournamentStatus === "canceled";
-  const isForfeited = myMatch?.status === "forfeited";
-  const isEliminated =
-    !myMatch ||
-    (myMatch.status === "completed" && myMatch.winner_id !== user?.id);
-  const isWaitingForNextRound =
-    myMatch && myMatch.status === "completed" && myMatch.winner_id === user?.id;
+ // const isForfeited = myMatch?.status === "forfeited";
+  const isEliminated = () => {
+    if(!myMatch) return true;
+      
+      else if(tournamentFormat == "Single Elimination"){
+        return myMatch.winner_id != null && myMatch.winner_id !== user?.id;
+      }
+      return false;
+  }
+ //   !myMatch ||
+   // (myMatch.status === "completed" && myMatch.winner_id !== user?.id && tournamentFormat == "Single Elimination");
+  const isWaitingForNextRound = () => {
+   // myMatch && myMatch.status === "completed" && myMatch.winner_id === user?.id;
+    if(!myMatch) return false;
+    if(tournamentFormat == "Swiss"){
+      return myMatch.status === "completed" || myMatch.status === "forfeited";
+    }
+    else if(tournamentFormat == "Single Elimination"){
+      return myMatch.winner_id === user?.id;
+    }
+    return false;
+
+  };
   const canJoinMatch =
     myMatch && myMatch.status !== "completed" && tournamentStarted;
 
@@ -78,7 +99,7 @@ const TournamentFooter: React.FC<{
     }
     console.log("Joining match with code:", myMatch.game_code);
     navigate(`/game/${myMatch.game_code}`, {
-      state: { gameType: "playTournament" },
+      state: { gameType: "Tournament", format: tournamentFormat, tournamentId },
     });
   };
 
@@ -235,25 +256,25 @@ const TournamentFooter: React.FC<{
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
                 Canceled
               </div>
-            ) : isEliminated ? (
+            ) : isEliminated() ? (
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
                 Eliminated
-              </div>
-            ) :
-            isForfeited ? 
-              myMatch?.forfeiter_user_id === user?.id ? (<div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
-                Eliminated
-              </div>):(
-                <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
-                Waiting For Next Round
-              </div>
-              )
+              </div>)
+            // ) :
+            // isForfeited ? 
+            //   myMatch?.forfeiter_user_id === user?.id ? (<div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
+            //     Eliminated
+            //   </div>):(
+            //     <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
+            //     Waiting For Next Round
+            //   </div>
+            //   )
               
-             : isWaitingForNextRound ? (
+             : isWaitingForNextRound() ? (
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
                 Waiting For Next Round
               </div>
-            ) : (
+            ) :  (
               <button
                 onClick={handleJoinMatch}
                 disabled={!canJoinMatch}

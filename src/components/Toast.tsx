@@ -23,7 +23,7 @@ const Toast: React.FC<ToastProps> = ({
   return (
     <div
       className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg shadow-lg transition-transform duration-300 flex items-center gap-3 whitespace-nowrap ${
-        isVisible ? "translate-y-0" : "-translate-y-20 pointer-events-none"
+        isVisible ? "translate-y-0" : "-translate-y-36 pointer-events-none"
       }`}
     >
       <svg
@@ -37,7 +37,7 @@ const Toast: React.FC<ToastProps> = ({
           clipRule="evenodd"
         />
       </svg>
-      <span>{message}</span>
+      <span className="text-sm" >{message}</span>
     </div>
   );
 };

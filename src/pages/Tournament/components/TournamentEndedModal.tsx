@@ -30,7 +30,7 @@ const TournamentEndedModal: React.FC<TournamentEndedModalProps> = ({
             onClick={onClose}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition-colors"
           >
-            View Results
+            View Standings
           </button>
         </div>
       </div>

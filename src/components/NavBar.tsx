@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { customLog, removeToken } from "@/utils/Functions";
-import { Home, Info, ScrollText, Mail,  Medal } from "lucide-react";
+import { Home, Info, ScrollText, Mail,  Medal, Trophy } from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -442,12 +442,12 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
               <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
               </Link>
-              {/* <Link
+              <Link
                 to="/tournaments"
                 className="text-gray-300 hover:text-white px-3 py-2"
               >
                 Tournaments
-              </Link> */}
+              </Link>
               <Link
                 to="/leaderboard"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -778,13 +778,13 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   <Home className="w-5 h-5" />
                   Home
                 </Link>
-                {/* <Link
+                <Link
                   to="/tournaments"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
                   <Trophy className="w-5 h-5" />
                   Tournaments
-                </Link> */}
+                </Link>
                 <Link
                   to="/leaderboard"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"

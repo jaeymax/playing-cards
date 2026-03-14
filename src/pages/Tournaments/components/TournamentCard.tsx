@@ -57,7 +57,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
     >
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-bold text-white">{tournament.title}</h3>
+          <h3 className="text-lg font-bold text-white">{tournament.name}</h3>
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
               tournament.status
@@ -72,24 +72,24 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Start Time</span>
             <span className="text-gray-300">
-              {formatDate(tournament.startDate)}
+              {formatDate(tournament.start_date)}
             </span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Entry Fee</span>
-            <span className="text-gray-300">{tournament.entryFee} Gems</span>
+            <span className="text-gray-300">{tournament.registration_fee} GHC</span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Prize Pool</span>
-            <span className="text-gray-300">{tournament.prizePool} Gems</span>
+            <span className="text-gray-300">{tournament.prize} GHC</span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Players</span>
             <span className="text-gray-300">
-              {tournament.registeredPlayers}/{tournament.maxPlayers}
+              {tournament.registered_participants}/{tournament.max_participants}
             </span>
           </div>
 
@@ -102,7 +102,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
             <span className="text-gray-400">Difficulty</span>
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(
-                tournament.difficulty
+                tournament.difficulty.toLowerCase()
               )}`}
             >
               {tournament.difficulty.charAt(0).toUpperCase() +

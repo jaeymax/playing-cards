@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { baseUrl } from "@/config/api";
+import { useNavigate } from "react-router-dom";
 
 interface Champion {
   id: string;
@@ -10,7 +11,7 @@ interface Champion {
   rank: "gold" | "silver" | "bronze";
 }
 
-const WeeklyChampions: React.FC = () => {
+const WeeklySingleEliminationChampions: React.FC = () => {
   // const champions: Champion[] = [
   //   {
   //     id: "1",
@@ -62,6 +63,8 @@ const WeeklyChampions: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [champions, setChampions] = useState<Champion[]>([]);
+  const [tournamentId, setTournamentId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   (error)
 
@@ -82,7 +85,8 @@ const WeeklyChampions: React.FC = () => {
         );
       }
 
-      setChampions(data);
+      setChampions(data.winners);
+      setTournamentId(data.tournamentId);
     } catch (err: any) {
       console.log("Error fetching weekly champions", err);
       setError(err.message || "An error occured. Please try again");
@@ -96,7 +100,15 @@ const WeeklyChampions: React.FC = () => {
     getWeeklyChampions();
   }, []);
 
+
+  const handleViewFullStandings = () => {
+    if(tournamentId) {
+      navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
+    } 
+  };
   if(!champions || champions.length == 0)return null;
+
+
 
   return (
     <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 shadow-lg">
@@ -179,11 +191,11 @@ const WeeklyChampions: React.FC = () => {
       </div>
 
       {/* CTA Button */}
-      {/* <button className="w-full mt-6 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-lg hover:shadow-purple-500/20">
+      <button onClick={handleViewFullStandings} className="w-full mt-6 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-lg hover:bg-blue-700">
         View Full Standings
-      </button> */}
+      </button>
     </div>
   );
 };
 
-export default WeeklyChampions;
+export default WeeklySingleEliminationChampions;

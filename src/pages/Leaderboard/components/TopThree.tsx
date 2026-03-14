@@ -65,7 +65,7 @@ const TopThree: React.FC<TopThreeProps> = ({ currentFilter, topPlayers }) => {
           <h3 className="text-lg font-bold text-white mb-2">{player.username}</h3>
           <div className="text-gray-400 text-sm space-y-1 text-center">
             <p>{player.rating} Points</p>
-            <p>{Math.round(player.win_rate)}% Win Rate</p>
+            <p>{player.win_rate}% Win Rate</p>
           </div>
         </div>
       ))}

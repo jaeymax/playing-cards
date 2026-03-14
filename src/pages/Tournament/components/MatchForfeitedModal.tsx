@@ -33,9 +33,7 @@ const MatchForfeitedModal: React.FC<MatchForfeitedModalProps> = ({
         </h2>
 
         <p className="text-gray-300 mb-6 text-center text-sm md:text-base leading-relaxed">
-          {isUserForfeited
-            ? "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
-            : "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."}
+          {message}
         </p>
 
         <div className="flex gap-4">

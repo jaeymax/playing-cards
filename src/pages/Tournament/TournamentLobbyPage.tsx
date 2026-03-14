@@ -6,9 +6,10 @@ import PrizePool from "./components/PrizePool";
 import TournamentRules from "./components/TournamentRules";
 import TournamentFooter from "./components/TournamentFooter";
 import TimelineWidget from "./components/TimelineWidget";
-import TournamentResults from "./components/TournamentResults";
+//import TournamentResults from "./components/TournamentResults";
 import TournamentEndedModal from "./components/TournamentEndedModal";
 import MatchForfeitedModal from "./components/MatchForfeitedModal";
+import TournamentStandings from "./components/TournamentStandings";
 import { useParams } from "react-router-dom";
 import { baseUrl } from "@/config/api";
 import { authHeaders, customLog } from "@/utils/Functions";
@@ -16,6 +17,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/contexts/SocketProvider";
 import NavBar from "@/components/NavBar";
 import { Round } from "@/types/tournament";
+import { TournamentParticipant } from "../Tournaments/types";
 
 interface Tournament {
   id: number;
@@ -28,15 +30,18 @@ interface Tournament {
   current_round_number: number;
 }
 
-interface Participant {
-  id: number;
-  username: string;
-  image_url: string;
-  rank: string;
-  status: string;
-  wins: number;
-  losses: number;
-}
+// interface Participant {
+//   id: number;
+//   username: string;
+//   image_url: string;
+//   rank: string;
+//   rating: number;
+//   is_rated: boolean;
+//   status: string;
+//   wins: number;
+//   score: number;
+//   losses: number;
+// }
 
 interface Rule {
   id: number;
@@ -47,14 +52,15 @@ interface Rule {
 interface TournamentData {
   success: boolean;
   tournament: Tournament;
-  participants: Participant[];
+  participants: TournamentParticipant[];
   rounds: Round[];
   rules: Rule[];
+  standings:any[]
 }
 
-const TournamentPage: React.FC = () => {
+const TournamentLobbyPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    "bracket" | "participants" | "rules"
+    "bracket" | "participants" | "rules" | "standings"
   >("bracket");
 
   const { user } = useAppContext();
@@ -75,6 +81,18 @@ const TournamentPage: React.FC = () => {
     useState<boolean>(false);
   const [matchForfeitedMessage, setMatchForfeitedMessage] =
     useState<string>("");
+  const [isParticipant, setIsParticipant] = useState<boolean>(true);
+
+  (isParticipant) && true;
+
+  // get the current selected tab from the url query params and set it as the active tab on page load like tab=standings and set it as the active tab on page load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab === "bracket" || tab === "participants" || tab === "rules" || tab === "standings") {
+      setActiveTab(tab);
+    }
+  }, []);
 
   myGameCode && true;
 
@@ -90,32 +108,39 @@ const TournamentPage: React.FC = () => {
   }) => {
     customLog("Match forfeited event received via socket", data);
     setShowMatchForfeitedModal(true);
+    console.log('tournamentFormat', tournamentData?.tournament.format);
     if (user?.id === data.loserId) {
-      setMatchForfeitedMessage(
-        "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
-      );
+      if(tournamentData?.tournament.format === "Swiss"){
+        setMatchForfeitedMessage(
+          "You have forfeited your match. You will receive 0 points for this round, but you still have a chance to advance to the next round. Check the standings tab for more details."
+        );
+        return;
+      }else if(tournamentData?.tournament.format === "Single Elimination"){
+        setMatchForfeitedMessage(
+          "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!"
+        );
+      }
+
     } else {
-      setMatchForfeitedMessage(
-        "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."
-      );
+      if(tournamentData?.tournament.format === "Swiss"){
+        setMatchForfeitedMessage(
+          "Your opponent has forfeited the match. You have advanced to the next round and will received 1 point for this round. Check the standings tab for more details."
+        );
+        return;
+      }else if(tournamentData?.tournament.format === "Single Elimination"){
+        setMatchForfeitedMessage(
+          "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament."
+        );
+      }
     }
 
     // fetchTournamentData();
   };
 
-  // useEffect(() => {
-  //   if (!socket || !user) return;
-  //   socket.on("tournamentEnded", tournamentEndedCallback);
-  //   socket.on("matchForfeited", matchForfeitedCallback);
-
-  //   return () => {
-  //     socket.off("tournamentEnded", tournamentEndedCallback);
-  //     socket.off("matchForfeited", matchForfeitedCallback);
-  //   };
-  // }, [socket, user]);
-
-  const extractGameCodeFromTournamentData = (data: TournamentData | null): string => {
-    if(!data)return "";
+  const extractGameCodeFromTournamentData = (
+    data: TournamentData | null
+  ): string => {
+    if (!data) return "";
     const current_round_number = data.tournament.current_round_number;
     const current_round_matches = data.rounds.find(
       (round) => round.round === current_round_number
@@ -157,7 +182,8 @@ const TournamentPage: React.FC = () => {
       const data: TournamentData = await response.json();
       setTournamentData(data);
       setMyGameCode(extractGameCodeFromTournamentData(data));
-
+      const isparticipant = data.participants.some((p) => p.id === user?.id);
+      setIsParticipant(isparticipant);
       // Set tournament start time from data if available
       if (data.tournament.start_date) {
         const startDate = new Date(data.tournament.start_date);
@@ -173,7 +199,7 @@ const TournamentPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+   // if (!user) return;
     fetchTournamentData();
   }, [id, user]);
 
@@ -181,17 +207,16 @@ const TournamentPage: React.FC = () => {
     customLog("Received tournamentData via socket");
     setTournamentData(tournamentData);
     console.log("tournamentData via socket", tournamentData);
- 
   };
 
   useEffect(() => {
     if (!user) return;
     if (!socket) return;
-    if(!tournamentData)return;
+    if (!tournamentData) return;
     socket.emit("joinTournamentRoom", {
       tournamentId: id,
       userId: user?.id,
-      gameCode: extractGameCodeFromTournamentData(tournamentData)
+      gameCode: extractGameCodeFromTournamentData(tournamentData),
     });
     //socket?.emit('')
     socket.on("lobbyUpdate", lobbyUpdateCallback);
@@ -202,18 +227,18 @@ const TournamentPage: React.FC = () => {
       socket?.off("lobbyUpdate", lobbyUpdateCallback);
       socket.off("tournamentEnded", tournamentEndedCallback);
       socket.off("matchForfeit", matchForfeitedCallback);
-      socket.emit('leaveTournamentRoom', {
-        tournamentId:id,
+      socket.emit("leaveTournamentRoom", {
+        tournamentId: id,
         userId: user?.id,
-        gameCode: extractGameCodeFromTournamentData(tournamentData)
-      })
+        gameCode: extractGameCodeFromTournamentData(tournamentData),
+      });
     };
   }, [user, socket, tournamentData]);
 
   const handleTournamentEndedModalClose = () => {
     setShowTournamentEndedModal(false);
-    fetchTournamentData();
-  }
+    setActiveTab("standings");
+  };
 
   return (
     <div className="min-h-screen w-full bg-gray-900 text-gray-100 pb-32">
@@ -258,7 +283,7 @@ const TournamentPage: React.FC = () => {
           />
 
           <div className="md:container mx-auto md:px-4 py-8 borde">
-            {tournamentData?.tournament.status === "completed" && (
+            {/* {tournamentData?.tournament.status === "completed" && (
               <div className="mb-8">
                 <TournamentResults
                   participants={tournamentData?.participants || []}
@@ -267,29 +292,34 @@ const TournamentPage: React.FC = () => {
                   number_of_rounds={tournamentData?.rounds.length}
                 />
               </div>
-            )}
+            )} */}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 borde w-full">
               {/* Main Content */}
               <div className="lg:col-span-9 space-y-6">
                 {/* Tab Navigation */}
                 <div className="bg-gray-800 w-full md:rounded-lg p-4 border-t border-b md:border border-gray-700">
-                  <div className="flex space-x-4 border-b border-gray-700">
-                    {["bracket", "participants", "rules"].map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab as any)}
-                        className={`px-4 gap-3 flex py-2 text-sm font-medium capitalize ${
-                          activeTab === tab
-                            ? "text-blue-400 border-b-2 border-blue-400"
-                            : "text-gray-400 hover:text-white"
-                        }`}
-                      >
-                        {tab}
-                        {tab === "participants" && (<span className="bg-blue-400 w-6 rounded-full text-gray-800" >{tournamentData?.participants.length}</span>)}
-                        
-                      </button>
-                    ))}
+                  <div className="flex space-x-4 border-b border-gray-700 overflow-x-scroll scrollbar-hide">
+                    {["bracket", "participants", "rules", "standings"].map(
+                      (tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveTab(tab as any)}
+                          className={`px-4 gap-3 flex py-2 text-sm font-medium capitalize ${
+                            activeTab === tab
+                              ? "text-blue-400 border-b-2 border-blue-400"
+                              : "text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          {tab}
+                          {tab === "participants" && (
+                            <span className="bg-blue-400 w-6 rounded-full text-gray-800">
+                              {tournamentData?.participants.length}
+                            </span>
+                          )}
+                        </button>
+                      )
+                    )}
                   </div>
 
                   {/* Tab Content */}
@@ -300,6 +330,7 @@ const TournamentPage: React.FC = () => {
                         numberOfParticipants={
                           tournamentData?.participants.length
                         }
+                        tournamentFormat={tournamentData?.tournament.format}
                         loading={loading}
                       />
                     )}
@@ -307,12 +338,25 @@ const TournamentPage: React.FC = () => {
                       <Participants
                         participants={tournamentData?.participants}
                         loading={loading}
+                      
+                        tournamentFormat={tournamentData?.tournament.format}
                       />
                     )}
                     {activeTab === "rules" && (
                       <TournamentRules
                         loading={loading}
                         rules={tournamentData?.rules}
+                      />
+                    )}
+                    {activeTab === "standings" && (
+                      <TournamentStandings
+                        tournamentId={tournamentData?.tournament.id}
+                        tournamentFormat={tournamentData?.tournament.format}
+                       standings={tournamentData?.standings}
+                        numberOfParticipants={
+                          tournamentData?.participants.length
+                        }
+                        loading={loading}
                       />
                     )}
                   </div>
@@ -336,10 +380,12 @@ const TournamentPage: React.FC = () => {
           </div>
 
           <TournamentFooter
+            tournamentId={tournamentData?.tournament.id}
             tournamentStarted={tournamentStarted}
             tournamentStartTime={tournamentStartTime}
             setTournamentStarted={setTournamentStarted}
             tournamentStatus={tournamentData?.tournament.status}
+            tournamentFormat={tournamentData?.tournament.format}
             matches={tournamentData?.rounds}
             currentRoundNumber={
               tournamentData?.tournament.current_round_number ?? 0
@@ -352,4 +398,4 @@ const TournamentPage: React.FC = () => {
   );
 };
 
-export default TournamentPage;
+export default TournamentLobbyPage;

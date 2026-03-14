@@ -8,7 +8,8 @@ import Footer from "@/components/Footer";
  import TournamentBanner from "./components/TournamentBanner";
 // import OnlineFriends from "./components/OnlineFriends";
 // import RecentActivities from "./components/RecentActivities";
- import WeeklyChampions from "./components/WeeklyChampions";
+ import WeeklySingleEliminationChampions from "./components/WeeklySingleEliminationChampions";
+import WeeklySwissChampions from "./components/WeeklySwissChampions";
 
 const HomePage: React.FC = () => {
   return (
@@ -22,7 +23,8 @@ const HomePage: React.FC = () => {
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             <TopPlayers />
-            <WeeklyChampions />
+            <WeeklySingleEliminationChampions />
+            <WeeklySwissChampions />
           </div>
 
           {/* Main Content */}

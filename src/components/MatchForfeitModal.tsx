@@ -16,8 +16,49 @@ const MatchForfeitModal: React.FC<MatchForfeitModalProps> = ({
 }) => {
   onClose;
 
+  //console.log('loserTimeouts', loserTimeouts);
+
   const isCurrentPlayerForfeited =
     forfeitedPlayer?.user?.id == currentPlayer?.user?.id;
+
+ // const outOFTimeouts = loserTimeouts >= 3;
+
+  // const renderHeaderMessage = () =>{
+  //   if(isCurrentPlayerForfeited){
+  //     if(outOFTimeouts){
+  //        return "You Forfeited"
+  //     }else{
+  //       return "You ran out of time"
+  //     }
+  //   }else{
+  //     if(outOFTimeouts){
+  //       return `${forfeitedPlayer?.user?.username} Forfeited`
+  //     }else{
+  //       return `${forfeitedPlayer?.user?.username} ran out of time`
+  //     }
+  //   }
+
+  //   return "";
+  // }
+
+  // const renderContentMessage = () =>{
+  //   if(isCurrentPlayerForfeited){
+  //     if(outOFTimeouts){
+  //       return "Match forfeited due to inactivity. Opponent wins"
+  //     }else{
+  //       if(loserTimeouts == 1)return `Penalty: 1 point for opponent. Two more timeouts will forfeit the match.`
+  //       else if(loserTimeouts == 2)return `Penalty: 1 point for opponent. Next timeout will forfeit the match.`
+  //     }
+  //   }else{
+  //     if(outOFTimeouts){
+  //       return `${forfeitedPlayer?.user?.username} forfeited due to inactivity. You win`
+  //     }else{
+  //       return `${forfeitedPlayer?.user?.username} ran out of time. You've earned one point`
+  //     }
+  //   }
+
+  //     return "";
+  // }
 
   return (
     <Modal isOpen={isOpen} onClose={() => {}} title="Match Forfeited">
@@ -45,12 +86,14 @@ const MatchForfeitModal: React.FC<MatchForfeitModalProps> = ({
             {isCurrentPlayerForfeited
               ? "You Forfeited"
               : `${forfeitedPlayer?.user?.username} Forfeited`}
+             
           </h3>
           <div className="text-gray-400 sm:text-sm text-xs">
             <p>
               {isCurrentPlayerForfeited
                 ? "Better luck next time!"
                 : "Congratulations on your victory!"}
+              
             </p>
           </div>
         </div>

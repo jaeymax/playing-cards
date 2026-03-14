@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trophy, Clock, Award, Loader2 } from "lucide-react";
+import { Trophy, Clock, Loader2 } from "lucide-react";
 import Modal from "../../../components/Modal";
 import { baseUrl } from "@/config/api";
 import { authHeaders } from "@/utils/Functions";
@@ -111,7 +111,7 @@ const TournamentRegistrationModal: React.FC<
           </div>
 
           {/* Qualification */}
-          <div className="bg-gradient-to-r from-blue-700/20 to-purple-600/10 rounded-lg p-4 border border-blue-700/30">
+          {/* <div className="bg-gradient-to-r from-blue-700/20 to-purple-600/10 rounded-lg p-4 border border-blue-700/30">
             <div className="flex items-center gap-3">
               <Award className="text-purple-400" size={20} />
               <div>
@@ -125,7 +125,7 @@ const TournamentRegistrationModal: React.FC<
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Feedback Messages */}

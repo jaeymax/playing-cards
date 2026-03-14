@@ -1,5 +1,6 @@
 import React from "react";
 import { Round } from "@/types/tournament";
+import { TournamentParticipant } from "@/pages/Tournaments/types";
 
 interface TimelineWidgetProps {
   status?: string;
@@ -18,15 +19,15 @@ interface Tournament {
   current_round_number: number;
 }
 
-interface Participant {
-  id: number;
-  username: string;
-  image_url: string;
-  rank: string;
-  status: string;
-  wins: number;
-  losses: number;
-}
+// interface Participant {
+//   id: number;
+//   username: string;
+//   image_url: string;
+//   rank: string;
+//   status: string;
+//   wins: number;
+//   losses: number;
+// }
 
 interface Rule {
   id: number;
@@ -37,7 +38,7 @@ interface Rule {
 interface TournamentData {
   success: boolean;
   tournament: Tournament;
-  participants: Participant[];
+  participants: TournamentParticipant[];
   rounds: Round[];
   rules: Rule[];
 }
@@ -65,10 +66,16 @@ const TimelineWidget: React.FC<TimelineWidgetProps> = ({
     const roundsMap = new Map(rounds.map((r) => [r.round, r]));
 
     const renderRoundName = (round: number) => {
+      if(tournamentData.tournament.format == "Swiss"){
+        return "Round " + round;
+      }
       const roundsFromEnd = totalRounds - round;
       if (roundsFromEnd === 0) return "Finals";
       if (roundsFromEnd === 1) return "Semi Finals";
       if (roundsFromEnd === 2) return "Quarter Finals";
+      if (roundsFromEnd === 3) return "Round of 16";
+      if (roundsFromEnd === 4) return "Round of 32";
+      if (roundsFromEnd === 5) return "Round of 64";
       return "Round " + round;
     };
 
