@@ -27,6 +27,9 @@ import WinnerModal from "@/components/WinnerModal";
 import SwissGameOverModal from "@/components/SwissGameOverModal";
 import MatchForfeitModal from "@/components/MatchForfeitModal";
 import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
+import GameNotFoundPage from "@/components/GameNotFoundPage";
+import GameForfeitedPage from "@/components/GameForfeitedPage";
+import GameEndedPage from "@/components/GameEndedPage";
 
 interface SwissGameProps {
   tournamentId: number;
@@ -103,10 +106,10 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   const handleSwissGameOverModalClose = () => {
     if(game?.is_final_match) {
       // if the game is final match navigate back to the lobby and set the current tab to standings
-      navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
+      navigate(`/tournaments/${tournamentId}?tab=standings`);
       return;
     }
-    navigate(-1);
+   return navigate(`/tournaments/${tournamentId}?tab=bracket`);
   }
 
   const handleMatchForfeitClose = () => {
@@ -467,6 +470,19 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
     },
     [me, firstOpponent, secondOpponent, thirdOpponent]
   );
+
+  if(gameNotFound){
+    return <GameNotFoundPage gameCode={code} />;
+  }
+
+  if (game?.status === "forfeited") {
+    return <GameForfeitedPage gameCode={code} />;
+  }
+
+  if(game?.status === 'completed'){
+    return <GameEndedPage gameCode={code} />;
+  }
+
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">

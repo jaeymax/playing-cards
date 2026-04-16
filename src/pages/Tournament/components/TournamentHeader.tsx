@@ -1,6 +1,7 @@
 import { useAppContext } from "@/contexts/AppContext";
 import React, { useEffect } from "react";
 import MatchModal from "./MatchModal";
+import { TournamentStatus } from "@/pages/Tournaments/types";
 
 interface Match {
   id: number;
@@ -23,7 +24,7 @@ interface Match {
 interface TournamentHeaderProps {
   name?: string;
   format?: string;
-  status?: "upcoming" | "ongoing" | "completed";
+  status?: TournamentStatus
   numberOfParticipants?: number;
   prize?: string;
   current_round_number?: number;

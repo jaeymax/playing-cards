@@ -4,10 +4,8 @@ import React from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 
 interface TournamentStandingsProps {
-  tournamentId?: number;
   tournamentFormat?: string;
   standings: any[] | undefined;
-  numberOfParticipants?: number;
   loading?: boolean;
 }
 
@@ -113,8 +111,7 @@ const TournamentStandings: React.FC<TournamentStandingsProps> = ({
     return `${getOrdinal(tierStart)}-${getOrdinal(tierEnd)}`;
   };
 
-    if (loading) {
-
+  if (loading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 5 }).map((_, index) => (
@@ -127,11 +124,10 @@ const TournamentStandings: React.FC<TournamentStandingsProps> = ({
     );
   }
 
-
   if (!standings || standings?.length === 0) {
     return (
       <div className="text-center text-gray-400 py-8">
-        No standings available yet
+        📊 No standings available yet
       </div>
     );
   }
@@ -153,6 +149,9 @@ const TournamentStandings: React.FC<TournamentStandingsProps> = ({
                 <th className="px-4 py-3 font-semibold text-center">Losses</th>
                 <th className="px-4 py-3 font-semibold text-center">
                   Sum of Opponents Score
+                </th>
+                <th className="px-4 py-3 font-semibold text-center">
+                  Sum of Opponents Won Score
                 </th>
               </>
             )}
@@ -229,6 +228,11 @@ const TournamentStandings: React.FC<TournamentStandingsProps> = ({
                       {participant.buchholz_score}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-center text-xs sm:text-sm">
+                    <span className="text-red-400 font-semibold">
+                      {participant.sonneborn_berger_score}
+                    </span>
+                  </td>
                 </>
               )}
               <td className="px-4 py-3 text-center text-xs sm:text-sm">
@@ -237,8 +241,8 @@ const TournamentStandings: React.FC<TournamentStandingsProps> = ({
                     participant.status === "active"
                       ? "bg-green-900 text-green-200"
                       : participant.status === "eliminated"
-                      ? "bg-red-900 text-red-200"
-                      : "bg-gray-700 text-gray-300"
+                        ? "bg-red-900 text-red-200"
+                        : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   {participant.status}

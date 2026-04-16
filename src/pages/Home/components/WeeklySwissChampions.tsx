@@ -82,7 +82,7 @@ const WeeklySwissChampions = () => {
     
       const handleViewFullStandings = () => {
         if(tournamentId) {
-          navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
+          navigate(`/tournaments/${tournamentId}?tab=standings`);
         } 
       };
 

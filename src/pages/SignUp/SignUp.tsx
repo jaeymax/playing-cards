@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
 import NavBar from "@/components/NavBar";
@@ -14,14 +14,14 @@ const SignUp: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<SignUpStep>("email");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-
+  const location = useLocation();
   verificationCode;
   const { user, updateUser } = useAppContext();
 
   const navigate = useNavigate();
 
   useEffect(()=>{
-      if(user)navigate('/')
+      if(user  && !user.is_guest)navigate('/')
   
     },[user])
 
@@ -65,6 +65,10 @@ const SignUp: React.FC = () => {
         console.log(data);
         saveToken(data.token);
         updateUser(data);
+        if(location.state?.from){
+          navigate(location.state.from);
+          return;
+        }
         navigate("/");
       } else if (response.status === 400) {
         alert("Email, username, and password are required");

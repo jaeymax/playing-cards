@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProfileHeader from "./components/ProfileHeader";
 import Overview from "./components/Overview";
 import MatchHistory from "./components/MatchHistory";
@@ -6,7 +7,9 @@ import Statistics from "./components/Statistics";
 import Achievements from "./components/Achievements";
 import ProfileSettings from "./components/ProfileSettings";
 import NavBar from "@/components/NavBar";
-
+//import Footer from "@/components/Footer";
+import { removeToken } from "@/utils/Functions";
+import { useAppContext } from "@/contexts/AppContext";
 
 type ProfileTab =
   | "overview"
@@ -17,6 +20,8 @@ type ProfileTab =
 
 const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
+  const { updateUser } = useAppContext();
+  const navigate = useNavigate();
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -26,14 +31,32 @@ const ProfilePage: React.FC = () => {
     { id: "settings", label: "Settings" },
   ];
 
+  const handleLogout = () => {
+    // Clear auth data (adjust based on your auth implementation)
+    removeToken();
+        // Clear user context
+        updateUser(null);
+        // Redirect to signin page
+        navigate("/signin");
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <NavBar showSignUps = {true} />
+      <NavBar showSignUps={true} />
       <ProfileHeader />
 
-      <div className="max-w-2xl w-full borde mx-auto md:px-4 py-8 ">
-        <div className="bg-gray-800 md:rounded-lg md:border md:border-gray-700">
+      <div className="max-w-2xl w-full mx-auto md:px-4 py-8">
+
+      <div className="bg-gray-750 rounded-lg  p-5  borde border-gray-700 borde">
+        <button
+          onClick={handleLogout}
+          className="w-full px- py-2 bg-blue-600 text-white rounded-lg hove:bg-yellow-700"
+        >
+          Logout
+        </button>
+      </div>
+
+        <div className="bg-gray-800 border-t border-b border-gray-700 md:rounded-lg md:border md:border-gray-700">
           {/* Tab Navigation */}
           <div className="border-b border-gray-700">
             <div className="flex overflow-x-auto">
@@ -62,7 +85,10 @@ const ProfilePage: React.FC = () => {
             {activeTab === "settings" && <ProfileSettings />}
           </div>
         </div>
+        
       </div>
+
+
     </div>
   );
 };

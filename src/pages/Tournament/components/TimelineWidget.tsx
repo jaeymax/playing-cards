@@ -1,23 +1,23 @@
 import React from "react";
 import { Round } from "@/types/tournament";
-import { TournamentParticipant } from "@/pages/Tournaments/types";
+import { TournamentLobbyData} from "@/pages/Tournaments/types";
 
 interface TimelineWidgetProps {
   status?: string;
   loading?: boolean;
-  tournamentData: TournamentData | null;
+  tournamentData: TournamentLobbyData | null;
 }
 
-interface Tournament {
-  id: number;
-  name: string;
-  start_date: string;
-  status: "upcoming" | "ongoing" | "completed";
-  format: string;
-  prize: string;
-  registration_fee: string;
-  current_round_number: number;
-}
+// interface Tournament {
+//   id: number;
+//   name: string;
+//   start_date: string;
+//   status: "upcoming" | "ongoing" | "completed";
+//   format: string;
+//   prize: string;
+//   registration_fee: string;
+//   current_round_number: number;
+// }
 
 // interface Participant {
 //   id: number;
@@ -29,26 +29,26 @@ interface Tournament {
 //   losses: number;
 // }
 
-interface Rule {
-  id: number;
-  title: string;
-  content: string;
-}
+// interface Rule {
+//   id: number;
+//   title: string;
+//   content: string;
+// }
 
-interface TournamentData {
-  success: boolean;
-  tournament: Tournament;
-  participants: TournamentParticipant[];
-  rounds: Round[];
-  rules: Rule[];
-}
+// interface TournamentData {
+//   success: boolean;
+//   tournament: Tournament;
+//   participants: TournamentParticipant[];
+//   rounds: Round[];
+//   rules: Rule[];
+// }
 
 const TimelineWidget: React.FC<TimelineWidgetProps> = ({
   status,
   loading = false,
   tournamentData,
 }) => {
-  const generateTimeLine = (tournamentData: TournamentData) => {
+  const generateTimeLine = (tournamentData: TournamentLobbyData) => {
     if (!tournamentData) return [];
 
     const rounds = tournamentData.rounds;

@@ -31,6 +31,8 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
     }
   };
 
+  console.log('tournament', tournament)
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -115,12 +117,13 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
       <div className="p-4 bg-gray-750 border-t border-gray-700">
         <button
           className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-[1.02]"
-          disabled={tournament.status !== "upcoming"}
+          
         >
-          {tournament.status === "upcoming" ? "Register Now" : "View Details"}
+          {tournament.status === "upcoming" || tournament.status === "ongoing" ? tournament.registered? "Join Lobby": "Register Now": "View Details"}
         </button>
       </div>
     </div>
+   
   );
 };
 

@@ -3,8 +3,8 @@ import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import { customLog, removeToken } from "@/utils/Functions";
-import { Home, Info, ScrollText, Mail,  Medal, Trophy } from "lucide-react";
+import {removeToken } from "@/utils/Functions";
+import { Home, Info, ScrollText, Mail,  Medal, Trophy} from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -40,7 +40,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
   const { notifications } = useAppContext();
-  customLog("NavBar Notifications:", notifications);
+  //customLog("NavBar Notifications:", notifications);
   const notificationCount = notifications.filter((n) => !n.is_read).length;
 
   (notificationCount && true);
@@ -504,7 +504,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   </div> */}
 
                   {/* Wallet Icon */}
-                  {/* <div className="relative">
+                  <div className="relative">
                     <button
                       onClick={() => navigate("/wallet")}
                       className="mt-3 rounded-lg text-gray-400 hover:text-white"
@@ -523,7 +523,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                         />
                       </svg>
                     </button>
-                  </div> */}
+                  </div>
 
                   {/* Friends Icon */}
                   {/* <div className="relative">

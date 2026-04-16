@@ -17,7 +17,7 @@ const TournamentsHeader: React.FC<TournamentsHeaderProps> = ({
   const filters: { id: TournamentStatus; label: string }[] = [
     { id: "all", label: "All" },
     { id: "upcoming", label: "Upcoming" },
-    { id: "ongoing", label: "In Progress" },
+    { id: "ongoing", label: "Ongoing" },
     { id: "completed", label: "Completed" },
   ];
 

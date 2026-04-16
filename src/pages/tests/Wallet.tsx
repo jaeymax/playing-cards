@@ -349,7 +349,7 @@ const WalletPage = () => {
                 </svg>
                 Add Funds
               </button>
-              <button
+              {/* <button
                 onClick={() => setIsWithdrawOpen(true)}
                 className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-800 transition duration-200 flex items-center gap-2"
               >
@@ -367,7 +367,7 @@ const WalletPage = () => {
                   />
                 </svg>
                 Withdraw
-              </button>
+              </button> */}
             </div>
           </div>
 

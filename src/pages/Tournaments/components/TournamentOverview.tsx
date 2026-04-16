@@ -152,7 +152,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                     <span>1st</span>
                   </span>
                   <span className="font-semibold text-yellow-400">
-                    {tournament?.prize && parseInt(tournament.prize) * 0.5}
+                    {tournament?.prize && parseInt(tournament.prize) * 1} GHC
                     {/* {parseInt(tournament?.prize) * 0.5} */}
                   </span>
                 </div>
@@ -162,7 +162,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                     <span>2nd</span>
                   </span>
                   <span className="font-semibold text-gray-300">
-                    {tournament?.prize && parseInt(tournament.prize) * 0.3}
+                    {/* {tournament?.prize && parseInt(tournament.prize) * 0} */}
                     {/* {parseInt(tournament.prize) * 0.3} */}
                   </span>
                 </div>
@@ -172,7 +172,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                     <span>3rd</span>
                   </span>
                   <span className="font-semibold text-orange-400">
-                    {tournament?.prize && parseInt(tournament.prize) * 0.2}
+                    {/* {tournament?.prize && parseInt(tournament.prize) * 0} */}
                     {/* {parseInt(tournament.prize) * 0.2} */}
                   </span>
                 </div>
@@ -219,7 +219,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
             <button
               onClick={onRegistration}
               disabled={buttonConfig.disabled}
-              className={`w-full py-2 md:py-3 px-3 md:px-4 bg-gradient-to-r ${buttonConfig.color} 
+              className={`w-full py-2.5 md:py-3 px-3 md:px-4 bg-gradient-to-r ${buttonConfig.color} 
                 text-white font-bold text-xs sm:text-sm md:text-base rounded-lg transform transition 
                 hover:scale-[1.02] active:scale-[0.98] shadow-lg
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}

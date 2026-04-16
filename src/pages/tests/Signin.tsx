@@ -20,7 +20,7 @@ const SignInPage = () => {
   const { user, updateUser } = useAppContext();
 
   useEffect(()=>{
-    if(user)navigate('/')
+    if(user && !user.is_guest)navigate('/')
 
   },[user])
 
@@ -87,6 +87,15 @@ const SignInPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+
+  const handleCreateAccount = () => {
+    if(location.state){
+      navigate("/signup", { state: { from: location.state.from } });
+      return;
+    }
+    return navigate("/signup");
   };
 
   return (
@@ -273,7 +282,7 @@ const SignInPage = () => {
                     <button
                       type="button"
                       className="font-medium text-blue-400 hover:text-blue-300 focus:outline-none"
-                      onClick={() => navigate("/signup")}
+                      onClick={handleCreateAccount}
                     >
                       Create an account
                     </button>

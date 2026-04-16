@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Round } from "@/types/tournament";
 import { useAppContext } from "@/contexts/AppContext";
-import { Match } from "@/types/tournament";
+import { TournamentMatch, TournamentRound } from "@/pages/Tournaments/types";
 //import { customLog } from "@/utils/Functions";
 
 
 const TournamentFooter: React.FC<{
   tournamentId: number | undefined;
   tournamentStarted: boolean;
-  tournamentStartTime: Date | null;
+  tournamentStartTime: string | undefined;
+  isRegistered:boolean | undefined;
   setTournamentStarted: React.Dispatch<React.SetStateAction<boolean>>;
   tournamentStatus?: string;
   tournamentFormat?: string;
   loading?: boolean;
-  matches?: Round[];
+  matches?: TournamentRound[];
   currentRoundNumber: number;
 }> = ({
   tournamentId,
   tournamentStarted,
   tournamentStartTime,
+  isRegistered,
   setTournamentStarted,
   currentRoundNumber,
   tournamentStatus,
@@ -30,7 +31,7 @@ const TournamentFooter: React.FC<{
 
   const { user } = useAppContext();
   
-  const getMyMatch = (matches: Round[]): Match | undefined => {
+  const getMyMatch = (matches: TournamentRound[]): TournamentMatch | undefined => {
     const roundData = matches.find((r) => r.round === currentRoundNumber);
     if (!roundData) return undefined;
     const myMatch = roundData.matches.find(
@@ -40,19 +41,20 @@ const TournamentFooter: React.FC<{
     //console.log('my Match', myMatch?.turn_ends_at)
     return myMatch;
   };
-  const myMatch: Match | undefined = matches ? getMyMatch(matches) : undefined;
+  const myMatch: TournamentMatch | undefined = matches ? getMyMatch(matches) : undefined;
+  //console.log('myMatch in Footer', myMatch)
 
   const [countdown, setCountdown] = useState<string>("");
   const [joinDeadlineCountdown, setJoinDeadlineCountdown] =
     useState<string>("");
   const [joinDeadlineTime, setJoinDeadlineTime] = useState<Date | null>(
-   myMatch?.turn_ends_at ? new Date(myMatch.turn_ends_at) : null
+   myMatch?.turn_ends_at ? new Date(myMatch?.turn_ends_at) : null
   );
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    setJoinDeadlineTime(myMatch?.turn_ends_at ? new Date(myMatch.turn_ends_at) : null);
+    setJoinDeadlineTime(myMatch?.turn_ends_at ? new Date(myMatch?.turn_ends_at) : null);
   }, [myMatch]);
   
 
@@ -63,18 +65,24 @@ const TournamentFooter: React.FC<{
 
   // Determine user status
   const tournamentUpcoming = tournamentStatus === "upcoming";
+  //console.log('tournamentStatus', tournamentStatus)
   const tournamentOngoing = tournamentStatus === "ongoing";
   const tournamentEnded = tournamentStatus === "completed";
   const tournamentCanceled = tournamentStatus === "canceled";
  // const isForfeited = myMatch?.status === "forfeited";
   const isEliminated = () => {
-    if(!myMatch) return true;
+    if(!myMatch && isRegistered) return true;
       
       else if(tournamentFormat == "Single Elimination"){
-        return myMatch.winner_id != null && myMatch.winner_id !== user?.id;
+        return myMatch?.winner_id != null && myMatch.winner_id !== user?.id;
       }
       return false;
   }
+
+  const isSpectating = () => {
+    return !isRegistered;
+  }
+
  //   !myMatch ||
    // (myMatch.status === "completed" && myMatch.winner_id !== user?.id && tournamentFormat == "Single Elimination");
   const isWaitingForNextRound = () => {
@@ -104,11 +112,12 @@ const TournamentFooter: React.FC<{
   };
 
   useEffect(() => {
+    //console.log('countdown', countdown)
     if (tournamentStarted || !tournamentStartTime) return;
 
     const updateCountdown = () => {
       const now = new Date();
-      const diff = tournamentStartTime.getTime() - now.getTime();
+      const diff = new Date(tournamentStartTime).getTime() - now.getTime();
 
       if (diff <= 0) {
         setCountdown("");
@@ -183,7 +192,7 @@ const TournamentFooter: React.FC<{
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-[10]">
       <style>{`
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
@@ -245,7 +254,7 @@ const TournamentFooter: React.FC<{
           {/* Right Side - Action Button */}
           <div className="shrink-0">
             {tournamentUpcoming ? (
-              <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-blue-900/40 text-blue-300 border border-blue-700/60">
+              <div className={`px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide  text-blue-300 border border-blue-700/60 ${countdown ? "bg-blue-900/40" : "bg-blue-600/40 animate-pulse-glow"}`}>
                 Waiting
               </div>
             ) : tournamentEnded ? (
@@ -260,6 +269,11 @@ const TournamentFooter: React.FC<{
               <div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">
                 Eliminated
               </div>)
+              : isSpectating() ? (
+                <div className="px-4 py-1.5 rounded text-xs font-bold uppercase animate-pulse tracking-wide bg-yellow-900/40 text-yellow-300 border border-yellow-700/60">
+                  Spectating
+                </div>
+              )
             // ) :
             // isForfeited ? 
             //   myMatch?.forfeiter_user_id === user?.id ? (<div className="px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wide bg-red-900/40 text-red-300 border border-red-700/60">

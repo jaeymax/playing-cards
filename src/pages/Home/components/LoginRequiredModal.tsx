@@ -1,3 +1,4 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,21 +13,38 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const {user} = useAppContext();
+
+  const isGuest = user?.is_guest? true : false;
+  console.log("isGuest", isGuest);
+
   if (!isOpen) return null;
 
   const handleLoginClick = () => {
     onClose();
-    navigate("/signin");
+    navigate("/signin",  { state: { from: window.location.pathname } });
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg p-11 max-w-md w-full">
         <h2 className="text-2xl font-bold text-white mb-4">Login Required</h2>
-        <p className="text-gray-300 mb-6">
+        {
+          isGuest ? (
+            <p className="text-gray-300 mb-6">
+              You are currently logged in with a guest account. To register for
+              tournaments, please log in with a real account.
+            </p>
+          ) : (
+            <p className="text-gray-300 mb-6">
+              You are currently not logged in. You need to log in to register for tournaments.
+            </p>
+          )
+        }
+        {/* <p className="text-gray-300 mb-6">
           You need to log in with a real account to register for tournaments.
           Guest accounts cannot participate in tournaments.
-        </p>
+        </p> */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={onClose}

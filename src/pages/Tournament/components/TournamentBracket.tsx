@@ -265,6 +265,17 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
     );
   }
 
+  if (!rounds || rounds.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-400">
+        <p className="text-base md:text-lg">
+          🏆 Bracket and rounds coming soon...
+        </p>
+      </div>
+
+    )
+  }
+
   return (
     <div className="relative">
       {/* Mobile View */}

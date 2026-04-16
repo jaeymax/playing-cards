@@ -42,7 +42,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   return (
     <div className="bg-gray-800 md:rounded-lg md:border border-gray-700">
       <div className="overflow-x-auto">
-        <table className="min-w-full">
+        <table className="min-w-full border-t border-b border-gray-700">
           <thead>
             <tr className="border-b border-gray-700">
               <th className="pl-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">

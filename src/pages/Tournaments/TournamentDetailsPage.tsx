@@ -6,14 +6,23 @@ import { useAppContext } from "@/contexts/AppContext";
 import Toast from "@/components/Toast";
 import Participants from "@/pages/Tournament/components/Participants";
 import TournamentOverview from "./components/TournamentOverview";
-import TournamentBracket from "./components/TournamentBracket";
-import TournamentStandings from "./components/TournamentStandings";
+import TournamentBracket from "../Tournament/components/TournamentBracket";
+import TournamentStandings from "../Tournament/components/TournamentStandings";
 import TournamentRules from "./components/TournamentRules";
-import { Share2 } from "lucide-react";
-// import TournamentFooter from "../Tournament/components/TournamentFooter";
+import { MessageSquare } from "lucide-react";
+import TournamentFooter from "../Tournament/components/TournamentFooter";
 // import TournamentHeader from "../Tournament/components/TournamentHeader";
 import { baseUrl } from "@/config/api";
-import { authHeaders } from "@/utils/Functions";
+import { authHeaders, customLog } from "@/utils/Functions";
+import RegistrationModal from "./components/RegistrationModal";
+import PhoneNumberRequiredModal from "../Home/components/PhoneNumberRequiredModal";
+import TournamentHeader from "../Tournament/components/TournamentHeader";
+import LobbyChatModal from "./components/LobbyChatModal";
+import MatchForfeitedModal from "../Tournament/components/MatchForfeitedModal";
+import TournamentEndedModal from "../Tournament/components/TournamentEndedModal";
+import { useSocket } from "@/contexts/SocketProvider";
+import TournamentInfo from "./components/TournamentInfo";
+import LoginRequiredModal from "../Home/components/LoginRequiredModal";
 
 const TournamentDetailsPage: React.FC = () => {
   const { id } = useParams();
@@ -35,7 +44,7 @@ const TournamentDetailsPage: React.FC = () => {
 
   const [userRegistered, setUserRegistered] = useState(false);
   const { user } = useAppContext();
-  const [showToast, setShowToast] = useState(false);
+  const [showToast] = useState(false);
   const [shareToastMessage, setShareToastMessage] = useState("");
   const [showShareToast, setShowShareToast] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,31 +52,107 @@ const TournamentDetailsPage: React.FC = () => {
   const [tournamentLobbyData, setTournamentLobbyData] =
     useState<TournamentLobbyData | null>(null);
   const [tournamentStarted, setTournamentStarted] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
+      useState(false);
+  const [phoneNumberRequiredModalOpen, setPhoneNumberRequiredModalOpen] =
+    useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const { socket } = useSocket();
+  const [showTournamentEndedModal, setShowTournamentEndedModal] =
+    useState<boolean>(false);
+  const [showMatchForfeitedModal, setShowMatchForfeitedModal] =
+    useState<boolean>(false);
+  const [matchForfeitedMessage, setMatchForfeitedMessage] =
+    useState<string>("");
+    const [myGameCode, setMyGameCode] = useState<string>("");
 
-  (error && tournamentStarted) && true;
+    myGameCode && true;
 
-  // const getTournament = (id: string): Tournament => {
-  //   return {
-  //     id: id,
-  //     name: "Spar Weekend Championship",
-  //     type: "Elimination",
-  //     status: "upcoming",
-  //     start_date: "2026-03-10T20:00:00Z",
-  //     registration_closing_date: "2026-03-10T19:30:00Z",
-  //     registration_fee: "5",
-  //     prize: "10000",
-  //     registered_participants: 14,
-  //     max_participants: 32,
-  //     format: "Swiss",
-  //     difficulty: "advanced",
-  //   };
-  // };
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (
+      tab === "bracket" ||
+      tab === "participants" ||
+      tab === "rules" ||
+      tab === "standings"
+    ) {
+      setActiveTab(tab);
+    }
+  }, []);
 
-  // const tournament = useMemo(() => getTournament(id || ""), [id]);
-  const startDate = useMemo(() => tournamentLobbyData?.tournament.start_date, [tournamentLobbyData]);
+  const tournamentEndedCallback = () => {
+    customLog("Tournament ended event received via socket");
+    setShowTournamentEndedModal(true);
+    //fetchTournamentData();
+  };
+
+  const matchForfeitedCallback = (data: {
+    loserId: number;
+    reason: string;
+  }) => {
+    customLog("Match forfeited event received via socket", data);
+    setShowMatchForfeitedModal(true);
+    console.log("tournamentFormat", tournamentLobbyData?.tournament.format);
+    if (user?.id === data.loserId) {
+      if (tournamentLobbyData?.tournament.format === "Swiss") {
+        setMatchForfeitedMessage(
+          "You have forfeited your match. You will receive 0 points for this round, but you still have a chance to advance to the next round. Check the standings tab for more details.",
+        );
+        return;
+      } else if (
+        tournamentLobbyData?.tournament.format === "Single Elimination"
+      ) {
+        setMatchForfeitedMessage(
+          "You have forfeited your match. Unfortunately, you are now out of the tournament. Better luck next time!",
+        );
+      }
+    } else {
+      if (tournamentLobbyData?.tournament.format === "Swiss") {
+        setMatchForfeitedMessage(
+          "Your opponent has forfeited the match. You have advanced to the next round and will received 1 point for this round. Check the standings tab for more details.",
+        );
+        return;
+      } else if (
+        tournamentLobbyData?.tournament.format === "Single Elimination"
+      ) {
+        setMatchForfeitedMessage(
+          "Your opponent has forfeited the match. Congratulations! You have advanced to the next stage of the tournament.",
+        );
+      }
+    }
+
+    // fetchTournamentData();
+  };
+
+  const extractGameCodeFromTournamentData = (
+    data: TournamentLobbyData | null,
+  ): string => {
+    if (!data) return "";
+    const current_round_number = data.tournament.current_round_number;
+    const current_round_matches = data.rounds.find(
+      (round) => round.round === current_round_number,
+    )?.matches;
+    customLog("current_round_matches", current_round_matches);
+    const myMatch = current_round_matches?.find(
+      (match) => match.player1.id === user?.id || match.player2.id === user?.id,
+    );
+    if (myMatch) {
+      return myMatch.game_code;
+    }
+    return "";
+  };
+
+
+
+  const startDate = useMemo(
+    () => tournamentLobbyData?.tournament.start_date,
+    [tournamentLobbyData],
+  );
   const registrationClosingDate = useMemo(
     () => tournamentLobbyData?.tournament.registration_closing_date,
-    [tournamentLobbyData]
+    [tournamentLobbyData],
   );
 
   const getTournamentLobbyData = async () => {
@@ -83,12 +168,22 @@ const TournamentDetailsPage: React.FC = () => {
         },
       });
       if (!response.ok) {
-        throw new Error("Failed to fetch tournament data");
+         if (response.status === 500) {
+          setError(
+            "Network problem: Please check your connection and try again."
+          );
+        } else {
+          setError("Failed to fetch tournament data. Please try again.");
+        }
+        return;
       }
       const data = await response.json();
       setTournamentLobbyData(data);
+       setMyGameCode(extractGameCodeFromTournamentData(data));
+      setUserRegistered(data.tournament.registered);
       console.log("fetched tournament data", data);
     } catch (error) {
+      console.error("Error fetching tournament data:", error);
       setError("Failed to load tournament lobby data. Please try again later.");
     } finally {
       setLoading(false);
@@ -97,12 +192,48 @@ const TournamentDetailsPage: React.FC = () => {
 
   useEffect(() => {
     getTournamentLobbyData();
-  }, []);
+  }, [id, user]);
+
+  const lobbyUpdateCallback = (tournamentData: TournamentLobbyData) => {
+      customLog("Received tournamentData via socket");
+      setTournamentLobbyData(tournamentData);
+      console.log("tournamentData via socket", tournamentData);
+    };
+  
+    useEffect(() => {
+      if (!user) return;
+      if (!socket) return;
+      if (!tournamentLobbyData) return;
+      socket.emit("joinTournamentRoom", {
+        tournamentId: id,
+        userId: user?.id,
+        gameCode: extractGameCodeFromTournamentData(tournamentLobbyData),
+      });
+      //socket?.emit('')
+      socket.on("lobbyUpdate", lobbyUpdateCallback);
+      socket.on("tournamentEnded", tournamentEndedCallback);
+      socket.on("matchForfeit", matchForfeitedCallback);
+  
+      return () => {
+        socket?.off("lobbyUpdate", lobbyUpdateCallback);
+        socket.off("tournamentEnded", tournamentEndedCallback);
+        socket.off("matchForfeit", matchForfeitedCallback);
+        socket.emit("leaveTournamentRoom", {
+          tournamentId: id,
+          userId: user?.id,
+          gameCode: extractGameCodeFromTournamentData(tournamentLobbyData),
+        });
+      };
+    }, [user, socket, tournamentLobbyData]);
+  
+    const handleTournamentEndedModalClose = () => {
+      setShowTournamentEndedModal(false);
+      setActiveTab("standings");
+    };
 
   const calculateTimeLeft = (startDate: string) => {
     const difference = new Date(startDate).getTime() - new Date().getTime();
     if (difference <= 0) {
-      setTournamentStarted(true);
       return {
         days: 0,
         hours: 0,
@@ -119,7 +250,8 @@ const TournamentDetailsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!startDate || tournamentLobbyData?.tournament.status !== "upcoming") return;
+    if (!startDate || tournamentLobbyData?.tournament.status !== "upcoming")
+      return;
     const updateTimer = () => {
       const timeLeft = calculateTimeLeft(startDate);
       if (timeLeft) {
@@ -132,7 +264,11 @@ const TournamentDetailsPage: React.FC = () => {
   }, [startDate, tournamentLobbyData?.tournament.status]);
 
   useEffect(() => {
-    if (!registrationClosingDate || tournamentLobbyData?.tournament.status !== "upcoming") return;
+    if (
+      !registrationClosingDate ||
+      tournamentLobbyData?.tournament.status !== "upcoming"
+    )
+      return;
     const updateRegistrationTimer = () => {
       const timeLeft = calculateTimeLeft(registrationClosingDate);
       if (timeLeft) {
@@ -144,14 +280,22 @@ const TournamentDetailsPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [registrationClosingDate, tournamentLobbyData?.tournament.status]);
 
-  const handleRegistration = () => {
-    if (!user) {
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+  const handleRegistrationClicked = () => {
+    if (!user || user.is_guest) {
+      setIsLoginRequiredModalOpen(true);
       return;
     }
-    setUserRegistered(true);
+    //Registration logic goes here
+    if (!user.phone) {
+      setPhoneNumberRequiredModalOpen(true);
+    } else {
+      setRegistrationModalOpen(true);
+    }
+    //setRegistrationModalOpen(true);
+    // setUserRegistered(true);
   };
+
+
 
   const handleShare = () => {
     const currentUrl = window.location.href;
@@ -162,9 +306,12 @@ const TournamentDetailsPage: React.FC = () => {
     });
   };
 
+  const handleLobbyChat = () => {
+    setChatModalOpen(true);
+  };
+
   const getButtonState = () => {
-    if (tournamentLobbyData?.tournament.status === "completed") return "results";
-    if (tournamentLobbyData?.tournament.status === "ongoing") return "rounds";
+    if (userRegistered) return "lobby";
     if (
       registrationTimeLeft.days === 0 &&
       registrationTimeLeft.hours === 0 &&
@@ -172,9 +319,13 @@ const TournamentDetailsPage: React.FC = () => {
       registrationTimeLeft.seconds === 0
     )
       return "closed";
-    if (tournamentLobbyData && tournamentLobbyData?.tournament.registered_participants >= tournamentLobbyData?.tournament.max_participants)
+    if (
+      tournamentLobbyData &&
+      tournamentLobbyData?.tournament.registered_participants >=
+        tournamentLobbyData?.tournament.max_participants
+    )
       return "full";
-    if (userRegistered) return "lobby";
+
     return "register";
   };
 
@@ -192,7 +343,7 @@ const TournamentDetailsPage: React.FC = () => {
       lobby: {
         label: "Registered",
         color: "bg-gray-600 text-white font-medium rounded-lg",
-        disabled: false,
+        disabled: true,
       },
       full: {
         label: "Tournament Full",
@@ -204,204 +355,91 @@ const TournamentDetailsPage: React.FC = () => {
         color: "bg-gray-600 text-white font-medium rounded-lg",
         disabled: true,
       },
-      rounds: {
-        label: "View Rounds",
-        color:
-          "from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500",
-        disabled: false,
-      },
-      results: {
-        label: "View Results",
-        color:
-          "from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500",
-        disabled: false,
-      },
     };
     return configs[state];
   };
 
   const buttonConfig = getButtonConfig(getButtonState());
 
-  // const tabs = [
-  //   { id: "overview", label: "Overview", icon: "📋" },
-  //   { id: "participants", label: "Participants", icon: "👥" },
-  //   { id: "bracket", label: "Bracket / Rounds", icon: "🏆" },
-  //   { id: "standings", label: "Standings", icon: "📊" },
-  //   { id: "rules", label: "Rules", icon: "📖" },
-  // ];
-
-  // const mockParticipants = [
-  //   {
-  //     id: 1,
-  //     username: "Player1",
-  //     image_url: "",
-  //     rank: "Gold",
-  //     rating: 1800,
-  //     is_rated: true,
-  //     status: "qualified",
-  //     score: 3,
-  //     wins: 3,
-  //     losses: 0,
-  //   },
-  //   {
-  //     id: 2,
-  //     username: "Player2",
-  //     image_url: "",
-  //     rank: "Silver",
-  //     rating: 1600,
-  //     is_rated: true,
-  //     status: "active",
-  //     score: 2,
-  //     wins: 2,
-  //     losses: 1,
-  //   },
-  //   {
-  //     id: 3,
-  //     username: "Player3",
-  //     image_url: "",
-  //     rank: "Bronze",
-  //     rating: 1400,
-  //     is_rated: true,
-  //     status: "eliminated",
-  //     score: 1,
-  //     wins: 1,
-  //     losses: 2,
-  //   },
-  // ];
-
-  if (!tournamentLobbyData) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
-        <h2 className="text-2xl">Tournament not found</h2>
-      </div>
-    );
-  }
-
+ 
   return (
     <div className="min-h-screen w-full bg-gray-900 text-gray-100 pb-32">
       <NavBar showSignUps={true} />
+      <TournamentEndedModal
+        isOpen={showTournamentEndedModal}
+        onClose={handleTournamentEndedModalClose}
+      />
+
+      <MatchForfeitedModal
+        isOpen={showMatchForfeitedModal}
+        onClose={() => setShowMatchForfeitedModal(false)}
+        message={matchForfeitedMessage}
+      />
       <Toast
         message={shareToastMessage || "Please Register or Sign in"}
         isVisible={showShareToast || showToast}
         onClose={() => {}}
       />
 
+       {error && (
+        <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-4 m-4 rounded-lg flex justify-between items-center">
+          <span>{error}</span>
+          <button
+            onClick={getTournamentLobbyData}
+            className="bg-red-700 hover:bg-red-600 px-4 py-2 rounded font-medium text-sm"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+   {
+    tournamentLobbyData?.tournament.status !== "upcoming" && (
+      <TournamentHeader
+        name={tournamentLobbyData?.tournament.name}
+        format={tournamentLobbyData?.tournament.format}
+        status={tournamentLobbyData?.tournament.status}
+        numberOfParticipants={
+          tournamentLobbyData?.participants.length
+        }
+        prize={tournamentLobbyData?.tournament.prize}
+        current_round_number={
+          tournamentLobbyData?.tournament.current_round_number ?? 0
+        }
+        matches={tournamentLobbyData?.rounds ?? []}
+        loading={loading}
+      />
+
+    )
+   }
+
       <main className="md:container mx-auto md:px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
           {/* Main Content */}
           <div className="lg:col-span-9 space-y-6">
-            {/* Tournament Header */}
-            <div className="px-4 md:px-0">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2">
-                {tournamentLobbyData ? tournamentLobbyData.tournament.name : "Loading Tournament..."}
-              </h1>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <p className="text-gray-400 text-sm">
-                      Starts:{" "}
-                      {
-                        tournamentLobbyData && (
-                          <>
-                          {new Date(tournamentLobbyData.tournament.start_date).toLocaleDateString()} at{" "}
-                          {new Date(tournamentLobbyData.tournament.start_date).toLocaleTimeString()}
-                          </>
-                        )
-                      }
-                    </p>
-                    <button
-                      onClick={handleShare}
-                      className="p-3 rounded-full flex items-center justify-items-center bg-gray-700/60 hover:bg-gray-600 transition-colors"
-                      title="Share tournament"
-                    >
-                      <Share2 size={16} className="text-gray-300" />
-                    </button>
-                  </div>
-                  {/* <div className="flex items-center gap-3">
-                    <p className="text-gray-400 text-sm">
-                      Registration Closes:{" "}
-                      {new Date(
-                        tournament.registrationClosingDate
-                      ).toLocaleDateString()}{" "}
-                      at{" "}
-                      {new Date(
-                        tournament.registrationClosingDate
-                      ).toLocaleTimeString()}
-                    </p>
-                  </div> */}
-                  {tournamentLobbyData?.tournament.status === "upcoming" && (
-                    <>
-                      <div className="flex gap-4 text-sm">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-400">
-                            {timeLeft.days}
-                          </div>
-                          <div className="text-gray-400 text-xs">days</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-400">
-                            {timeLeft.hours}
-                          </div>
-                          <div className="text-gray-400 text-xs">hours</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-400">
-                            {timeLeft.minutes}
-                          </div>
-                          <div className="text-gray-400 text-xs">mins</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-400">
-                            {timeLeft.seconds}
-                          </div>
-                          <div className="text-gray-400 text-xs">secs</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-4 text-sm items-center">
-                        <p className="text-gray-400">Registration closes in:</p>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-400">
-                            {registrationTimeLeft.days}
-                          </div>
-                          <div className="text-gray-400 text-xs">days</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-400">
-                            {registrationTimeLeft.hours}
-                          </div>
-                          <div className="text-gray-400 text-xs">hours</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-400">
-                            {registrationTimeLeft.minutes}
-                          </div>
-                          <div className="text-gray-400 text-xs">mins</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-400">
-                            {registrationTimeLeft.seconds}
-                          </div>
-                          <div className="text-gray-400 text-xs">secs</div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={handleRegistration}
-                  disabled={buttonConfig.disabled}
-                  className={`bg-gradient-to-r ${
-                    buttonConfig.color
-                  } text-white font-semibold py-2 px-6 rounded-lg transition-all whitespace-nowrap ${
-                    buttonConfig.disabled ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {buttonConfig.label}
-                </button>
-              </div>
-            </div>
+           
+            {
+              tournamentLobbyData?.tournament.status === "upcoming" && (
+                <TournamentInfo
+                  tournament={tournamentLobbyData?.tournament}
+                  userRegistered={userRegistered}
+                  registrationTimeLeft={registrationTimeLeft}
+                  buttonConfig={buttonConfig}
+                  handleRegistration={handleRegistrationClicked}
+                  handleShare={handleShare}
+                />
 
-            {/* Tab Navigation */}
+              )
+            }
+
+
+            <button
+              onClick={handleLobbyChat}
+              aria-label="Open lobby chat"
+              className="fixed right-4 bottom-24 z-50 p-4 rounded-full bg-blue-600 text-white shadow-2xl hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <MessageSquare size={20} />
+            </button>
             <div className="bg-gray-800 w-full md:rounded-lg p-4 border-t border-b md:border border-gray-700">
               <div className="flex space-x-4 border-b border-gray-700 overflow-x-scroll scrollbar-hide">
                 {[
@@ -421,14 +459,17 @@ const TournamentDetailsPage: React.FC = () => {
                     }`}
                   >
                     {tab}
-                    {tab === "participants" && tournamentLobbyData && tournamentLobbyData.tournament.registered_participants > 0 && (
-                      <span className="bg-blue-400 w-6 rounded-full text-gray-800 text-xs flex items-center justify-center">
-                        {
-                          tournamentLobbyData?.tournament
-                            .registered_participants
-                        }
-                      </span>
-                    )}
+                    {tab === "participants" &&
+                      tournamentLobbyData &&
+                      tournamentLobbyData.tournament.registered_participants >
+                        0 && (
+                        <span className="bg-blue-400 w-6 rounded-full text-gray-800 text-xs flex items-center justify-center">
+                          {
+                            tournamentLobbyData?.tournament
+                              .registered_participants
+                          }
+                        </span>
+                      )}
                   </button>
                 ))}
               </div>
@@ -442,7 +483,7 @@ const TournamentDetailsPage: React.FC = () => {
                     timeLeft={timeLeft}
                     // registrationTimeLeft={registrationTimeLeft}
                     buttonConfig={buttonConfig}
-                    onRegistration={handleRegistration}
+                    onRegistration={handleRegistrationClicked}
                   />
                 )}
 
@@ -468,6 +509,7 @@ const TournamentDetailsPage: React.FC = () => {
                 {activeTab === "standings" && (
                   <TournamentStandings
                     tournamentFormat={tournamentLobbyData?.tournament.format}
+                    standings={tournamentLobbyData?.standings}
                     loading={loading}
                   />
                 )}
@@ -482,19 +524,46 @@ const TournamentDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* <TournamentFooter
+          <TournamentFooter
+            tournamentId={tournamentLobbyData?.tournament.id}
             tournamentStarted={tournamentStarted}
             tournamentStartTime={tournamentLobbyData?.tournament.start_date}
             setTournamentStarted={setTournamentStarted}
+            isRegistered={userRegistered}
             tournamentStatus={tournamentLobbyData?.tournament.status}
             tournamentFormat={tournamentLobbyData?.tournament.format}
-            loading={loading}
             matches={tournamentLobbyData?.rounds}
-            currentRoundNumber={tournamentLobbyData?.tournament.current_round_number as number}
+            currentRoundNumber={
+              tournamentLobbyData?.tournament.current_round_number ?? 0
+            }
+            loading={loading}
           />
-          */}
         </div>
       </main>
+      <RegistrationModal
+        isOpen={registrationModalOpen}
+        tournamentId={tournamentLobbyData?.tournament.id}
+        setUserRegistered={setUserRegistered}
+        entryFee={tournamentLobbyData?.tournament.registration_fee}  
+        onCancel={() => setRegistrationModalOpen(false)}
+      />
+      <PhoneNumberRequiredModal
+        isOpen={phoneNumberRequiredModalOpen}
+        onClose={() => setPhoneNumberRequiredModalOpen(false)}
+        onPhoneNumberAdded={() => {
+          setPhoneNumberRequiredModalOpen(false);
+          setRegistrationModalOpen(true);
+        }}
+      />
+       <LoginRequiredModal
+        isOpen={isLoginRequiredModalOpen}
+        onClose={() => setIsLoginRequiredModalOpen(false)}
+      />
+      <LobbyChatModal
+        isOpen={chatModalOpen}
+        onClose={() => setChatModalOpen(false)}
+        tournamentId={id || ""}
+      />
     </div>
   );
 };

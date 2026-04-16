@@ -1,9 +1,8 @@
 import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
-import { authHeaders, removeToken } from "@/utils/Functions";
+import { authHeaders} from "@/utils/Functions";
 import Toast from "@/components/Toast";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const ProfileSettings: React.FC = () => {
   const { user } = useAppContext();
@@ -28,9 +27,7 @@ const ProfileSettings: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const { updateUser } = useAppContext();
-
-  const navigate = useNavigate();
+  
 
   const handleInputChange = (field: string, value: string) => {
     setSettings((prev) => ({
@@ -39,15 +36,6 @@ const ProfileSettings: React.FC = () => {
     }));
   };
 
-  const handleLogout = () => {
-    // Implement logout logic here (e.g., clear auth tokens, redirect to login page)
-    // Clear session storage
-    removeToken();
-    // Clear user context
-    updateUser(null);
-    // Redirect to signin page
-    navigate("/signin");
-  };
 
   const updateProfile = async () => {
     // Implement profile update logic here (e.g., send updated settings to backend)
@@ -168,7 +156,7 @@ const ProfileSettings: React.FC = () => {
       </div>
 
       {/* Notification Settings */}
-      {/* <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
+      <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
         <h3 className="text-lg font-bold text-white mb-4">
           Notification Settings
         </h3>
@@ -200,10 +188,10 @@ const ProfileSettings: React.FC = () => {
             </div>
           ))}
         </div>
-      </div> */}
+      </div> 
 
       {/* Privacy Settings */}
-      {/* <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
+       <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
         <h3 className="text-lg font-bold text-white mb-4">Privacy Settings</h3>
         <div className="space-y-4">
           {Object.entries(settings.privacy).map(([key, value]) => (
@@ -233,17 +221,17 @@ const ProfileSettings: React.FC = () => {
             </div>
           ))}
         </div>
-      </div> */}
+      </div>
 
       {/* Logout */}
-      <div className="bg-gray-750 rounded-lg p- borde border-gray-700 borde">
+      {/* <div className="bg-gray-750 rounded-lg p- borde border-gray-700 borde">
         <button
           onClick={handleLogout}
           className="w-full px- py-2 bg-blue-600 text-white rounded-lg hove:bg-yellow-700"
         >
           Logout
         </button>
-      </div>
+      </div> */}
 
       {/* Danger Zone */}
       {/* <div className="bg-red-500/10 rounded-lg p-6 border border-red-500/20">

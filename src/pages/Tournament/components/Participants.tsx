@@ -69,9 +69,12 @@ const Participants: React.FC<ParticipantsProps> = ({
 
 
   if(!participants || participants.length === 0){
+
+    // return players joining with a player icon emoji
+    
     return (
       <div className="text-center py-10">
-        <p className="text-gray-400">Players joining.</p>
+        <p className="text-gray-400">👥 Players joining</p>
       </div>
     );
   }

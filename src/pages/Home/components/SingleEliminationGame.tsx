@@ -27,7 +27,9 @@ import SingleEliminationGameOverModal from "@/components/SingleEliminationGameOv
 import MatchForfeitModal from "@/components/MatchForfeitModal";
 import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
-
+import GameForfeitedPage from "@/components/GameForfeitedPage";
+import GameEndedPage from "@/components/GameEndedPage";
+import GameNotFoundPage from "@/components/GameNotFoundPage";
 
 // interface Message {
 //   user_id: number | undefined;
@@ -44,7 +46,9 @@ interface SingleEliminationGameProps {
   tournamentId: number;
 }
 
-const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournamentId}) => {
+const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
+  tournamentId,
+}) => {
   const { code } = useParams();
   const { socket } = useSocket();
   const { user } = useAppContext();
@@ -74,7 +78,6 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
   const [processingForfeit, setProcessingForfeit] = useState<any>(false);
-
 
   gameNotFound && true;
 
@@ -125,8 +128,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
       setLosingPlayer(losingPlayer);
       setGameOver(true);
     } else {
-      navigate(-1);
-   
+       return navigate(`/tournaments/${tournamentId}?tab=bracket`);
     }
   };
 
@@ -244,19 +246,19 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     }
   }, [game]);
 
-
   const handleSingleEliminationGameOverModalClose = () => {
-    if(game?.is_final_match) {
-    navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
-    return;
+    if (game?.is_final_match) {
+      navigate(`/tournaments/${tournamentId}?tab=standings`);
+      return;
     }
-    return navigate(-1);
-  }
-
+    return navigate(`/tournaments/${tournamentId}?tab=bracket`);
+  };
 
   const matchForfeitCallback = (data: any) => {
-    const currentUsersGame = players.find(player=>player.user.id == user?.id);
-    if(!currentUsersGame)return;
+    const currentUsersGame = players.find(
+      (player) => player.user.id == user?.id
+    );
+    if (!currentUsersGame) return;
     setProcessingForfeit(false);
     setMatchForfeited(true);
     const forfeiterId = data.loserId;
@@ -266,7 +268,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
     customLog("forfeiter", forfeiter);
     setMatchForfeiter(forfeiter);
     console.log("Match forfeit:", data);
-  //  setLoserTimeouts(data.loserTimeouts);
+    //  setLoserTimeouts(data.loserTimeouts);
   };
 
   useEffect(() => {
@@ -353,7 +355,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
       setRemainingSeconds(remaining);
 
       if (remaining === 0) {
-        if(!matchForfeiter){
+        if (!matchForfeiter) {
           setProcessingForfeit(true);
         }
         clearInterval(interval);
@@ -483,6 +485,19 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({tournament
   );
 
   //customLog('losing player', losingPlayer);
+
+
+  if(gameNotFound){
+    return <GameNotFoundPage gameCode={code} />;
+  }
+
+  if (game?.status === "forfeited") {
+    return <GameForfeitedPage gameCode={code} />;
+  }
+
+  if(game?.status === 'completed'){
+    return <GameEndedPage gameCode={code} />;
+  }
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">

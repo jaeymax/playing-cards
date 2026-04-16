@@ -103,7 +103,7 @@ const WeeklySingleEliminationChampions: React.FC = () => {
 
   const handleViewFullStandings = () => {
     if(tournamentId) {
-      navigate(`/tournaments/lobby/${tournamentId}?tab=standings`);
+      navigate(`/tournaments/${tournamentId}?tab=standings`);
     } 
   };
   if(!champions || champions.length == 0)return null;

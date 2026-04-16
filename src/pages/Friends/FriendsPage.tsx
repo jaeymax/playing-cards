@@ -70,7 +70,7 @@ const FriendsPage: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <RecentlyPlayed />
+          <RecentlyPlayed />
           </div>
         </div>
       </div>

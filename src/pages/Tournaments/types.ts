@@ -6,13 +6,15 @@ export type TournamentDifficulty =
   | "pro";
 
 export interface Tournament {
-  id: string;
+  id: number;
   name: string;
   type: string;
   status: TournamentStatus;
   start_date: string;
   registration_fee: string;
+  description: string;
   prize: string;
+  registered: boolean;
   registered_participants: number;
   max_participants: number;
   format: string;
@@ -21,33 +23,36 @@ export interface Tournament {
   current_round_number: number;
 }
 
+export interface TournamentMatch {
+  id: number;
+  player1: {
+    id: number;
+    name: string;
+    rating: number;
+    is_rated: boolean;
+    image_url: string;
+    score: number;
+    winner: boolean;
+  };
+  player2: {
+    id: number;
+    name: string;
+    rating: number;
+    is_rated: boolean;
+    image_url: string;
+    score: number;
+    winner: boolean;
+  };
+  game_code: string;
+  turn_ends_at: number;
+  game_id: number;
+  status: "pending" | "in_progress" | "completed" | "forfeited";
+  winner_id: number | null;
+}
+
 export interface TournamentRound {
   round: number;
-  matches: {
-    player1: {
-      id: string;
-      name: string;
-      rating: number;
-      is_rated: boolean;
-      image_url: string;
-      score: number;
-      winner: boolean;
-    };
-    player2: {
-      id: string;
-      name: string;
-      rating: number;
-      is_rated: boolean;
-      image_url: string;
-      score: number;
-      winner: boolean;
-    };
-    game_code: string;
-    game_id: number;
-    id: number;
-    status: "pending" | "in_progress" | "completed" | "forfeited";
-    winner_id: number | null;
-  }[];
+  matches: TournamentMatch[];
 }
 
 export interface TournamentRule {

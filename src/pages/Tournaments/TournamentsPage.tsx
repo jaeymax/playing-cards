@@ -5,6 +5,8 @@ import TournamentCardSkeleton from "./components/TournamentCardSkeleton";
 import { Tournament, TournamentStatus } from "./types";
 import NavBar from "@/components/NavBar";
 import { baseUrl } from "@/config/api";
+import { useAppContext } from "@/contexts/AppContext";
+import { authHeaders } from "@/utils/Functions";
 
 const TournamentsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<TournamentStatus>("all");
@@ -12,6 +14,7 @@ const TournamentsPage: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {user} = useAppContext();
 
   // const tournaments: Tournament[] = [
   //   {
@@ -107,7 +110,16 @@ const TournamentsPage: React.FC = () => {
     setError(null);
     try {
       // make get request to /api/tournaments
-      const response = await fetch(`${baseUrl}/tournaments`);
+      const response = await fetch(`${baseUrl}/tournaments`, 
+        {
+          method: "GET",
+          headers:{
+              "Content-Type": "application/json",
+              ...authHeaders()
+          }
+        }
+        
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch tournaments");
       }
@@ -123,7 +135,7 @@ const TournamentsPage: React.FC = () => {
 
   useEffect(() => {
     fetchTournaments();
-  }, []);
+  }, [user]);
 
   const filteredTournaments = useMemo(() => {
     let filtered = tournaments;

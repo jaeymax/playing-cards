@@ -136,7 +136,15 @@ const TournamentBanner: React.FC = () => {
   };
 
   const handleJoinTournament = () => {
-    navigate(`/tournaments/lobby/${tournamentData?.id}`);
+    if(tournamentData?.status === "completed"){
+      navigate(`/tournaments/${tournamentData?.id}/?tab=standings`);
+      return;
+    }
+    else if(tournamentData?.status === "ongoing"){
+      navigate(`/tournaments/${tournamentData?.id}/?tab=bracket`);
+      return;
+    }
+   return navigate(`/tournaments/${tournamentData?.id}`);
   };
 
   const getTournamentDetails = async () => {
@@ -169,15 +177,8 @@ const TournamentBanner: React.FC = () => {
   }, [user]);
 
   const handleRegistration = () => {
-  if (!user || user?.is_guest) {
-      setIsLoginRequiredModalOpen(true);
-    } else {
-      if (!user?.phone) {
-        setPhoneNumberRequiredModalOpen(true);
-      } else {
-        setIsRegistrationModalOpen(true);
-      }
-    }
+ 
+    navigate(`/tournaments/${tournamentData?.id}`);
   };
 
   if (isLoading) {
@@ -216,14 +217,14 @@ const TournamentBanner: React.FC = () => {
             {!tournamentData?.registered ? (
               <button
                 onClick={handleRegistration}
-                disabled={!tournamentData || isExpired}
+                disabled={!tournamentData}
                 className={`w-full sm:w-auto px-6 py-2 ${
                   !tournamentData || isExpired
-                    ? "bg-gray-600 cursor-not-allowed"
+                    ? "bg-gray-600"
                     : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transform transition hover:scale-105"
                 } text-white font-medium rounded-lg`}
               >
-                {isExpired ? "Registration Ended" : "Register Now"}
+                {isExpired ? "Spectate" : "Register Now"}
               </button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

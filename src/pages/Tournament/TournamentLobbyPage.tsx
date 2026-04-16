@@ -16,19 +16,18 @@ import { authHeaders, customLog } from "@/utils/Functions";
 import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/contexts/SocketProvider";
 import NavBar from "@/components/NavBar";
-import { Round } from "@/types/tournament";
-import { TournamentParticipant } from "../Tournaments/types";
+import { TournamentLobbyData} from "../Tournaments/types";
 
-interface Tournament {
-  id: number;
-  name: string;
-  start_date: string;
-  status: "upcoming" | "ongoing" | "completed";
-  format: string;
-  prize: string;
-  registration_fee: string;
-  current_round_number: number;
-}
+// interface Tournament {
+//   id: number;
+//   name: string;
+//   start_date: string;
+//   status: "upcoming" | "ongoing" | "completed";
+//   format: string;
+//   prize: string;
+//   registration_fee: string;
+//   current_round_number: number;
+// }
 
 // interface Participant {
 //   id: number;
@@ -43,20 +42,20 @@ interface Tournament {
 //   losses: number;
 // }
 
-interface Rule {
-  id: number;
-  title: string;
-  content: string;
-}
+// interface Rule {
+//   id: number;
+//   title: string;
+//   content: string;
+// }
 
-interface TournamentData {
-  success: boolean;
-  tournament: Tournament;
-  participants: TournamentParticipant[];
-  rounds: Round[];
-  rules: Rule[];
-  standings:any[]
-}
+// interface TournamentData {
+//   success: boolean;
+//   tournament: Tournament;
+//   participants: TournamentParticipant[];
+//   rounds: Round[];
+//   rules: Rule[];
+//   standings:any[]
+// }
 
 const TournamentLobbyPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
@@ -64,14 +63,14 @@ const TournamentLobbyPage: React.FC = () => {
   >("bracket");
 
   const { user } = useAppContext();
-  const [tournamentData, setTournamentData] = useState<TournamentData | null>(
+  const [tournamentData, setTournamentData] = useState<TournamentLobbyData | null>(
     null
   );
   const { socket } = useSocket();
   const [loading, setLoading] = useState(true);
-  const [tournamentStartTime, setTournamentStartTime] = useState<Date | null>(
-    null
-  );
+  // const [tournamentStartTime, setTournamentStartTime] = useState<Date | null>(
+  //   null
+  // );
   const [tournamentStarted, setTournamentStarted] = useState(false);
   const [myGameCode, setMyGameCode] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -138,7 +137,7 @@ const TournamentLobbyPage: React.FC = () => {
   };
 
   const extractGameCodeFromTournamentData = (
-    data: TournamentData | null
+    data: TournamentLobbyData | null
   ): string => {
     if (!data) return "";
     const current_round_number = data.tournament.current_round_number;
@@ -179,7 +178,7 @@ const TournamentLobbyPage: React.FC = () => {
         return;
       }
 
-      const data: TournamentData = await response.json();
+      const data: TournamentLobbyData = await response.json();
       setTournamentData(data);
       setMyGameCode(extractGameCodeFromTournamentData(data));
       const isparticipant = data.participants.some((p) => p.id === user?.id);
@@ -187,7 +186,7 @@ const TournamentLobbyPage: React.FC = () => {
       // Set tournament start time from data if available
       if (data.tournament.start_date) {
         const startDate = new Date(data.tournament.start_date);
-        setTournamentStartTime(startDate);
+        //setTournamentStartTime(startDate);
         setTournamentStarted(new Date() >= startDate);
       }
     } catch (error) {
@@ -198,12 +197,13 @@ const TournamentLobbyPage: React.FC = () => {
     }
   };
 
+
   useEffect(() => {
    // if (!user) return;
     fetchTournamentData();
   }, [id, user]);
 
-  const lobbyUpdateCallback = (tournamentData: TournamentData) => {
+  const lobbyUpdateCallback = (tournamentData: TournamentLobbyData) => {
     customLog("Received tournamentData via socket");
     setTournamentData(tournamentData);
     console.log("tournamentData via socket", tournamentData);
@@ -283,17 +283,7 @@ const TournamentLobbyPage: React.FC = () => {
           />
 
           <div className="md:container mx-auto md:px-4 py-8 borde">
-            {/* {tournamentData?.tournament.status === "completed" && (
-              <div className="mb-8">
-                <TournamentResults
-                  participants={tournamentData?.participants || []}
-                  tournament_status={tournamentData?.tournament?.status}
-                  tournament_id={tournamentData?.tournament?.id}
-                  number_of_rounds={tournamentData?.rounds.length}
-                />
-              </div>
-            )} */}
-
+          
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 borde w-full">
               {/* Main Content */}
               <div className="lg:col-span-9 space-y-6">
@@ -350,12 +340,10 @@ const TournamentLobbyPage: React.FC = () => {
                     )}
                     {activeTab === "standings" && (
                       <TournamentStandings
-                        tournamentId={tournamentData?.tournament.id}
+                       
                         tournamentFormat={tournamentData?.tournament.format}
                        standings={tournamentData?.standings}
-                        numberOfParticipants={
-                          tournamentData?.participants.length
-                        }
+                       
                         loading={loading}
                       />
                     )}
@@ -382,7 +370,8 @@ const TournamentLobbyPage: React.FC = () => {
           <TournamentFooter
             tournamentId={tournamentData?.tournament.id}
             tournamentStarted={tournamentStarted}
-            tournamentStartTime={tournamentStartTime}
+            tournamentStartTime={tournamentData?.tournament.start_date}
+            isRegistered={tournamentData?.tournament.registered}
             setTournamentStarted={setTournamentStarted}
             tournamentStatus={tournamentData?.tournament.status}
             tournamentFormat={tournamentData?.tournament.format}

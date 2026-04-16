@@ -19,6 +19,7 @@ interface User {
   is_rated:boolean;
   tournaments_played:number;
   tournaments_won:number;
+  balance:string;
   rank:number;
   is_guest:boolean;
   rating:number;
