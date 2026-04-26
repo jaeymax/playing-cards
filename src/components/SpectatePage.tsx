@@ -22,8 +22,20 @@ import {
 import { useAppContext } from "@/contexts/AppContext";
 import GameForfeitedPage from "./GameForfeitedPage";
 import GameEndedPage from "./GameEndedPage";
+import SpectatorChat from "./SpectatorChat";
+import { baseUrl } from "@/config/api";
 
 const MemoizedMatchHeader = memo(MatchHeader);
+
+interface ChatMessage {
+  id: string;
+  game_code: string;
+  user_id:number;
+  username: string;
+  message: string;
+  timestamp: string;
+  image_url?: string;
+}
 
 const SpectatePage = () => {
   const { code } = useParams();
@@ -40,7 +52,78 @@ const SpectatePage = () => {
   const [playerTwo, setPlayerTwo] = useState<any | null>();
   const [playerThree, setPlayerThree] = useState<any | null>({});
   const [playerFour, setPlayerFour] = useState<any | null>({});
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+       // {
+    //   id: "1",
+    //   user_id: 1,
+    //   username: "Jaey",
+    //   message: "He will lose this match",
+    //   timestamp: new Date(Date.now() - 300000),
+    // },
+    // {
+    //   id: "2",
+    //   user_id: 2,
+    //   username: "ProPlayer92",
+    //   message: "Amazing play right there!",
+    //   timestamp: new Date(Date.now() - 240000),
+    // },
+    // {
+    //   id: "3",
+    //   user_id: 3,
+    //   username: "CardMaster",
+    //   message: "Did you see that trick? Insane!",
+    //   timestamp: new Date(Date.now() - 180000),
+    // },
+    // {
+    //   id: "4",
+    //   user_id: 4,
+    //   username: "SpectatorX",
+    //   message: "Player 2 is playing defensively",
+    //   timestamp: new Date(Date.now() - 120000),
+    // },
+    // {
+    //   id: "5",
+    //   user_id: 5,
+    //   username: "Jaey",
+    //   message: "Yeah, smart move honestly",
+    //   timestamp: new Date(Date.now() - 90000),
+    // },
+    // {
+    //   id: "6",
+    //   user_id: 6,
+    //   username: "TwitchViewer",
+    //   message: "This is the best match I've seen all season",
+    //   timestamp: new Date(Date.now() - 60000),
+    // },
+    // {
+    //   id: "7",
+    //   user_id: 7,
+    //   username: "GamerPete",
+    //   message: "The strategy here is top tier",
+    //   timestamp: new Date(Date.now() - 45000),
+    // },
+    // {
+    //   id: "8",
+    //   user_id: 8,
+    //   username: "ProPlayer92",
+    //   message: "What a comeback!",
+    //   timestamp: new Date(Date.now() - 30000),
+    // },
+    // {
+    //   id: "9",
+    //   user_id: 9,
+    //   username: "CardMaster",
+    //   message: "Did NOT expect that move",
+    //   timestamp: new Date(Date.now() - 15000),
+    // },
+    // {
+    //   id: "10",
+    //   user_id: 10,
+    //   username: "SpectatorX",
+    //   message: "This is intense!",
+    //   timestamp: new Date(Date.now() - 5000),
+    // },
+  ]);
  // const [newMessage, setNewMessage] = useState("");
   const [gameCompleted, setGameCompleted] = useState(false);
   const [gameForfeited, setGameForfeited] = useState(false);
@@ -70,7 +153,7 @@ const SpectatePage = () => {
     socket?.on("gameData", handleGameData);
     socket?.on("updatedGameData", handleUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
-    socket?.on("chatMessage", handleChatMessage);
+    socket?.on("spectatorChatMessage", handleChatMessage);
 
     handleConnect();
 
@@ -78,7 +161,7 @@ const SpectatePage = () => {
       socket?.off("gameData", handleGameData);
       socket?.off("updatedGameData", handleUpdatedGameData);
       socket?.off("game-not-found", handleGameNotFound);
-      socket?.off("chatMessage", handleChatMessage);
+      socket?.off("spectatorChatMessage", handleChatMessage);
       socket?.emit("leave-room", code);
   //alert('You are leaving the game room');
 //console.log('leaving room ....')
@@ -92,6 +175,28 @@ const SpectatePage = () => {
       //console.log('leaving room ....')
     };
   }, [socket, user]);
+
+  useEffect(() => {
+    async function fetchSpectatorChatMessages() {
+      try {
+          setLoading(true);
+          const response = await fetch(
+            `${baseUrl}/messages/spectator/${code}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch chat messages");
+          }
+          const data = await response.json();
+          setChatMessages(data);
+        } catch (error) {
+          console.error("Error fetching spectator chat messages:", error);
+        }
+        finally {
+            setLoading(false);
+        }
+      }
+      fetchSpectatorChatMessages();
+  }, []);
 
   useEffect(() => {
     if (game) {
@@ -298,23 +403,15 @@ const SpectatePage = () => {
     return <GameNotFoundPage gameCode={code} />;
   }
 
-  if(gameCompleted){
-    return <GameEndedPage gameCode={code} />
-  }
+  // if(gameCompleted){
+  //   return <GameEndedPage gameCode={code} />
+  // }
 
-  if(gameForfeited){
-    return <GameForfeitedPage gameCode={code} />
-  }
+  // if(gameForfeited){
+  //   return <GameForfeitedPage gameCode={code} />
+  // }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-green-800">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold">Loading game...</h1>
-        </div>
-      </div>
-    );
-  }
+ 
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover min-h-screen flex flex-col">
@@ -325,7 +422,7 @@ const SpectatePage = () => {
         player3={game?.players[2]}
         player4={game?.players[3]}
         eventName={`${eventName} - ${roundName}`}
-        viewers={27}
+        viewers={Math.floor(Math.random() * 30) + 1} // Placeholder for viewer count
       />
       <MainLayout
         gameBoard={
@@ -353,11 +450,15 @@ const SpectatePage = () => {
         }
       />
 
-      {/* <SpectatorChat
+      <SpectatorChat
         socket={socket}
-        gameCode={code}
-        username={user?.username}
-      /> */}
+        gameCode={code as string}
+        user_id={user?.id as number}
+        username={user?.username as string}
+        loading={loading}
+        chatMessages={chatMessages}
+        setChatMessages={setChatMessages}
+      />
     </div>
   );
 };

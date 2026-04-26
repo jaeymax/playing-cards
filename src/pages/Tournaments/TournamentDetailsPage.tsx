@@ -313,18 +313,18 @@ const TournamentDetailsPage: React.FC = () => {
   const getButtonState = () => {
     if (userRegistered) return "lobby";
     if (
+      tournamentLobbyData &&
+      tournamentLobbyData?.tournament.registered_participants >=
+        tournamentLobbyData?.tournament.max_participants
+    )
+      return "full";
+    if (
       registrationTimeLeft.days === 0 &&
       registrationTimeLeft.hours === 0 &&
       registrationTimeLeft.minutes === 0 &&
       registrationTimeLeft.seconds === 0
     )
       return "closed";
-    if (
-      tournamentLobbyData &&
-      tournamentLobbyData?.tournament.registered_participants >=
-        tournamentLobbyData?.tournament.max_participants
-    )
-      return "full";
 
     return "register";
   };

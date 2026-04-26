@@ -6,24 +6,28 @@ interface MatchHeaderProps {
   player1?: {
     name: string;
     rating: number;
+    score: number;
     image_url: string;
     user: { username: string; image_url: string; rating: number };
   };
   player2?: {
     name: string;
     rating: number;
+    score:number;
     image_url: string;
     user: { username: string; image_url: string; rating: number };
   };
   player3?: {
     name: string;
     rating: number;
+    score:number;
     image_url: string;
     user: { username: string; image_url: string; rating: number };
   };
   player4?: {
     name: string;
     rating: number;
+    score:number;
     image_url: string;
     user: { username: string; image_url: string; rating: number };
   };
@@ -58,6 +62,9 @@ const MatchHeader = ({
         alt={player?.user.username}
         className="w-12 h-12 lg:w-20 lg:h-20 rounded-full object-cover mb-2 lg:mb-3 border-2 border-blue-400 shadow-lg"
       />
+       <p className="text-xs lg:text-sm font-bold text-white truncate max-w-[80px] lg:max-w-[120px]">
+        {player?.score }
+      </p>
       <p className="text-xs lg:text-sm font-bold text-white truncate max-w-[80px] lg:max-w-[120px]">
         {player?.user.username || `PLAYER ${playerNumber}`}
       </p>
@@ -118,7 +125,7 @@ const MatchHeader = ({
       </div>
 
       {/* Event details and viewers */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-700/30">
+      <div className="flex  flex-row items-center justify-between gap-3 pt-4 border-t border-gray-700/30">
         <div className="flex items-center gap-2">
           <span className="text-xs lg:text-sm text-gray-400">Game Code:</span>
           <span className="text-xs lg:text-sm font-mono font-bold text-blue-300">

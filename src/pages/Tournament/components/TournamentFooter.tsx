@@ -192,7 +192,7 @@ const TournamentFooter: React.FC<{
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-[10]">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-[100] md:z-[10]">
       <style>{`
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }

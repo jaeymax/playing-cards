@@ -16,6 +16,8 @@ interface GameChatProps {
   socket: any;
   gameCode: string;
   currentUser: any;
+  typingPlayer: any;
+  setTypingPlayer: React.Dispatch<React.SetStateAction<any>>;
   isOpen: boolean;
   onClose: () => void;
   messages: Message[];
@@ -26,6 +28,8 @@ const GameChat = ({
   socket,
   gameCode,
   currentUser,
+  typingPlayer,
+  setTypingPlayer,
   isOpen,
   onClose,
   messages,
@@ -35,7 +39,7 @@ const GameChat = ({
   const [isClosing, setIsClosing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  let typingTimeout: NodeJS.Timeout;
+  let typingTimeout: ReturnType<typeof setTimeout>;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -62,23 +66,32 @@ const GameChat = ({
   };
 
   const handleTyping = () => {
-    socket?.emit("typing", { gameCode, username: currentUser.username });
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      socket?.emit("stopTyping", { gameCode, username: currentUser.username });
-    }, 1000);
+    socket?.emit("typingGameChat", { game_code: gameCode, username: currentUser.username, user_id: currentUser.id, avatar: currentUser.image_url });
+    // clearTimeout(typingTimeout);
+    // typingTimeout = setTimeout(() => {
+    //   //socket?.emit("stopTyping", { gameCode, username: currentUser.username });
+    //   setTypingPlayer(null);
+    //   setIsTyping(false);
+    // }, 2000);
   };
 
   useEffect(() => {
-    socket?.on("userTyping", (username: string) => {
-      if (username !== currentUser.username) setIsTyping(true);
+    socket?.on("typingGameChat", ({ username, user_id, avatar }: { username: string; user_id: number; avatar: string }) => {
+      if (user_id !== currentUser.id) {
+        setTypingPlayer({ username, user_id, avatar });
+        setIsTyping(true);
+        setTimeout(() => {
+          setTypingPlayer(null);
+          setIsTyping(false);
+        }, 2000);
+       } 
     });
-    socket?.on("userStoppedTyping", () => setIsTyping(false));
+    //socket?.on("userStoppedTyping", () => setIsTyping(false));
 
     return () => {
-      socket?.off("userTyping");
-      socket?.off("userStoppedTyping");
-      clearTimeout(typingTimeout);
+      socket?.off("typingGameChat");
+      //socket?.off("userStoppedTyping");
+     // clearTimeout(typingTimeout);
     };
   }, [socket]);
 
@@ -250,12 +263,28 @@ const GameChat = ({
         {isTyping && (
           <div className="flex items-center gap-2 p-2">
             <div className="w-8 h-8 rounded-full bg-gray-700/50 overflow-hidden">
-              <img
-                src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
-                alt="typing"
-                className="w-full h-full object-cover"
-              />
+             {
+                typingPlayer?.avatar ? (
+                  <img
+                    src={typingPlayer.avatar}
+                    alt={typingPlayer.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                   <img
+                   src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                   alt="typing"
+                   className="w-full h-full object-cover"
+                 />
+                )
+             }
+
             </div>
+            <div className="flex flex-col items-start gap-2">
+             {/* username here */}
+              <span className="text-sm text-green-500 font-bold">
+                {typingPlayer?.username ? `${typingPlayer.username}` : "Someone is typing..."}
+              </span>
             <div className="flex space-x-1">
               <div
                 className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"
@@ -269,6 +298,7 @@ const GameChat = ({
                 className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"
                 style={{ animationDelay: "300ms" }}
               />
+            </div>
             </div>
           </div>
         )}

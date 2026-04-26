@@ -8,6 +8,7 @@ const PlayerInfo = ({
   points,
   remaining_time = 60,
   total_time = 60,
+  is_typing=false,
   styles,
 }: {
   name: string;
@@ -17,6 +18,7 @@ const PlayerInfo = ({
   points: number;
   remaining_time?:number,
   total_time?:number,
+  is_typing?:boolean,
   styles: string;
 }) => {
   //const RADIUS = 16;
@@ -91,6 +93,25 @@ const PlayerInfo = ({
         <div className="font-medium player-name">{name}</div>
         <div className="text-sm font-semibold player-score">{points} pts</div>
       </div>
+      {/* Typing Indicator three dot animation */}
+        {
+          is_typing && (
+          <div className="flex-1 mt- bg-gray-400/0 p-1 rounded-md">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+              </div>
+            </div>
+          )
+        }
+        
     </div>
   );
 };

@@ -66,6 +66,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
   const [processingForfeit, setProcessingForfeit] = useState<any>(null);
+  const [soundOn, setSoundOn] = useState(true);
 
   gameNotFound && true;
   losingPlayer && true;
@@ -305,7 +306,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
 
   useEffect(() => {
     if (game) {
@@ -327,7 +328,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       socket?.off("matchForfeit", matchForfeitCallback);
       //socket?.off("rematch", rematchCallback);
     };
-  }, [socket, game, gameCards]);
+  }, [socket, game, gameCards, soundOn]);
 
   useEffect(() => {
     if (!turn_ends_at) {
@@ -414,6 +415,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
     trick_number: number;
   }) => {
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,
@@ -449,6 +451,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       setGameCards(cards);
       dealCards(
         cards,
+        soundOn,
         me?.id,
         firstOpponent?.id,
         secondOpponent?.id,
@@ -468,7 +471,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
   );
 
   if(gameNotFound){

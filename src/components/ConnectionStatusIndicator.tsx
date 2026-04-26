@@ -18,7 +18,7 @@ const ConnectionStatusIndicator = () => {
   return (
     <div
       className={`
-        fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+        fixed bottom-4 left-1/2 -translate-x-1/2 z-[100000]
         px-4 py-1.5 rounded-full text-sm font-medium
         transition-all duration-300 flex items-center gap-2
         ${

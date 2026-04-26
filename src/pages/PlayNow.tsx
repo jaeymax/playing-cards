@@ -52,6 +52,7 @@ const PlayTest = () => {
   const [gameEnded, setGameEnded] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [soundOn, setSoundOn] = useState(true);
 
   const navigate = useNavigate();
 
@@ -134,6 +135,7 @@ const PlayTest = () => {
     setGameCards(cards);
     dealCards(
       cards,
+      soundOn,
       me?.id,
       firstOpponent?.id,
       secondOpponent?.id,
@@ -152,7 +154,7 @@ const PlayTest = () => {
     );
     setShowDealButton(false);
     setShowShuffleButton(false);
-  }, [me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
 
   const startNewHandCallback = (data: any) => {
 
@@ -208,7 +210,7 @@ const PlayTest = () => {
       socket?.off("dealtCards", dealtCardsCallback);
     }
 
-  },[socket, me, firstOpponent, secondOpponent, thirdOpponent])
+  },[socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn])
 
   useEffect(() => {
     if (game) {
@@ -227,7 +229,7 @@ const PlayTest = () => {
       socket?.off("gameOver", gameOverCallback);
       socket?.off("rematch", rematchCallback);
     };
-  }, [socket, game, gameCards]);
+  }, [socket, game, gameCards, soundOn]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: any) => {
@@ -287,6 +289,7 @@ const PlayTest = () => {
     trick_number: number;
   }) => {
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,

@@ -34,6 +34,7 @@ const PlayVsComputer = () => {
   const [game, setGame] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
   const [gameCards, setGameCards] = useState<any[]>([]);
+  const [soundOn, setSoundOn] = useState(true);
   const [me, setMe] = useState<any>(null);
   const deckRef = useRef<HTMLDivElement>(null);
 
@@ -150,6 +151,7 @@ const PlayVsComputer = () => {
       //setGameCards(cards);
       dealCards(
         cards,
+        soundOn,
         me?.id,
         firstOpponent?.id,
         secondOpponent?.id,
@@ -169,7 +171,7 @@ const PlayVsComputer = () => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
   );
 
   const shuffledDeckCallback = useCallback((cards: any) => {
@@ -216,7 +218,7 @@ const PlayVsComputer = () => {
       socket?.off("dealtCards", dealtCardsCallback);
       socket?.off("shuffledDeck", shuffledDeckCallback);
     };
-  }, [me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
 
   useEffect(() => {
     if (game) {
@@ -234,7 +236,7 @@ const PlayVsComputer = () => {
       socket?.off("gameOver", gameOverCallback);
       socket?.off("rematch", rematchCallback);
     };
-  }, [gameCards, game]);
+  }, [gameCards, game, soundOn]);
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
@@ -295,6 +297,7 @@ const PlayVsComputer = () => {
     trick_number: number;
   }) => {
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,

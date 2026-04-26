@@ -4,6 +4,8 @@ import {
   ArrowRightOnRectangleIcon,
   MicrophoneIcon,
   CheckIcon,
+  SpeakerWaveIcon,
+    SpeakerXMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useAppContext } from "@/contexts/AppContext";
 
@@ -13,6 +15,8 @@ interface BottomBarProps {
   onToggleChat: () => void;
   onLeaveRoom: () => void;
   onRecord?: () => void;
+  setSoundOn: React.Dispatch<React.SetStateAction<boolean>>;
+  soundOn: boolean;
   socket?: any;
   gameCode?: string;
   isLoading?: boolean;
@@ -25,6 +29,8 @@ const BottomBar: React.FC<BottomBarProps> = ({
   onToggleChat,
   onLeaveRoom,
   socket,
+    setSoundOn,
+    soundOn,
   gameCode,
   isLoading = false,
   setMessages,
@@ -121,8 +127,28 @@ const BottomBar: React.FC<BottomBarProps> = ({
   };
 
   return (
-    <div className="fixe bottom-0 left-0 right-0 z-[99999] px-6 py-1 pborder">
-      <div className="mx-auto max-w-xl bg-gray-900/40 backdrop-blur- border border-gray-700/40 rounded-full shadow-2xl flex items-center justify-around py-1 md:py-2 px-4">
+    <div className="fixed bottom-20 left- right-1 z-[99999] px-  borde">
+      <div className="w-full h-full bg-gray-900/0 backdrop-blur- borde border-gray-700/40 rounded-sm shadw-2xl flex flex-col gap-5 items-center justify-around py-1 md:py-2 px-2">
+         {/* --- Speaker Icon --- */}
+        <button
+          onClick={() => {
+            // Toggle sound on/off
+            // For demo, we'll just toggle the state. In a real app, you'd also want to inform the server and other clients.
+            setSoundOn(!soundOn);
+          }}
+          
+          className="flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+        >
+          {soundOn ? (
+            <SpeakerWaveIcon className="h-7 w-7 hover:text-gry-500 opacity-90 hover:opacity-100 transition" />
+          ) : (
+            <SpeakerXMarkIcon className="h-7 w-7 hover:text-gry-500 opacity-90 hover:opacity-100 transition" />
+          )}
+          <span className="text-xs text-gray-300">
+           Sound
+          </span>
+        </button>
+
         {/* --- Chat Icon --- */}
         <button
           onClick={onToggleChat}

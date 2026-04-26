@@ -38,6 +38,7 @@ import GameNotFoundPage from "@/components/GameNotFoundPage";
 interface Message {
   user_id: number | undefined;
   username: string | undefined;
+  game_code: string;
   avatar: string | undefined;
   message: string;
   type: "text" | "audio";
@@ -73,7 +74,9 @@ const PlayWithFriend = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [gameNotFound, setGameNotFound] = useState(false);
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   
+  console.log('soundOn:', soundOn);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -90,6 +93,9 @@ const PlayWithFriend = () => {
   const { socket } = useSocket();
   const { user, updateUser } = useAppContext();
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [typingPlayer, setTypingPlayer] = useState<any>(null);
+  console.log('typingPlayer:', typingPlayer);
+
   const navigate = useNavigate();
 
   const getPlayerByPosition = (player_position: number) => {
@@ -149,7 +155,7 @@ const PlayWithFriend = () => {
       socket?.off("gameOver", gameOverCallback);
       socket?.off("rematch", rematchCallback);
     };
-  }, [socket, gameCards, game]);
+  }, [socket, gameCards, game, soundOn]);
 
   useEffect(() => {
     const authToken = getToken();
@@ -217,7 +223,7 @@ const PlayWithFriend = () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
 
   useEffect(() => {
     if (!user) return;
@@ -355,6 +361,7 @@ const PlayWithFriend = () => {
       setGameCards(cards);
       dealCards(
         cards,
+        soundOn,
         me?.id,
         firstOpponent?.id,
         secondOpponent?.id,
@@ -374,14 +381,14 @@ const PlayWithFriend = () => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [firstOpponent, secondOpponent, thirdOpponent]
+    [firstOpponent, secondOpponent, thirdOpponent, soundOn]
   );
 
   const shuffledDeckCallback = (cards: any) => {
     setShuffledAtLeastOnce(true);
     console.log("ShuffleCards", cards);
     setGameCards(cards);
-    playShuffleSound();
+    if(soundOn)playShuffleSound();
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
   };
 
@@ -428,7 +435,9 @@ const PlayWithFriend = () => {
     player_id: number;
     trick_number: number;
   }) => {
+   
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,
@@ -490,6 +499,7 @@ const PlayWithFriend = () => {
     });
     const messageData: Message = {
       user_id: user?.id,
+      game_code: code as string,
       username: user?.username,
       avatar: user?.image_url,
       type: "text",
@@ -557,6 +567,7 @@ const PlayWithFriend = () => {
             "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
           }
           points={firstOpponent?.score || 0}
+          is_typing={typingPlayer?.user_id === firstOpponent?.user.id}
           styles="left-1/2 -translate-x-1/2 top-1"
         />
 
@@ -570,6 +581,7 @@ const PlayWithFriend = () => {
               "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
             }
             points={secondOpponent?.score}
+            is_typing={typingPlayer?.user_id === secondOpponent?.user.id}
             styles="top-1/2 -translate-y-1/2 left-1"
           />
         )}
@@ -583,6 +595,7 @@ const PlayWithFriend = () => {
               "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
             }
             points={thirdOpponent?.score}
+            is_typing={typingPlayer?.user_id === thirdOpponent?.user.id}
             styles="top-1/2 -translate-y-1/2 right-1"
           />
         )}
@@ -712,6 +725,8 @@ const PlayWithFriend = () => {
           socket={socket}
           gameCode={code || ""}
           currentUser={user}
+          typingPlayer={typingPlayer}
+          setTypingPlayer={setTypingPlayer}
           isOpen={showChat}
           onClose={() => setShowChat(false)}
           messages={messages}
@@ -729,6 +744,8 @@ const PlayWithFriend = () => {
         }}
         socket={socket}
         gameCode={code}
+        setSoundOn={setSoundOn}
+        soundOn={soundOn}
         onLeaveRoom={handleLeaveRoom}
         setMessages={setMessages}
       />

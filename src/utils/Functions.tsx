@@ -252,6 +252,7 @@ export const extractDealingSequence = (
 };
 
 export const dealSequenceToPositions = (
+  soundOn: boolean,
   startIndex: number,
   target: string,
   positions: number[],
@@ -316,7 +317,7 @@ export const dealSequenceToPositions = (
           : (cardToMove.rotation = 0);
         cardToMove.inSlot = true;
         cardToMove.slotPosition = { target, position };
-        playDealCardSound(); // Play sound for each dealt card
+        if (soundOn)playDealCardSound(); // Play sound for each dealt card
         setGameCards(updatedCards);
 
         if (index === positions.length - 1) resolve();
@@ -355,6 +356,7 @@ const moveDrawPileOffScreen = (
 
 export const dealCards = async (
   cards: any[],
+  soundOn: boolean, 
   current_player_id: number,
   first_opponent_id: number,
   second_opponent_id: number,
@@ -385,6 +387,7 @@ export const dealCards = async (
     third_opponent_id
   )) {
     await dealSequenceToPositions(
+      soundOn,
       cardIndex,
       sequence.target,
       sequence.positions,
@@ -543,6 +546,7 @@ export const playCardToSlot = (
 };
 
 interface PlayedCardArgs {
+  soundOn: boolean;
   card_id: number;
   player_id: number;
   trick_number: number;
@@ -562,6 +566,7 @@ interface PlayedCardArgs {
 }
 
 export const handlePlayedCard = ({
+  soundOn,
   card_id,
   player_id,
   trick_number,
@@ -586,7 +591,8 @@ export const handlePlayedCard = ({
     `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
   );
 
-  playSound();
+  console.log('soundOn in functions', soundOn);
+  if(soundOn)playSound();
 
   if (player_id === me?.id) {
     const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);

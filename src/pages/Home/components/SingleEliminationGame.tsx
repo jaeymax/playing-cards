@@ -78,6 +78,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
   const [matchForfeited, setMatchForfeited] = useState(false);
   const [matchForfeiter, setMatchForfeiter] = useState<any>(null);
   const [processingForfeit, setProcessingForfeit] = useState<any>(false);
+  const [soundOn, setSoundOn] = useState(true);
 
   gameNotFound && true;
 
@@ -318,7 +319,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
 
   useEffect(() => {
     if (game) {
@@ -340,7 +341,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       socket?.off("matchForfeit", matchForfeitCallback);
       //socket?.off("rematch", rematchCallback);
     };
-  }, [socket, game, gameCards]);
+  }, [socket, game, gameCards, soundOn]);
 
   useEffect(() => {
     if (!turn_ends_at) {
@@ -427,6 +428,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
     trick_number: number;
   }) => {
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,
@@ -462,6 +464,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       setGameCards(cards);
       dealCards(
         cards,
+          soundOn,
         me?.id,
         firstOpponent?.id,
         secondOpponent?.id,
@@ -481,7 +484,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
   );
 
   //customLog('losing player', losingPlayer);
