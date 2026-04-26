@@ -28,9 +28,10 @@ import { baseUrl } from "@/config/api";
 const MemoizedMatchHeader = memo(MatchHeader);
 
 interface ChatMessage {
-  id: string;
+   id: string;
   game_code: string;
-  user_id:number;
+  user_id: number;
+  avatar: string;
   username: string;
   message: string;
   timestamp: string;
@@ -127,8 +128,9 @@ const SpectatePage = () => {
  // const [newMessage, setNewMessage] = useState("");
   const [gameCompleted, setGameCompleted] = useState(false);
   const [gameForfeited, setGameForfeited] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   
-  (chatMessages)
+  (chatMessages && setSoundOn)
   // Refs for card positions (same as PlayWithFriend)
   const deckRef = useRef<HTMLDivElement>(null);
   const playerOneHandRef = useRef<HTMLDivElement>(null);
@@ -214,7 +216,7 @@ const SpectatePage = () => {
       socket?.off("startNewHand", startNewHandCallback);
       socket?.off('matchForfeit', matchForfeitCallback);
     };
-  }, [socket, game, gameCards]);
+  }, [socket, game, gameCards, soundOn]);
 
   useEffect(() => {
     socket?.on("dealtCards", handleDealtCards);
@@ -224,7 +226,7 @@ const SpectatePage = () => {
       socket?.off("dealtCards", handleDealtCards);
       socket?.off("shuffledDeck", handleShuffledDeck);
     };
-  }, [socket, playerOne, playerTwo, playerThree, playerFour]);
+  }, [socket, playerOne, playerTwo, playerThree, playerFour, soundOn]);
 
   const handleConnect = () => {
     socket?.emit("join-room", code);
@@ -305,6 +307,7 @@ const SpectatePage = () => {
       trick_number,
     });
     handlePlayedCard({
+      soundOn,
       card_id,
       player_id,
       trick_number,
@@ -330,6 +333,7 @@ const SpectatePage = () => {
       setGameCards(cards);
       dealCards(
         cards,
+        soundOn,
         playerOne?.id,
         playerTwo?.id,
         playerThree?.id,
@@ -403,13 +407,13 @@ const SpectatePage = () => {
     return <GameNotFoundPage gameCode={code} />;
   }
 
-  // if(gameCompleted){
-  //   return <GameEndedPage gameCode={code} />
-  // }
+  if(gameCompleted){
+    return <GameEndedPage gameCode={code} />
+  }
 
-  // if(gameForfeited){
-  //   return <GameForfeitedPage gameCode={code} />
-  // }
+  if(gameForfeited){
+    return <GameForfeitedPage gameCode={code} />
+  }
 
  
 

@@ -80,7 +80,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
   const [processingForfeit, setProcessingForfeit] = useState<any>(false);
   const [soundOn, setSoundOn] = useState(true);
 
-  gameNotFound && true;
+  gameNotFound && true && setSoundOn;
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);

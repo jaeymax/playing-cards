@@ -38,6 +38,8 @@ const PlayVsComputer = () => {
   const [me, setMe] = useState<any>(null);
   const deckRef = useRef<HTMLDivElement>(null);
 
+  (true && setSoundOn)
+
   const navigate = useNavigate();
 
   const [firstOpponent, setFirstOpponent] = useState<any>(null);

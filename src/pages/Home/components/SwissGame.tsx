@@ -68,7 +68,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   const [processingForfeit, setProcessingForfeit] = useState<any>(null);
   const [soundOn, setSoundOn] = useState(true);
 
-  gameNotFound && true;
+  gameNotFound && true && setSoundOn;
   losingPlayer && true;
 
   // Refs for card positions

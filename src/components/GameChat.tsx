@@ -39,7 +39,7 @@ const GameChat = ({
   const [isClosing, setIsClosing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  let typingTimeout: ReturnType<typeof setTimeout>;
+ // let typingTimeout: ReturnType<typeof setTimeout>;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });

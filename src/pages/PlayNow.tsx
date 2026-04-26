@@ -56,6 +56,8 @@ const PlayTest = () => {
 
   const navigate = useNavigate();
 
+  (true && setSoundOn)
+
 
   useEffect(() => {
     if (game?.current_player_position === me?.position) {
