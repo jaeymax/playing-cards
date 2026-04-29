@@ -31,7 +31,7 @@ export const SocketProvider: React.FC<{children: React.ReactNode }> = ({children
         
         if(!socketRef.current){
           socketRef.current = io(sockerUrl, {
-            auth: { userId: user?.id },
+            auth: { userId: user?.id, username: user?.username },
             autoConnect: true,
           });
         }

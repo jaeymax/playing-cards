@@ -206,6 +206,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                   <div className="text-center">
                     <p className="text-gray-400 text-xs mb-1">Starts in</p>
                     <p className="text-lg md:text-2xl font-mono font-bold text-green-400">
+                      {timeLeft.days > 0 && `${timeLeft.days}d `}
                       {String(timeLeft.hours).padStart(2, "0")}:
                       {String(timeLeft.minutes).padStart(2, "0")}:
                       {String(timeLeft.seconds).padStart(2, "0")}

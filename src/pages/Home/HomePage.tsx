@@ -6,9 +6,10 @@ import RecentGames from "./components/RecentGames";
 //import Announcements from "./components/Announcements";
 import Footer from "@/components/Footer";
  import TournamentBanner from "./components/TournamentBanner";
-// import OnlineFriends from "./components/OnlineFriends";
+//import OnlineFriends from "./components/OnlineFriends";
 // import RecentActivities from "./components/RecentActivities";
  import WeeklySingleEliminationChampions from "./components/WeeklySingleEliminationChampions";
+//import OnlinePlayers from "./components/OnlinePlayers";
 //import WeeklySwissChampions from "./components/WeeklySwissChampions";
 
 const HomePage: React.FC = () => {
@@ -22,6 +23,8 @@ const HomePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-8">
+            {/* <OnlinePlayers /> */}
+            {/* <OnlineFriends /> */}
             <TopPlayers />
             <WeeklySingleEliminationChampions />
             {/* <WeeklySwissChampions /> */}
@@ -36,7 +39,6 @@ const HomePage: React.FC = () => {
 
           {/* Right Sidebar */}
       <div className="lg:col-span-3 space-y-8">
-            {/* <OnlineFriends /> */}
             {/* <Announcements /> */}
           </div>
         </div>

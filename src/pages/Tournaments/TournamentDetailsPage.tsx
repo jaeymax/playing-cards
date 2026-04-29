@@ -544,7 +544,6 @@ const TournamentDetailsPage: React.FC = () => {
         isOpen={registrationModalOpen}
         tournamentId={tournamentLobbyData?.tournament.id}
         setUserRegistered={setUserRegistered}
-        entryFee={tournamentLobbyData?.tournament.registration_fee}  
         onCancel={() => setRegistrationModalOpen(false)}
       />
       <PhoneNumberRequiredModal

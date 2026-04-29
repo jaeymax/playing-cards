@@ -53,7 +53,7 @@ const TournamentInfo: React.FC<TournamentHeaderProps> = ({
             </p>
             <button
               onClick={handleShare}
-              className="p-3 rounded-full flex items-center justify-center bg-blue-500 b-gray-700/60 hover:bg-blue-400 transition-colors"
+              className="p-3 rounded-full flex items-center justify-center bg-blue-500/20 hover:bg-blue-500/30 b-gray-700/60  transition-colors"
               title="Share tournament"
             >
               <Share2 size={16} className="text-gray-300" />
