@@ -11,13 +11,13 @@ interface TournamentsHeaderProps {
 const TournamentsHeader: React.FC<TournamentsHeaderProps> = ({
   activeFilter,
   onFilterChange,
-  searchQuery,
-  onSearchChange,
+  // searchQuery,
+  // onSearchChange,
 }) => {
   const filters: { id: TournamentStatus; label: string }[] = [
     { id: "all", label: "All" },
     { id: "upcoming", label: "Upcoming" },
-    { id: "ongoing", label: "In Progress" },
+    { id: "ongoing", label: "Ongoing" },
     { id: "completed", label: "Completed" },
   ];
 
@@ -44,7 +44,7 @@ const TournamentsHeader: React.FC<TournamentsHeaderProps> = ({
               ))}
             </div>
           </div>
-
+{/* 
           <div className="w-full lg:w-64 relative">
             <input
               type="text"
@@ -66,7 +66,7 @@ const TournamentsHeader: React.FC<TournamentsHeaderProps> = ({
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

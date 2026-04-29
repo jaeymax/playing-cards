@@ -4,6 +4,7 @@ import FriendRequests from "./components/FriendRequests";
 import SearchFriends from "./components/SearchFriends";
 import OnlineFriends from "./components/OnlineFriends";
 import RecentlyPlayed from "./components/RecentlyPlayed";
+import NavBar from "@/components/NavBar";
 
 type TabType = "all" | "online" | "requests" | "search";
 
@@ -19,14 +20,18 @@ const FriendsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <div className="container mx-auto px-4 py-8">
+      <NavBar showSignUps = {true} />
+      <div className="container mx-auto md:px-4 py8 borde">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700" >
+          <h2 className="text-xl font-bold text-white flex items-center" >Friends</h2>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-6 borde">
             {/* Tabs */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+            <div className="bg-gray-800 md:rounded-lg md:border md:border-gray-700 overflow-hidden">
               <div className="border-b border-gray-700">
-                <div className="flex overflow-x-auto">
+                <div className="flex scrollbar-hide md:scrollbar-auto overflow-x-auto">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -65,7 +70,7 @@ const FriendsPage: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <RecentlyPlayed />
+          <RecentlyPlayed />
           </div>
         </div>
       </div>

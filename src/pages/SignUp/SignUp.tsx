@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import EmailStep from "./steps/EmailStep";
 import VerificationStep from "./steps/VerificationStep";
 import CredentialsStep from "./steps/CredentialsStep";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
+import NavBar from "@/components/NavBar";
+import { saveToken } from "@/utils/Functions";
 
 type SignUpStep = "email" | "verification" | "credentials";
 
@@ -12,11 +14,16 @@ const SignUp: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<SignUpStep>("email");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
- 
-  verificationCode
-  const {updateUser} = useAppContext();
+  const location = useLocation();
+  verificationCode;
+  const { user, updateUser } = useAppContext();
 
   const navigate = useNavigate();
+
+  useEffect(()=>{
+      if(user  && !user.is_guest)navigate('/')
+  
+    },[user])
 
   const steps = [
     { key: "email", label: "Email" },
@@ -36,28 +43,33 @@ const SignUp: React.FC = () => {
     setCurrentStep("credentials");
   };
 
-  const handleCredentialsSubmit = async (username: string, password: string, setIsLoading:any) => {
+  const handleCredentialsSubmit = async (
+    username: string,
+    password: string,
+    setIsLoading: any
+  ) => {
     // Handle final signup
     console.log("Sign up complete", { email, username, password });
     try {
-      const response = await fetch(
-        `${baseUrl}/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password, email }),
-        }
-      );
+      const response = await fetch(`${baseUrl}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password, email }),
+      });
 
       const data = await response.json();
       if (response.status === 201) {
         // Successful registration
         console.log(data);
-        sessionStorage.setItem('accessToken', data.token);
+        saveToken(data.token);
         updateUser(data);
-        navigate('/')
+        if(location.state?.from){
+          navigate(location.state.from);
+          return;
+        }
+        navigate("/");
       } else if (response.status === 400) {
         alert("Email, username, and password are required");
       }
@@ -71,14 +83,7 @@ const SignUp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      {/* Header */}
-      {/* <header className="bg-gradient-to-r from-indigo-700 to-blue-500 border-b border-blue-800">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-center md:justify-start">
-            <h1 className="text-2xl font-bold text-white">NEXUS CARDS</h1>
-          </div>
-        </div>
-      </header> */}
+      <NavBar showSignUps = {false} />
 
       {/* Main Content */}
       <main className="flex-grow flex items-center justify-center px-4 py-12">
@@ -153,7 +158,7 @@ const SignUp: React.FC = () => {
       <footer className="bg-gray-800 border-t border-gray-700">
         <div className="container mx-auto px-4 py-4">
           <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} Cards. All rights reserved.
+            © {new Date().getFullYear()} SparPlay. All rights reserved.
           </p>
         </div>
       </footer>

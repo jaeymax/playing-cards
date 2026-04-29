@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../../components/Modal";
 import { useNavigate } from "react-router-dom";
-import { socket } from "@/socket";
 import { useAppContext } from "@/contexts/AppContext";
 import { baseUrl } from "@/config/api";
+import { useSocket } from "@/contexts/SocketProvider";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/firebase/config";
 
 interface PlayNowModalProps {
   isOpen: boolean;
@@ -19,17 +21,17 @@ interface Player {
 }
 
 const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
+  const { socket } = useSocket();
   const { user } = useAppContext();
   const [searchTime, setSearchTime] = useState(0);
   const [matchFound, setMatchFound] = useState(false);
   //const [players, setPlayers] = useState<[]>([]);
-  const [gameCode, setGameCode] = useState<string>("");
-  const [gameId, setGameId] = useState<number | null>(null);
+ // const [gameCode, setGameCode] = useState<string>("");
+ // const [gameId, setGameId] = useState<number | null>(null);
   const [you, setYou] = useState<Player | null>(null);
   const [opponent, setOpponent] = useState<Player | null>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [startAnimation, setStartAnimation] = useState(false);
-  console.log(startAnimation);
+  //const [startAnimation, setStartAnimation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,8 +60,8 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
   const matchFoundCallback = (data: any) => {
     setMatchFound(true);
     console.log("Match found:", data);
-    setGameCode(data.gameCode);
-    setGameId(data.gameId);
+    //setGameCode(data.gameCode);
+    //setGameId(data.gameId);
 
     console.log("players", data.players);
     if (data.players[0].id === user?.id) {
@@ -69,25 +71,26 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
       setYou(data.players[1]);
       setOpponent(data.players[0]);
     }
+
+    handleStartGame(data.gameCode, data.gameId);
   };
 
   const gameStartCallback = ({ gameCode }: { gameCode: string }) => {
     console.log("Game started:", gameCode);
-    navigate(`/game/${gameCode}`);
-
-  }
+    logEvent(analytics, 'start_match_game', { method: 'play_now' });
+    navigate(`/game/${gameCode}`, { state: { gameType: "playNow" } });
+  };
 
   useEffect(() => {
-    socket.on("matchFound", matchFoundCallback);
+    socket?.on("matchFound", matchFoundCallback);
 
-    socket.on('gameStarted', gameStartCallback);
-
+    socket?.on("gameStarted", gameStartCallback);
 
     return () => {
-      socket.off("matchFound", matchFoundCallback);
-      socket.off('gameStarted', gameStartCallback);
+      socket?.off("matchFound", matchFoundCallback);
+      socket?.off("gameStarted", gameStartCallback);
     };
-  }, [user]);
+  }, [user, socket]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -95,14 +98,14 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleStartGame = async () => {
+  const handleStartGame = async (gameCode: string, gameId: number) => {
     if (!gameCode || !gameId) {
       console.error("Game code or ID is not set");
       return;
     }
 
     setIsStarting(true);
-    setStartAnimation(true);
+    
 
     try {
       const response = await fetch(
@@ -118,21 +121,29 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
 
       if (response.ok) {
         //await new Promise((resolve) => setTimeout(resolve, 2000));
-        //navigate(`/game/${gameCode}`);
+        //navigate(`/game/${gameCode}`, { state: { gameType: "playNow" } });
       } else {
         console.error("Failed to start the game");
         setIsStarting(false);
-        setStartAnimation(false);
+        //setStartAnimation(false);
       }
     } catch (error) {
       console.error("Error starting game:", error);
       setIsStarting(false);
-      setStartAnimation(false);
+  
     }
   };
 
+   useEffect(() => {
+      socket?.on("queue_left", () => {
+       // console.log("queue left");
+        setIsStarting(false);
+        
+      });
+    }, [user, socket]);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Finding Match">
+    <Modal isOpen={isOpen} onClose={()=>{}} title="Finding Match">
       <div className="flex flex-col items-center space-y-6 py-8">
         {!matchFound ? (
           <>
@@ -165,20 +176,28 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
             <div className="text-2xl text-green-400">Match Found!</div>
             <div className="flex items-center justify-center space-x-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-2 mx-auto flex items-center justify-center text-2xl">
-                  <img className="rounded-full" src={you?.image_url} alt="" />
-                  {/* 👤 */}
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-500 rounded-full mb-2 mx-auto flex items-center justify-center text-2xl">
+                  {you?.image_url ? (
+                    <img className="rounded-full" src={you?.image_url} alt="" />
+                  ) : (
+                    <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt="" className="rounded-full" />
+                  )}
+                  
                 </div>
                 <div className="text-sm">You</div>
               </div>
               <div className="text-2xl">vs</div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full mb-2 mx-auto flex items-center justify-center text-2xl">
-                  <img
-                    className="rounded-full"
-                    src={opponent?.image_url}
-                    alt=""
-                  />
+                  {opponent?.image_url ? (
+                    <img
+                      className="rounded-full"
+                      src={opponent?.image_url}
+                      alt=""
+                    />
+                  ) : (
+                    <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png" alt="" className="rounded-full" />
+                  )}
                 </div>
                 <div className="text-sm">{opponent?.username}</div>
               </div>
@@ -203,7 +222,7 @@ const PlayNowModal: React.FC<PlayNowModalProps> = ({ isOpen, onClose }) => {
                     <span>You are the Dealer</span>
                   </div>
                   <button
-                    onClick={handleStartGame}
+                    onClick={()=>{}}
                     disabled={isStarting}
                     className="group relative px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 rounded-lg transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed min-w-[200px] overflow-hidden"
                   >

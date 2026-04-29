@@ -31,7 +31,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <NavBar />
+      <NavBar showSignUps = {true} />
       <div className="container mx-auto px-4 py-8">
         {/* Admin Header */}
         <div className="flex justify-between items-center mb-8">

@@ -82,7 +82,7 @@ const HelpPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Header */}
-      <div className="bg-gradient-to-b from-gray-800 to-gray-900 border-b border-gray-800">
+      <div className="bg-gray-800 border-b border-gray-700">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl font-bold mb-6">How can we help you?</h1>
@@ -91,7 +91,7 @@ const HelpPage = () => {
               <input
                 type="text"
                 placeholder="Search for help articles..."
-                className="w-full px-12 py-4 bg-gray-800 rounded-xl border border-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-lg"
+                className="w-full px-12 py-4 bg-gray-700 rounded-xl border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -102,12 +102,12 @@ const HelpPage = () => {
 
       {/* Quick Links */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           {quickLinks.map((link, index) => (
             <a
               key={index}
               href={link.url}
-              className="flex flex-col items-center p-6 bg-gray-800 rounded-xl border border-blue-900/50 hover:bg-gray-750 transition"
+              className="flex flex-col items-center p-6 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-750 transition"
             >
               <div className="mb-3 text-blue-400">{link.icon}</div>
               <span className="font-medium">{link.title}</span>
@@ -116,29 +116,42 @@ const HelpPage = () => {
         </div>
 
         {/* FAQ Sections */}
-        <div className="max-w-3xl mx-auto mt-16">
-          <div className="space-y-6">
-            {/* Basics Section */}
-            <div className="bg-gray-800 rounded-xl border border-blue-900/50 overflow-hidden">
+        <div className="max-w-3xl mx-auto mt-12 space-y-6">
+          {Object.entries(faqSections).map(([section, questions]) => (
+            <div
+              key={section}
+              className="bg-gray-800 rounded-xl border border-gray-700"
+            >
               <button
                 className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-750"
                 onClick={() =>
                   setExpandedSection(
-                    expandedSection === "basics" ? null : "basics"
+                    expandedSection === section ? null : section
                   )
                 }
               >
-                <div className="flex items-center">
-                  <Book className="w-5 h-5 mr-2 text-blue-400" />
-                  <span className="font-bold">Game Basics</span>
+                <div className="flex items-center gap-3">
+                  {section === "basics" && (
+                    <Book className="w-6 h-6 text-blue-400" />
+                  )}
+                  {section === "gameplay" && (
+                    <MessageCircle className="w-6 h-6 text-blue-400" />
+                  )}
+                  {section === "technical" && (
+                    <AlertCircle className="w-6 h-6 text-blue-400" />
+                  )}
+                  <span className="font-bold capitalize">{section}</span>
                 </div>
-                {expandedSection === "basics" ? <ChevronUp /> : <ChevronDown />}
+                {expandedSection === section ? <ChevronUp /> : <ChevronDown />}
               </button>
 
-              {expandedSection === "basics" && (
+              {expandedSection === section && (
                 <div className="px-6 pb-6 space-y-4">
-                  {faqSections.basics.map((item, index) => (
-                    <div key={index} className="pt-4">
+                  {questions.map((item, index) => (
+                    <div
+                      key={index}
+                      className="pt-4 border-t border-gray-700 first:border-0"
+                    >
                       <h3 className="font-medium text-blue-400 mb-2">
                         {item.q}
                       </h3>
@@ -148,97 +161,24 @@ const HelpPage = () => {
                 </div>
               )}
             </div>
-
-            {/* Gameplay Section */}
-            <div className="bg-gray-800 rounded-xl border border-blue-900/50 overflow-hidden">
-              <button
-                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-750"
-                onClick={() =>
-                  setExpandedSection(
-                    expandedSection === "gameplay" ? null : "gameplay"
-                  )
-                }
-              >
-                <div className="flex items-center">
-                  <MessageCircle className="w-5 h-5 mr-2 text-purple-400" />
-                  <span className="font-bold">Gameplay</span>
-                </div>
-                {expandedSection === "gameplay" ? (
-                  <ChevronUp />
-                ) : (
-                  <ChevronDown />
-                )}
-              </button>
-
-              {expandedSection === "gameplay" && (
-                <div className="px-6 pb-6 space-y-4">
-                  {faqSections.gameplay.map((item, index) => (
-                    <div key={index} className="pt-4">
-                      <h3 className="font-medium text-blue-400 mb-2">
-                        {item.q}
-                      </h3>
-                      <p className="text-gray-300">{item.a}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Technical Support Section */}
-            <div className="bg-gray-800 rounded-xl border border-blue-900/50 overflow-hidden">
-              <button
-                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-750"
-                onClick={() =>
-                  setExpandedSection(
-                    expandedSection === "technical" ? null : "technical"
-                  )
-                }
-              >
-                <div className="flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2 text-red-400" />
-                  <span className="font-bold">Technical Support</span>
-                </div>
-                {expandedSection === "technical" ? (
-                  <ChevronUp />
-                ) : (
-                  <ChevronDown />
-                )}
-              </button>
-
-              {expandedSection === "technical" && (
-                <div className="px-6 pb-6 space-y-4">
-                  {faqSections.technical.map((item, index) => (
-                    <div key={index} className="pt-4">
-                      <h3 className="font-medium text-blue-400 mb-2">
-                        {item.q}
-                      </h3>
-                      <p className="text-gray-300">{item.a}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Contact Support */}
-        <div className="max-w-3xl mx-auto mt-16">
-          <div className="bg-gray-800 rounded-xl border border-blue-900/50 p-6 text-center">
+        <div className="max-w-3xl mx-auto mt-12">
+          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 text-center">
             <h2 className="text-xl font-bold mb-4">Still need help?</h2>
             <p className="text-gray-300 mb-6">
               Our support team is available 24/7 to assist you
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <a
-                href="/support/ticket"
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition flex items-center justify-center"
-              >
+              <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Submit a Ticket
-              </a>
+              </button>
               <a
                 href="https://discord.gg/nexuscards"
-                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition flex items-center justify-center"
+                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium flex items-center justify-center"
               >
                 Join Discord Community
                 <ExternalLink className="w-4 h-4 ml-2" />

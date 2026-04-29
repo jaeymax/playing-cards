@@ -1,11 +1,49 @@
+import { baseUrl } from "@/config/api";
+import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
+import playedCardSound from "@/sounds/sound4.mp3";
+
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
+
+import dealCardSound from "@/sounds/sound2.mp3";
+
+function playDealCardSound() {
+  const audio = new Audio(dealCardSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+export function playShuffleSound() {
+  const audio = new Audio(shuffleSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+export function playPlayedCardSound() {
+  const audio = new Audio(playedCardSound);
+  audio.play().catch((err) => {
+    console.error("Failed to play sound:", err);
+  });
+}
+
+interface CardRefs {
+  playerHandRef: React.RefObject<HTMLDivElement>;
+  opponentOneHandRef: React.RefObject<HTMLDivElement>;
+  opponentTwoHandRef: React.RefObject<HTMLDivElement>;
+  opponentThreeHandRef: React.RefObject<HTMLDivElement>;
+  deckRef: React.RefObject<HTMLDivElement>;
+}
 
 export const shuffleCards = async (
   cardsToShuffle: any[],
   setGameCards: SetGameCardsFunction,
-  setIsShuffling: SetShufflingFunction
+  setIsShuffling: SetShufflingFunction,
+  isShuffling: boolean,
+  isDealing: boolean
 ) => {
+  if (isShuffling || isDealing) return; // Prevent multiple shuffles at once
   setIsShuffling(true);
 
   try {
@@ -137,54 +175,84 @@ export const bridgeFinish = (
   });
 };
 
-export const extractDealingSequence = (cards: any[], current_player_id: number) => {
-  const player_ids_and_card_hand_postions = cards.filter((card) => card.status == "in_hand").map((card) => { return {player_id: card.player_id, hand_position: card.hand_position}; });
-  const opponents = ['opponent1', 'opponent2', 'opponent3'];
-  let opponent_index = 0;
-  const sequence:any[] = [];
-  const player_id_map = new Map();
-  let hand_positions = [];
-  let target = ''
-  for(let id_and_hand_position of player_ids_and_card_hand_postions){
-    const {player_id, hand_position} = id_and_hand_position;
-    if(player_id_map.has(player_id)){
-       if(target ==player_id_map.get(player_id)){
-        hand_positions.push(hand_position);
-       }
-       else{
-        sequence.push({target, positions: hand_positions});
-        hand_positions = [];
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
-       }
-    }
-    else{
-      sequence.push({target, positions: hand_positions});
-      hand_positions = [];
-      target = '';
-      if(player_id == current_player_id){
-        console.log("current_player_id", current_player_id);
-        player_id_map.set(player_id, "player");
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
-      }
-      else{
-        player_id_map.set(player_id, opponents[opponent_index]);
-        target = player_id_map.get(player_id);
-        hand_positions.push(hand_position);
-        opponent_index++;
-      }
-    }
-  }
-  sequence.push({target, positions: hand_positions});
-  sequence.shift();
-  //console.log("player_id_map", player_id_map);
-console.log("sequence", sequence);
-return sequence;
-}
+const getTarget = (
+  player_id: number,
+  current_player_id: any,
+  first_opponent_id: any,
+  second_opponent_id: any,
+  third_opponent_id: number
+) => {
+  if (player_id == current_player_id) return "player";
+  else if (player_id == first_opponent_id) return "opponent1";
+  else if (player_id == second_opponent_id) return "opponent2";
+  else if (player_id == third_opponent_id) return "opponent3";
+};
 
+export const extractDealingSequence = (
+  cards: any[],
+  current_player_id: number,
+  first_opponent_id: number,
+  second_opponent_id: number,
+  third_opponent_id: number
+) => {
+  console.log(
+    current_player_id,
+    first_opponent_id,
+    second_opponent_id,
+    third_opponent_id
+  );
+
+  const player_ids_and_card_hand_postions = cards
+    .filter((card) => card.status == "in_hand")
+    .map((card) => {
+      return { player_id: card.player_id, hand_position: card.hand_position };
+    });
+
+  const sequence: any[] = [];
+  //console.log('ids_and_cards', player_ids_and_card_hand_postions)
+
+  let positions = [];
+  let index = 0;
+
+  while (index + 1 < player_ids_and_card_hand_postions.length) {
+    const { player_id, hand_position } =
+      player_ids_and_card_hand_postions[index];
+    positions.push(hand_position);
+
+    if (
+      player_ids_and_card_hand_postions[index].player_id !=
+      player_ids_and_card_hand_postions[index + 1].player_id
+    ) {
+      const target = getTarget(
+        player_id,
+        current_player_id,
+        first_opponent_id,
+        second_opponent_id,
+        third_opponent_id
+      );
+      sequence.push({ target, positions });
+      positions = [];
+    }
+
+    index++;
+  }
+
+  positions.push(player_ids_and_card_hand_postions[index].hand_position);
+  const target = getTarget(
+    player_ids_and_card_hand_postions[index].player_id,
+    current_player_id,
+    first_opponent_id,
+    second_opponent_id,
+    third_opponent_id
+  );
+  sequence.push({ target, positions });
+
+  console.log("sequence", sequence);
+  return sequence;
+};
 
 export const dealSequenceToPositions = (
+  soundOn: boolean,
   startIndex: number,
   target: string,
   positions: number[],
@@ -201,19 +269,16 @@ export const dealSequenceToPositions = (
   return new Promise<void>((resolve) => {
     let targetArea = refs.playerHandRef.current;
 
-    if(target == 'opponent1'){
-       targetArea = refs.opponentOneHandRef.current;
-    }
-    else if(target == 'opponent2'){
+    if (target == "opponent1") {
+      targetArea = refs.opponentOneHandRef.current;
+    } else if (target == "opponent2") {
       targetArea = refs.opponentTwoHandRef.current;
-    }
-    else if(target == 'opponent3'){
+    } else if (target == "opponent3") {
       targetArea = refs.opponentThreeHandRef.current;
-    }
-    else if(target == 'player'){
+    } else if (target == "player") {
       targetArea = refs.playerHandRef.current;
     }
-      
+
     let delay = 0;
 
     positions.forEach((position, index) => {
@@ -226,15 +291,33 @@ export const dealSequenceToPositions = (
         if (!refs.deckRef.current) return;
         const deckRect = refs.deckRef.current.getBoundingClientRect();
 
-        const xOffset = slotRect?.left - deckRect.left;
-        const yOffset = slotRect?.top - deckRect.top;
+        let xOffset = slotRect?.left - deckRect.left;
+        let yOffset = slotRect?.top - deckRect.top;
+
+        if (target == "player") {
+          xOffset = slotRect?.left - deckRect.left;
+          yOffset = slotRect?.top - deckRect.top;
+        } else if (target == "opponent1") {
+          xOffset = slotRect?.left - deckRect.left;
+          yOffset = slotRect?.top - deckRect.top;
+        } else if (target === "opponent2") {
+          xOffset = slotRect?.left - deckRect.right;
+          yOffset = slotRect?.bottom - deckRect.bottom;
+        } else {
+          xOffset = slotRect?.left - deckRect.right;
+          yOffset = slotRect?.bottom - deckRect.bottom;
+        }
 
         cardToMove.pos_x = xOffset;
         cardToMove.pos_y = yOffset;
-        target == 'opponent2' ? cardToMove.rotation = 90 : target == 'opponent3' ? cardToMove.rotation = 90 : cardToMove.rotation = 0;
+        target == "opponent2"
+          ? (cardToMove.rotation = 90)
+          : target == "opponent3"
+          ? (cardToMove.rotation = 90)
+          : (cardToMove.rotation = 0);
         cardToMove.inSlot = true;
         cardToMove.slotPosition = { target, position };
-
+        if (soundOn)playDealCardSound(); // Play sound for each dealt card
         setGameCards(updatedCards);
 
         if (index === positions.length - 1) resolve();
@@ -244,3 +327,612 @@ export const dealSequenceToPositions = (
     });
   });
 };
+
+const moveDrawPileOffScreen = (
+  cards: any[],
+  setGameCards: (cards: any) => void
+) => {
+  const cardsInDrawPile = cards.filter(
+    (card: any) => card.status === "in_drawpile"
+  );
+  cardsInDrawPile.forEach((card: any) => {
+    setGameCards((prevCards: any) => {
+      return prevCards.map((c: any) => {
+        if (c.id === card.id) {
+          return {
+            ...c,
+            pos_x: -1000,
+            pos_y: 0,
+            rotation: 0,
+            inSlot: false,
+            slotPosition: { target: "player", position: 0 },
+          };
+        }
+        return c;
+      });
+    });
+  });
+};
+
+export const dealCards = async (
+  cards: any[],
+  soundOn: boolean, 
+  current_player_id: number,
+  first_opponent_id: number,
+  second_opponent_id: number,
+  third_opponent_id: number,
+  refs: CardRefs,
+  setGameCards: (cards: any[]) => void,
+  isDealing: boolean,
+  isShuffling: boolean,
+  setIsDealing: (dealing: boolean) => void
+) => {
+  if (isDealing || isShuffling) return;
+  setIsDealing(true);
+
+  console.log(
+    "current_player_id",
+    current_player_id,
+    "first_opponent",
+    first_opponent_id
+  );
+
+  let cardIndex = 0;
+
+  for (const sequence of extractDealingSequence(
+    cards,
+    current_player_id,
+    first_opponent_id,
+    second_opponent_id,
+    third_opponent_id
+  )) {
+    await dealSequenceToPositions(
+      soundOn,
+      cardIndex,
+      sequence.target,
+      sequence.positions,
+      cards,
+      refs,
+      setGameCards
+    );
+    cardIndex += sequence.positions.length;
+  }
+
+  setIsDealing(false);
+
+  moveDrawPileOffScreen(cards, setGameCards);
+};
+
+export const removeToken = () => {
+  localStorage.removeItem("accessToken");
+};
+
+export const getToken = () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    console.error("No token found in localStorage");
+    return null;
+  }
+  return token;
+};
+
+export const saveToken = (token: string) => {
+  localStorage.setItem("accessToken", token);
+};
+
+export async function ensureGuest() {
+  const token = getToken();
+
+  if (token) return;
+
+  const res = await fetch(`${baseUrl}/auth/guest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    console.error("Failed to ensure guest status");
+    return;
+  }
+
+  const data = await res.json();
+  saveToken(data.token);
+  customLog(data.user);
+  customLog("Guest token saved:", data.token);
+  return data.user;
+}
+
+export async function upgradeGuest(
+  username: string,
+  email: string,
+  password: string
+) {
+  const res = await fetch(`${baseUrl}/auth/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ username, email, password }),
+  });
+  const body = await res.json();
+  if (res.ok) {
+    saveToken(body.token);
+  } else {
+    // handle errors (username/email taken)
+  }
+}
+
+export const authHeaders = () => {
+  return {
+    Authorization: `Bearer ${getToken()}`,
+  };
+};
+
+export const getSlotByPosition = (
+  position: number,
+  ref: React.RefObject<HTMLDivElement> | null
+) => {
+  if (!ref?.current) return null;
+  return ref.current.querySelector(`[data-position="${position}"]`);
+};
+
+export const playCardToSlot = (
+  card: any,
+  destSlot: Element | null,
+  trick_number: number,
+  deckRef: React.RefObject<HTMLDivElement>,
+  setGameCards: (cb: (prevCards: any[]) => any[]) => void,
+  opponent_number: number
+) => {
+  const slotRect = destSlot?.getBoundingClientRect();
+  const deckRect = deckRef?.current?.getBoundingClientRect();
+  let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+  let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+
+  if (opponent_number == 0) {
+    xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+    yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  } else if (opponent_number == 1) {
+    xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+    yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+  } else if (opponent_number == 2) {
+    xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+    yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+  } else {
+    xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+    yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+  }
+
+  card.pos_x = xOffset;
+  card.pos_y = yOffset;
+  card.rotation = 0;
+  card.inSlot = true;
+  card.slotPosition = { target: "player", position: 0 };
+
+  let rotation = 0;
+
+  switch (opponent_number) {
+    case 0:
+      rotation = 0;
+      break;
+    case 1:
+      rotation = 0;
+      break;
+    case 2:
+      rotation = 90;
+      break;
+    case 3:
+      rotation = 90;
+      break;
+  }
+
+  setGameCards((prevCards) => {
+    return prevCards.map((c) => {
+      if (c.id === card.id) {
+        return {
+          ...c,
+          pos_x: xOffset,
+          status: "played",
+          pos_y: yOffset,
+          rotation: rotation,
+          inSlot: true,
+          z_index: trick_number,
+          slotPosition: { target: "player", position: 0 },
+        };
+      }
+      return c;
+    });
+  });
+};
+
+interface PlayedCardArgs {
+  soundOn: boolean;
+  card_id: number;
+  player_id: number;
+  trick_number: number;
+  gameCards: any[];
+  game: any;
+  me: any;
+  firstOpponent: any;
+  secondOpponent: any;
+  thirdOpponent: any;
+  deckRef: React.RefObject<HTMLDivElement>;
+  playerPlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentOnePlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentTwoPlayAreaRef: React.RefObject<HTMLDivElement>;
+  opponentThreePlayAreaRef: React.RefObject<HTMLDivElement>;
+  setGameCards: (cb: (prevCards: any[]) => any[]) => void;
+  playSound: () => void;
+}
+
+export const handlePlayedCard = ({
+  soundOn,
+  card_id,
+  player_id,
+  trick_number,
+  gameCards,
+  game,
+  me,
+  firstOpponent,
+  secondOpponent,
+  thirdOpponent,
+  deckRef,
+  playerPlayAreaRef,
+  opponentOnePlayAreaRef,
+  opponentTwoPlayAreaRef,
+  opponentThreePlayAreaRef,
+  setGameCards,
+  playSound,
+}: PlayedCardArgs) => {
+  const card = gameCards.find((card: any) => card.id === card_id);
+  const player = game.players.find((player: any) => player.id === player_id);
+
+  customLog(
+    `${player.user.username} played ${card.card.rank} of ${card.card.suit}`
+  );
+
+  console.log('soundOn in functions', soundOn);
+  if(soundOn)playSound();
+
+  if (player_id === me?.id) {
+    const destSlot = getSlotByPosition(trick_number - 1, playerPlayAreaRef);
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 0);
+  } else if (player_id === firstOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentOnePlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 1);
+  } else if (player_id === secondOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentTwoPlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 2);
+  } else if (player_id === thirdOpponent?.id) {
+    const destSlot = getSlotByPosition(
+      trick_number - 1,
+      opponentThreePlayAreaRef
+    );
+    playCardToSlot(card, destSlot, trick_number, deckRef, setGameCards, 3);
+  }
+};
+
+export const handleGameMessage = (
+  message: string,
+  setMessage: (message: string) => void
+) => {
+  customLog("Game message:", message);
+  setMessage(message);
+};
+
+export const getPlayerIds = (players: any, currentUser: any) => {
+  let firstOpponentId;
+  let secondOpponentId;
+  let thirdOpponentId;
+  const meId = players.find(
+    (player: any) => player.user?.id === currentUser?.id
+  ).id;
+  const opponents = players.filter(
+    (player: any) => player.user?.id !== currentUser?.id
+  );
+  if (opponents.length > 0) firstOpponentId = opponents[0].id;
+  if (opponents.length > 1) secondOpponentId = opponents[1].id;
+  if (opponents.length > 2) thirdOpponentId = opponents[2].id;
+
+  return { meId, firstOpponentId, secondOpponentId, thirdOpponentId };
+};
+
+export const getPlayerIdsForSpectator = (players: any) => {
+  let playerOneId;
+  let playerTwoId;
+  let playerThreeId;
+  let playerFourId;
+
+  playerOneId = players[0].id;
+  playerTwoId = players[1].id;
+  if (players.length > 2) playerThreeId = players[2].id;
+  if (players.length > 3) playerFourId = players[3].id;
+
+  return { playerOneId, playerTwoId, playerThreeId, playerFourId };
+};
+
+export const reconcileCards = (
+  cards: any,
+  setGameCards: any,
+  meId: any,
+  firstOpponentId: any,
+  secondOpponentId: any,
+  thirdOpponentId: any,
+  deckRef: any,
+  playerHandRef: any,
+  opponentOneHandRef: any,
+  opponentTwoHandRef: any,
+  opponentThreeHandRef: any,
+  playerPlayAreaRef: any,
+  opponentOnePlayAreaRef: any,
+  opponentTwoPlayAreaRef: any,
+  opponentThreePlayAreaRef: any
+) => {
+  console.log("reconciling game cards");
+
+  const newCardsState = cards.map((card: any) => {
+    if (card.status == "played") {
+      const slot_position = card.trick_number - 1;
+      if (card.player_id == meId) {
+        const targetArea = playerPlayAreaRef.current;
+        const slot = targetArea?.children[slot_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+        let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 0;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+          z_index: card.trick_number,
+        };
+      } else if (card.player_id == firstOpponentId) {
+        const targetArea = opponentOnePlayAreaRef.current;
+        const slot = targetArea?.children[5 - slot_position - 1];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+        let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 0;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+          z_index: card.trick_number,
+        };
+      } else if (card.player_id == secondOpponentId) {
+        const targetArea = opponentTwoPlayAreaRef.current;
+        const slot = targetArea?.children[5 - slot_position - 1];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+        let yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 90;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+          z_index: card.trick_number,
+        };
+      } else if (card.player_id == thirdOpponentId) {
+        const targetArea = opponentThreePlayAreaRef.current;
+        const slot = targetArea?.children[slot_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+        let yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 90;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+          z_index: card.trick_number,
+        };
+      }
+    } else if (card.status == "in_hand") {
+      const hand_position = card.hand_position;
+      if (card.player_id == meId) {
+        const targetArea = playerHandRef.current;
+        const slot = targetArea?.children[hand_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+        let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 0;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+        };
+      } else if (card.player_id == firstOpponentId) {
+        const targetArea = opponentOneHandRef.current;
+        const slot = targetArea?.children[hand_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.left || 0);
+        let yOffset = (slotRect?.top || 0) - (deckRect?.top || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 0;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+        };
+      } else if (card.player_id == secondOpponentId) {
+        const targetArea = opponentTwoHandRef.current;
+        const slot = targetArea?.children[hand_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+        let yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 90;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+        };
+      } else if (card.player_id == thirdOpponentId) {
+        const targetArea = opponentThreeHandRef.current;
+        const slot = targetArea?.children[hand_position];
+        const slotRect = slot?.getBoundingClientRect();
+        const deckRect = deckRef?.current?.getBoundingClientRect();
+        let xOffset = (slotRect?.left || 0) - (deckRect?.right || 0);
+        let yOffset = (slotRect?.bottom || 0) - (deckRect?.bottom || 0);
+        card.x_pos = xOffset;
+        card.y_pos = yOffset;
+        card.rotation = 90;
+
+        return {
+          ...card,
+          pos_x: xOffset,
+          pos_y: yOffset,
+        };
+      }
+    } else if (card.status == "in_drawpile") {
+      return {
+        ...card,
+        pos_x: -1000,
+      };
+    } else if (card.status == "in_deck") {
+      return card;
+    }
+  });
+
+  setGameCards(newCardsState);
+};
+
+interface Division {
+  name: string;
+  min: number;
+  max: number;
+  emoji: string;
+  color: string; // hex or Tailwind class
+  badgeClasses: string;
+}
+
+const divisions: Division[] = [
+  {
+    name: "Rookie",
+    min: 0,
+    max: 1199,
+    emoji: "🃏",
+    color: "#9CA3AF",
+    badgeClasses: "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full",
+  }, // gray
+  {
+    name: "Contender",
+    min: 1200,
+    max: 1399,
+    emoji: "⚔️",
+    color: "#6B7280",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-green-500/10 text-green-400 rounded-full",
+  },
+  {
+    name: "Strategist",
+    min: 1400,
+    max: 1599,
+    emoji: "🔥",
+    color: "#F97316",
+    badgeClasses: "px-3 py-1 text-sm bg-cyan-500/10 text-cyan-400 rounded-full",
+  },
+  {
+    name: "Pro Player",
+    min: 1600,
+    max: 1799,
+    emoji: "🏆",
+    color: "#FACC15",
+    badgeClasses: "px-3 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full",
+  }, // blue
+  {
+    name: "Card Wizard",
+    min: 1800,
+    max: 1999,
+    emoji: "🦈",
+    color: "#10B981",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-purple-500/10 text-purple-400 rounded-full",
+  },
+  {
+    name: "Card Master",
+    min: 2000,
+    max: 2199,
+    emoji: "👑",
+    color: "#3B82F6",
+    badgeClasses:
+      "px-3 py-1 text-sm bg-yellow-500/10 text-yellow-400 rounded-full",
+  },
+  {
+    name: "Card Veteran",
+    min: 2200,
+    max: 2399,
+    emoji: "🌟",
+    color: "#8B5CF6",
+    badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-400 rounded-full",
+  },
+  {
+    name: "Card Legend",
+    min: 2400,
+    max: Infinity,
+    emoji: "🐉",
+    color: "#EF4444",
+    badgeClasses: "px-3 py-1 text-sm bg-red-500/10 text-red-500 rounded-full",
+  },
+];
+
+export function getDivision(rating: number) {
+  const division = divisions.find((d) => rating >= d.min && rating <= d.max);
+  if (!division) {
+    return {
+      name: "Unranked",
+      emoji: "❔",
+      color: "#6B7280",
+      badgeClasses:
+        "px-3 py-1 text-sm bg-gray-500/10 text-gray-400 rounded-full",
+    };
+  }
+  return division;
+}
+
+export function customLog(...args: any[]) {
+  if (import.meta.env.VITE_ENV === "development") {
+    console.log(...args);
+  }
+}
+
+// export const getPlayerByPosition = (player_position: number, players) => {
+//   return players.find((player) => player.position === player_position);
+// };
+
+// export const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+//   const player = getPlayerByPosition(player_position);
+
+//   return cards.find((card) => card.player_id === player?.id);
+// };

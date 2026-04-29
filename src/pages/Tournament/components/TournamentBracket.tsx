@@ -1,92 +1,393 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
+import { Round } from "@/types/tournament";
+import { Player } from "@/types/tournament";
+import { useNavigate } from "react-router-dom";
 
-const TournamentBracket: React.FC = () => {
-  return (
-    <div className="relative">
-      {/* Mobile View */}
-      <div className="lg:hidden space-y-8">
-        {[1, 2, 3, 4].map((round) => (
-          <div key={round} className="w-full">
-            <h3 className="text-sm font-medium text-gray-400 mb-4 text-center">
-              {round === 1
-                ? "Quarter Finals"
-                : round === 2
-                ? "Semi Finals"
-                : round === 3
-                ? "Finals"
-                : "Champion"}
-            </h3>
-            <div className="space-y-4 px-2">
-              {Array(Math.max(1, 8 / Math.pow(2, round - 1)))
-                .fill(0)
-                .map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-gray-750 rounded-lg border border-gray-700 p-3"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-white font-medium text-sm">
-                          Player 1
-                        </span>
-                        <span className="text-gray-400 text-sm">0</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-white font-medium text-sm">
-                          Player 2
-                        </span>
-                        <span className="text-gray-400 text-sm">0</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
+// interface Player {
+//   id:number;
+//   name: string;
+//   image_url: string;
+//   score: number;
+//   winner: boolean;
+// }
+
+// interface Match {
+//   id: number;
+//   player1: Player;
+//   player2: Player;
+//   status: string;
+//   game_id: number;
+//   game_code: string;
+//   winner_id: number | null;
+// }
+
+// interface Round {
+//   round: number;
+//   matches: Match[];
+// }
+
+interface TournamentBracketProps {
+  rounds?: Round[];
+  numberOfParticipants?: number;
+  loading?: boolean;
+  tournamentFormat?: string;
+}
+
+const TournamentBracket: React.FC<TournamentBracketProps> = ({
+  rounds = [],
+  numberOfParticipants = 0,
+  tournamentFormat,
+  loading = false,
+}) => {
+  const calculateTotalRounds = (participants: number): number => {
+    if (participants <= 1) return 0;
+    return Math.ceil(Math.log2(participants));
+  };
+
+  const totalRounds = calculateTotalRounds(numberOfParticipants);
+  const roundsMap = new Map(rounds.map((r) => [r.round, r]));
+
+  const renderRoundName = (round: number) => {
+    if (tournamentFormat == "Swiss") {
+      return "Round " + round;
+    }
+    const roundsFromEnd = totalRounds - round;
+    if (roundsFromEnd === 0) return "Finals";
+    if (roundsFromEnd === 1) return "Semi Finals";
+    if (roundsFromEnd === 2) return "Quarter Finals";
+    if (roundsFromEnd === 3) return "Round of 16";
+    if (roundsFromEnd === 4) return "Round of 32";
+    if (roundsFromEnd === 5) return "Round of 64";
+    return "Round " + round;
+  };
+
+  const { user } = useAppContext();
+
+  const PlayerRow: React.FC<{ player: Player; isWinner: boolean }> = ({
+    player,
+    isWinner,
+  }) => (
+    <div
+      className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+        isWinner
+          ? "bg-gradient-to-r from-blue-500/70 to-blue-800/40 border border-blue-500/90 shadow-md shadow-blue-900/30"
+          : "bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/60"
+      }`}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 border border-blue-400/30 shadow-lg">
+          {player.image_url ? (
+            <img
+              className="object-cover w-full h-full rounded-full"
+              src={player.image_url}
+              alt={""}
+            />
+          ) : (
+            <img
+            className="rounded-full w-full h-full object-cover"
+            src={
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
+            alt=""
+          />
+          )}
+        </div>
+        <div className="min-w-0">
+          <span className="text-white font-semibold text-sm truncate block">
+            {user?.id == player.id ? "You" : player.name}
+          </span>
+          {isWinner && (
+            <span className="text-amber-400 text-xs font-medium">Winner</span>
+          )}
+        </div>
       </div>
+      <span
+        className={`text-sm font-bold flex-shrink-0 ml-3 ${
+          isWinner ? "text-amber-300" : "text-slate-400"
+        }`}
+      >
+        {player.score}
+      </span>
+    </div>
+  );
 
-      {/* Desktop View */}
-      <div className="hidden lg:block overflow-x-auto">
-        <div className="min-w-[800px] p-4">
-          <div className="flex justify-between gap-4">
-            {[1, 2, 3, 4].map((round) => (
-              <div key={round} className="flex-1">
-                <h3 className="text-center text-sm font-medium text-gray-400 mb-4">
-                  {round === 1
-                    ? "Quarter Finals"
-                    : round === 2
-                    ? "Semi Finals"
-                    : round === 3
-                    ? "Finals"
-                    : "Champion"}
-                </h3>
+  const MatchStatus: React.FC<{ status: string }> = ({ status }) => {
+    const statusConfig = {
+      pending: {
+        label: "Pending",
+        bgColor: "bg-slate-500/20",
+        textColor: "text-slate-400",
+        dotColor: "bg-slate-400",
+      },
+      in_progress: {
+        label: "In Progress",
+        bgColor: "bg-blue-500/20",
+        textColor: "text-blue-300",
+        dotColor: "bg-blue-400",
+      },
+      completed: {
+        label: "Completed",
+        bgColor: "bg-green-500/20",
+        textColor: "text-green-300",
+        dotColor: "bg-green-400",
+      },
+      forfeited: {
+        label: "Forfeited",
+        bgColor: "bg-red-500/20",
+        textColor: "text-red-300",
+        dotColor: "bg-red-400",
+      },
+    };
 
-                <div className="space-y-8">
-                  {Array(Math.max(1, 8 / Math.pow(2, round - 1)))
-                    .fill(0)
-                    .map((_, i) => (
-                      <div key={i} className="px-2">
-                        <div className="bg-gray-750 rounded-lg border border-gray-700 p-3">
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-white font-medium">
-                                Player 1
-                              </span>
-                              <span className="text-gray-400">0</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-white font-medium">
-                                Player 2
-                              </span>
-                              <span className="text-gray-400">0</span>
-                            </div>
+    const config =
+      statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+
+    return (
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-2 h-2 rounded-full ${config.dotColor} animate-pulse`}
+        ></div>
+        <span
+          className={`px-3 py-1 text-xs font-semibold ${config.bgColor} ${config.textColor} rounded-md`}
+        >
+          {config.label}
+        </span>
+      </div>
+    );
+  };
+
+  const SpectateButton: React.FC<{ matchCode: string; roundName: string }> = ({
+    matchCode,
+    roundName,
+  }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+      navigate(`/game/${matchCode}/spectate`, {
+        state: { roundName, name: "Weekend Championship" },
+      });
+    };
+
+    //  if(matchId){
+    //   return;
+    //  }
+
+    return (
+      <button
+        onClick={handleClick}
+        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/40 flex items-center gap-2"
+      >
+        {/* <span>📺</span> */}
+        <span>Spectate</span>
+      </button>
+    );
+  };
+
+  const WaitingPlaceholder: React.FC = () => (
+    <div className="bg-slate-800/30 rounded-lg border border-dashed border-slate-600/50 p-6 backdrop-blur-sm">
+      <div className="space-y-3">
+        <div className="flex items-center justify-center h-24 rounded-lg bg-slate-700/30 border border-slate-600/30">
+          <span className="text-slate-500 text-xs font-medium tracking-wide">
+            Waiting for next round...
+          </span>
+        </div>
+        {/* <div className="border-t border-slate-700/50"></div> */}
+        {/* <div className="flex items-center justify-center h-10 rounded-lg bg-slate-700/30 border border-slate-600/30">
+          <span className="text-slate-500 text-xs font-medium tracking-wide">
+            Waiting for next round...
+          </span>
+        </div> */}
+      </div>
+    </div>
+  );
+
+  const BracketSkeleton: React.FC = () => (
+    <div className="space-y-8 px-2">
+      {Array.from({ length: 3 }).map((_, roundIndex) => (
+        <div key={roundIndex} className="space-y-4">
+          <div className="h-5 bg-gradient-to-r from-slate-700 to-transparent rounded animate-pulse w-32 mx-auto"></div>
+          <div className="space-y-4">
+            {Array.from({ length: 2 }).map((_, matchIndex) => (
+              <div
+                key={matchIndex}
+                className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm"
+              >
+                <div className="mb-4 h-5 bg-slate-700 rounded animate-pulse w-24"></div>
+                <div className="space-y-3">
+                  <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                  <div className="border-t border-slate-700/50"></div>
+                  <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="relative">
+        {/* Mobile View */}
+        <div className="lg:hidden">
+          <BracketSkeleton />
+        </div>
+
+        {/* Desktop View */}
+        <div className="hidden lg:block overflow-x-auto">
+          <div className="min-w-[900px] p-6">
+            <div className="flex justify-between gap-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex-1">
+                  <div className="h-5 bg-gradient-to-r from-slate-700 to-transparent rounded animate-pulse w-32 mx-auto mb-8"></div>
+                  <div className="space-y-10">
+                    {Array.from({ length: 2 }).map((_, matchIndex) => (
+                      <div key={matchIndex} className="px-2">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-5 backdrop-blur-sm">
+                          <div className="mb-4 h-5 bg-slate-700 rounded animate-pulse w-24"></div>
+                          <div className="space-y-3">
+                            <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                            <div className="border-t border-slate-700/50"></div>
+                            <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
                           </div>
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!rounds || rounds.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-400">
+        <p className="text-base md:text-lg">
+          🏆 Bracket and rounds coming soon...
+        </p>
+      </div>
+
+    )
+  }
+
+  return (
+    <div className="relative">
+      {/* Mobile View */}
+      <div className="lg:hidden space-y-8 py-4">
+        {Array.from({ length: totalRounds }).map((_, index) => {
+          const roundNumber = index + 1;
+          const roundData = roundsMap.get(roundNumber);
+
+          return (
+            <div key={roundNumber} className="w-full">
+              <h3 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r text-white fromblue-400 topurple-400 mb-5 text-center tracking-wide uppercase text-sm">
+                {renderRoundName(roundNumber)}
+              </h3>
+              <div className="overflow-x-auto scrollbar-hide py-2">
+                <div className="flex gap-4 px-2 min-w-min">
+                  {roundData ? (
+                    roundData.matches.map((match) => (
+                      <div
+                        key={match.id}
+                        className="flex-shrink-0 w-72 bg-slate-800/50 rounded-sm border border-slate-700/50 p-4 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm"
+                      >
+                        <div className="mb-4 flex items-center justify-between">
+                          <MatchStatus status={match.status} />
+                          {match.status == "in_progress" && (
+                            <SpectateButton
+                              matchCode={match.game_code}
+                              roundName={renderRoundName(roundNumber)}
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                          <PlayerRow
+                            player={match.player1}
+                            isWinner={match.player1.winner}
+                          />
+                          {match.player2?.name && (
+                            <>
+                              <div className="border-t border-slate-700/50"></div>
+                              <PlayerRow
+                                player={match.player2}
+                                isWinner={match.player2.winner}
+                              />
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex-shrink-0 w-full">
+                      <WaitingPlaceholder />
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block overflow-x-auto scrollbar-thin">
+        <div className="min-w-[900px] p-6">
+          <div className="flex justify-between gap-6">
+            {Array.from({ length: totalRounds }).map((_, index) => {
+              const roundNumber = index + 1;
+              const roundData = roundsMap.get(roundNumber);
+
+              return (
+                <div key={roundNumber} className="flex-1">
+                  <h3 className="text-center font-bold text-transparent bg-clip-text bg-gradient-to-r text-white fromblue-400 topurple-400 mb-8 tracking-wide uppercase text-sm">
+                    {renderRoundName(roundNumber)}
+                  </h3>
+
+                  <div className="space-y-10">
+                    {roundData ? (
+                      roundData.matches.map((match) => (
+                        <div key={match.id} className="px-2">
+                          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 shadow-xl hover:shadow-2xl hover:border-slate-600 transition-all duration-300 backdrop-blur-sm">
+                            <div className="mb-4 flex items-center justify-between">
+                              <MatchStatus status={match.status} />
+                              {match.status == "in_progress" && (
+                                <SpectateButton
+                                  matchCode={match.game_code}
+                                  roundName={renderRoundName(roundNumber)}
+                                />
+                              )}
+                            </div>
+                            <div className="space-y-3">
+                              <PlayerRow
+                                player={match.player1}
+                                isWinner={match.player1.winner}
+                              />
+                              {match.player2?.name && (
+                                <>
+                                  <div className="border-t border-slate-700/50"></div>
+                                  <PlayerRow
+                                    player={match.player2}
+                                    isWinner={match.player2.winner}
+                                  />
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <WaitingPlaceholder />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

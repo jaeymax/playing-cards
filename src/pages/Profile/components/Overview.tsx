@@ -1,31 +1,34 @@
+import { useAppContext } from "@/contexts/AppContext";
 import React from "react";
 
 const Overview: React.FC = () => {
-  const recentActivity = [
-    { type: "tournament", title: "Won Weekend Championship", time: "2h ago" },
-    { type: "achievement", title: "Perfect Game Master", time: "1d ago" },
-    { type: "rank", title: "Reached Diamond Rank", time: "3d ago" },
-  ];
+  // const recentActivity = [
+  //   { type: "tournament", title: "Won Weekend Championship", time: "2h ago" },
+  //   { type: "achievement", title: "Perfect Game Master", time: "1d ago" },
+  //   { type: "rank", title: "Reached Diamond Rank", time: "3d ago" },
+  // ];
 
-  const favoriteCards = [
-    { name: "Ace of Spades", winRate: "75%", timesPlayed: 156 },
-    { name: "King of Hearts", winRate: "70%", timesPlayed: 143 },
-    { name: "Queen of Diamonds", winRate: "68%", timesPlayed: 128 },
-  ];
+  // const favoriteCards = [
+  //   { name: "Ace of Spades", winRate: "75%", timesPlayed: 156 },
+  //   { name: "King of Hearts", winRate: "70%", timesPlayed: 143 },
+  //   { name: "Queen of Diamonds", winRate: "68%", timesPlayed: 128 },
+  // ];
 
-  const currentSeasonStats = {
-    rank: "#42",
-    rating: "2150",
-    wins: 85,
-    losses: 40,
-    winRate: "68%",
-    totalGames: 125,
-  };
+  const { user } = useAppContext();
+
+  // const currentSeasonStats = {
+  //   rank: "#42",
+  //   rating: "2150",
+  //   wins: 85,
+  //   losses: 40,
+  //   winRate: "68%",
+  //   totalGames: 125,
+  // };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Recent Activity */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
+      {/* <div className="bg-gray-750 rounded-lg p-6 borde border-gray-700">
         <h3 className="text-lg font-bold text-white mb-4">Recent Activity</h3>
         <div className="space-y-4">
           {recentActivity.map((activity, index) => (
@@ -58,41 +61,47 @@ const Overview: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Current Season Stats */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-700">
-        <h3 className="text-lg font-bold text-white mb-4">Current Season</h3>
+      <div className="bg-gray-750 rounded-lg p-6 borde border-gray-700">
+        {/* <h3 className="text-lg font-bold text-white mb-4">Current Season</h3> */}
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-white">
-              {currentSeasonStats.rank}
+              {user?.is_rated ? `#${user.rank}` : "Unrated"}
             </div>
             <div className="text-sm text-gray-400">Global Rank</div>
           </div>
           <div className="p-4 bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-white">
-              {currentSeasonStats.rating}
+              {user?.is_rated ? user.rating : "Unrated"}
             </div>
             <div className="text-sm text-gray-400">Rating</div>
           </div>
           <div className="p-4 bg-gray-800 rounded-lg">
-            <div className="text-2xl font-bold text-green-400">
-              {currentSeasonStats.wins}
+            <div className="text-2xl font-bold text-green400">
+              {user?.games_won}
             </div>
             <div className="text-sm text-gray-400">Wins</div>
           </div>
           <div className="p-4 bg-gray-800 rounded-lg">
-            <div className="text-2xl font-bold text-red-400">
-              {currentSeasonStats.losses}
+            <div className="text-2xl font-bold text-red400">
+              {`${(user?.games_played || 0) - (user?.games_won || 0)}`}
             </div>
             <div className="text-sm text-gray-400">Losses</div>
           </div>
+          {/* <div className="p-4 bg-gray-800 rounded-lg">
+            <div className="text-2xl font-bold text-red400">
+              {`${(user?.games_played || 0)}`}
+            </div>
+            <div className="text-sm text-gray-400">Games played</div>
+          </div> */}
         </div>
       </div>
 
       {/* Favorite Cards */}
-      <div className="lg:col-span-2">
+      {/* <div className="lg:col-span-2">
         <h3 className="text-lg font-bold text-white mb-4">Favorite Cards</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {favoriteCards.map((card, index) => (
@@ -112,7 +121,7 @@ const Overview: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

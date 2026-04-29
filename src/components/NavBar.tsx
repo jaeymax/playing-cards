@@ -3,6 +3,8 @@ import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
+import {removeToken } from "@/utils/Functions";
+import { Home, Info, ScrollText, Mail,  Medal, Trophy} from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -14,13 +16,16 @@ type Message = {
   avatar: string; // Add avatar field
 };
 
-const NavBar: React.FC = () => {
+interface NavBarProps {
+  showSignUps: boolean;
+}
+
+const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   // Add new loading state
   //const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [notificationCount] = useState(3);
+  //const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -33,6 +38,12 @@ const NavBar: React.FC = () => {
 
   const { isLoading } = useAppContext();
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
+
+  const { notifications } = useAppContext();
+  //customLog("NavBar Notifications:", notifications);
+  const notificationCount = notifications.filter((n) => !n.is_read).length;
+
+  (notificationCount && true);
 
   const navigate = useNavigate();
 
@@ -260,9 +271,7 @@ const NavBar: React.FC = () => {
   const getGlobalChatMessages = async () => {
     try {
       setIsMessagesLoading(true);
-      const response = await fetch(
-        `${baseUrl}/messages/global`
-      );
+      const response = await fetch(`${baseUrl}/messages/global`);
       if (!response.ok) {
         throw new Error("Failed to fetch messages");
       }
@@ -300,7 +309,7 @@ const NavBar: React.FC = () => {
     }
   };
 
-  console.log(messages);
+  //console.log(messages);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -340,7 +349,7 @@ const NavBar: React.FC = () => {
 
   const handleLogout = () => {
     // Clear session storage
-    sessionStorage.removeItem("accessToken");
+    removeToken();
     // Clear user context
     updateUser(null);
     // Close profile dropdown
@@ -376,38 +385,63 @@ const NavBar: React.FC = () => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="p- borde rounded-lg text-gray-400 hover:text-white md:hidden"
               >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
+                {isMenuOpen ? (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
               </button>
               <Link to="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 hidden sm:flex">
                   <img src="./cards.png" className="object-contain" alt="" />
                 </div>
-                <span className="text-2xl hidden sm:flex font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  PlaySpa
-                </span>
+                <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
+                  <span
+                    style={{ fontFamily: "Great Vibes" }}
+                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent"
+                  >
+                    Spar
+                  </span>
+                  <span
+                    style={{ fontFamily: "Great Vibes" }}
+                    className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent"
+                  >
+                    play
+                  </span>
+                  <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent"></span>
+                </div>
               </Link>
             </div>
 
             {/* Middle section - for future nav items */}
             <div className="hidden lg:flex flex-1 justify-center items-center gap-8">
-              <a href="#" className="text-gray-300 hover:text-white px-3 py-2">
+              <Link to="/" className="text-gray-300 hover:text-white px-3 py-2">
                 Home
-              </a>
-              <a href="#" className="text-gray-300 hover:text-white px-3 py-2">
-                Play
-              </a>
+              </Link>
               <Link
                 to="/tournaments"
                 className="text-gray-300 hover:text-white px-3 py-2"
@@ -420,20 +454,35 @@ const NavBar: React.FC = () => {
               >
                 Leaderboard
               </Link>
+              <Link
+                to="/about"
+                className="text-gray-300 hover:text-white px-3 py-2"
+              >
+                About
+              </Link>
 
-              <a href="#" className="text-gray-300 hover:text-white px-3 py-2">
-                Community
-              </a>
+              <Link
+                to="/rules"
+                className="text-gray-300 hover:text-white px-3 py-2"
+              >
+                Rules
+              </Link>
+              <Link
+                to="/contact"
+                className="text-gray-300 hover:text-white px-3 py-2"
+              >
+                Contact
+              </Link>
             </div>
 
             {/* Right side - adjusted with additional spacing */}
-            <div className="flex items-center gap- borde">
+            <div className="flex items-center gap-3">
               {isLoading ? (
                 <LoadingBubbles />
               ) : user ? (
                 <>
                   {/* Chat Icon */}
-                  <div className="relative">
+                  {/* <div className="relative">
                     <button
                       onClick={() => setIsChatOpen(true)}
                       className="p-2 borde rounded-lg text-gray-400 hover:text-white"
@@ -452,13 +501,35 @@ const NavBar: React.FC = () => {
                         />
                       </svg>
                     </button>
+                  </div> */}
+
+                  {/* Wallet Icon */}
+                  <div className="relative">
+                    <button
+                      onClick={() => navigate("/wallet")}
+                      className="mt-3 rounded-lg text-gray-400 hover:text-white"
+                    >
+                      <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V5a3 3 0 00-3-3H6a3 3 0 00-3 3v11a3 3 0 003 3z"
+                        />
+                      </svg>
+                    </button>
                   </div>
 
                   {/* Friends Icon */}
-                  <div className="relative">
+                  {/* <div className="relative">
                     <button
                       onClick={() => navigate("/friends")}
-                      className="p-2 rounded-lg text-gray-400 hover:text-white"
+                      className="mt-2 rounded-lg text-gray-400 hover:text-white"
                     >
                       <svg
                         className="h-6 w-6"
@@ -474,16 +545,16 @@ const NavBar: React.FC = () => {
                         />
                       </svg>
                     </button>
-                  </div>
+                  </div> */}
 
                   {/* Notification Bell */}
                   <div className="relative">
                     <button
-                      className="p-2 rounded-lg text-gray-400 hover:text-white"
+                      className="borde mt-2 rounded-lg text-gray-400 hover:text-white"
                       onClick={() => navigate("/notifications")}
                     >
                       <svg
-                        className="h-6 w-6"
+                        className="h-7 w-7"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -496,8 +567,8 @@ const NavBar: React.FC = () => {
                         />
                       </svg>
                       {notificationCount > 0 && (
-                        <span className="absolute top-3 right-3 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                          {notificationCount}
+                        <span className="absolute top-3 right-2 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                          {notificationCount > 9 ? "9+" : notificationCount}
                         </span>
                       )}
                     </button>
@@ -506,15 +577,26 @@ const NavBar: React.FC = () => {
                   {/* Profile Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
+                      onClick={() => navigate('/profile')}
                       className="flex items-center space-x-3 focus:outline-none"
                     >
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[2px]">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[0px]">
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                          <img className="rounded-full" src={user?.image_url} alt="" />
-                          {/* <span className="text-lg">
-                            👤
-                          </span> */}
+                          {user?.image_url ? (
+                            <img
+                              className="rounded-full w-full h-full object-cover"
+                              src={user?.image_url}
+                              alt=""
+                            />
+                          ) : (
+                            <img
+                              className="rounded-full w-full h-full object-cover"
+                              src={
+                                "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                              }
+                              alt=""
+                            />
+                          )}
                         </div>
                       </div>
                       {/* <span className="hidden md:block text-white">
@@ -540,8 +622,8 @@ const NavBar: React.FC = () => {
                     {/* Dropdown Menu */}
                     {isProfileOpen && (
                       <div className="absolute z-20 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5">
-                        <a
-                          href="/profile"
+                        <Link
+                          to="/profile"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
                           <svg
@@ -558,8 +640,8 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           View Profile
-                        </a>
-                        <a
+                        </Link>
+                        {/* <a
                           href="/avatar"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -577,8 +659,8 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           Edit Avatar
-                        </a>
-                        <a
+                        </a> */}
+                        {/* <a
                           href="/settings"
                           className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -602,8 +684,8 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           Settings
-                        </a>
-                        <button
+                        </a> */}
+                        {/* <button
                           onClick={() => setIsDarkMode(!isDarkMode)}
                           className="w-full flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         >
@@ -625,7 +707,7 @@ const NavBar: React.FC = () => {
                             />
                           </svg>
                           {isDarkMode ? "Light Mode" : "Dark Mode"}
-                        </button>
+                        </button> */}
                         <div className="border-t border-gray-700">
                           <button
                             onClick={handleLogout}
@@ -652,20 +734,22 @@ const NavBar: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => navigate("/signin")}
-                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => navigate("/signup")}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                  >
-                    Sign Up
-                  </button>
-                </div>
+                showSignUps && (
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => navigate("/signin")}
+                      className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => navigate("/signup")}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -691,102 +775,43 @@ const NavBar: React.FC = () => {
                   to="/"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
+                  <Home className="w-5 h-5" />
                   Home
-                </Link>
-                <Link
-                  to="#"
-                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Play
                 </Link>
                 <Link
                   to="/tournaments"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
+                  <Trophy className="w-5 h-5" />
                   Tournaments
                 </Link>
                 <Link
                   to="/leaderboard"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                    />
-                  </svg>
+                  <Medal className="w-5 h-5" />
                   Leaderboard
                 </Link>
                 <Link
-                  to="/shop"
+                  to="/rules"
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                    />
-                  </svg>
-                  Shop
+                  <ScrollText className="w-5 h-5" />
+                  Rules
+                </Link>
+                <Link
+                  to="/about"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                >
+                  <Info className="w-5 h-5" />
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700"
+                >
+                  <Mail className="w-5 h-5" />
+                  Contact
                 </Link>
               </div>
             </div>

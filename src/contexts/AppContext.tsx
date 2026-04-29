@@ -7,6 +7,8 @@ import React, {
 } from "react";
 
 import { baseUrl } from "@/config/api";
+import { authHeaders, customLog, getToken, removeToken } from "@/utils/Functions";
+import mixpanel from "mixpanel-browser";
 
 interface User {
   username: string;
@@ -14,6 +16,12 @@ interface User {
   image_url: string;
   games_played:number;
   games_won:number;
+  is_rated:boolean;
+  tournaments_played:number;
+  tournaments_won:number;
+  balance:string;
+  rank:number;
+  is_guest:boolean;
   rating:number;
   location:string;
   created_at:string;
@@ -39,10 +47,24 @@ interface AppState {
   updateOverlay: (value: boolean) => void;
   updateUser: (user: User | null) => void;
   isLoading: boolean;
+  notifications: Notification[];
+  notificationsError: string | null;
+  notificationsLoading: boolean;
+  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 }
 
 interface AppProviderProps {
   children: ReactNode;
+}
+
+interface Notification {
+  id: number;
+  type: string;
+  is_read: boolean;
+  title: string;
+  message: string;
+  created_at: string;
+  action: string;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -55,10 +77,53 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [overlay, setOverlay] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsError, setNotificationsError] = useState<string|null>(null);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+  customLog("User in context:", user);
 
   useEffect(() => {
-    const accessToken = sessionStorage.getItem("accessToken");
+      if (!user) return;
+      // Simulate fetching notifications from an API
+      const fetchNotifications = async () => {
+        // Replace this with actual API call
+        setNotificationsLoading(true);
+        setNotificationsError(null);
+        try{
+          const fetchedNotifications = await fetch(`${baseUrl}/notifications/user/${user?.id}`,  {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json", 
+              ...authHeaders()
+            },
+          });
+          if(!fetchedNotifications.ok){
+              throw new Error(
+                fetchedNotifications.status === 500 ? "Network error. Please check your internet connection":"Failed to fetch notifications"
+              )
+          }
+
+        const data = await fetchedNotifications.json();
+
+          setNotifications(data);
+        }catch(err:any){
+            console.log(err, "Error fetching notifications");
+            setNotificationsError(err.message || "An error occured. Please try again")
+        }finally{
+          setNotificationsLoading(false);
+        }
+      };
+
+  
+      fetchNotifications();
+    }, [user]);
+
+
+
     
+  useEffect(() => {
+    const accessToken = getToken();
     
     if (accessToken && !user) {
       setIsLoading(true);
@@ -70,17 +135,31 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       })
         .then((response) => {
           
-          if (!response.ok) throw new Error("Failed to fetch user data");
+         // if (!response.ok) throw new Error("Failed to fetch user data");
+
+          if(response.status === 401 || response.status === 403){
+            removeToken();
+            throw new Error("Unauthorized");
+          }
           return response.json();
         })
         .then((userData) => {
          
           
           setUser(userData);
+          mixpanel.identify(userData.id);
+          mixpanel.people.set({
+            $email: userData.email, // only if you have it
+            $created: new Date(userData.created_at), // only if you have it
+            username: userData.username,
+            games_played: userData.games_played,
+      
+          });
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          sessionStorage.removeItem("accessToken"); // Clear invalid token
+         // removeToken();
+          //sessionStorage.removeItem("accessToken"); // Clear invalid token
         })
         .finally(() => {
           setIsLoading(false);
@@ -132,6 +211,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         toggleSidebar,
         setActiveTabState,
         isLoading,
+        notifications,
+        setNotifications,
+        notificationsError,
+        notificationsLoading
       }}
     >
       {children}

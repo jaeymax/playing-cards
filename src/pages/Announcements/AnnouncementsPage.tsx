@@ -1,5 +1,5 @@
 import React from "react";
-import NavBar from "../../components/NavBar";
+import NavBar from "@/components/NavBar";
 import Footer from "../../components/Footer";
 
 type Announcement = {
@@ -120,7 +120,7 @@ const AnnouncementsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      <NavBar />
+      <NavBar showSignUps = {true} />
       <div className="container mx-auto px-4 py-8">
         <div className="bg-gray-800 rounded-lg border border-gray-700">
           <div className="p-4 border-b border-gray-700">
