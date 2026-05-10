@@ -3,8 +3,17 @@ import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "@/config/api";
-import {removeToken } from "@/utils/Functions";
-import { Home, Info, ScrollText, Mail,  Medal, Trophy} from "lucide-react";
+import { removeToken } from "@/utils/Functions";
+import {
+  Home,
+  Info,
+  ScrollText,
+  Mail,
+  Medal,
+  Trophy,
+  Settings,
+  Sun,
+} from "lucide-react";
 
 // Add Message type
 type Message = {
@@ -43,7 +52,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   //customLog("NavBar Notifications:", notifications);
   const notificationCount = notifications.filter((n) => !n.is_read).length;
 
-  (notificationCount && true);
+  notificationCount && true;
 
   const navigate = useNavigate();
 
@@ -264,33 +273,33 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
     },
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // const scrollToBottom = () => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // };
 
-  const getGlobalChatMessages = async () => {
-    try {
-      setIsMessagesLoading(true);
-      const response = await fetch(`${baseUrl}/messages/global`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch messages");
-      }
-      const data = await response.json();
-      setMessages(data);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setIsMessagesLoading(false);
-    }
-  };
+  // const getGlobalChatMessages = async () => {
+  //   try {
+  //     setIsMessagesLoading(true);
+  //     const response = await fetch(`${baseUrl}/messages/global`);
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch messages");
+  //     }
+  //     const data = await response.json();
+  //     setMessages(data);
+  //   } catch (error) {
+  //     console.error("Error fetching messages:", error);
+  //   } finally {
+  //     setIsMessagesLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    getGlobalChatMessages();
-  }, []);
+  // useEffect(() => {
+  //   getGlobalChatMessages();
+  // }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   const handleSendMessage = () => {
     if (currentMessage.trim()) {
@@ -577,7 +586,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   {/* Profile Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => navigate('/profile')}
+                      onClick={() => setIsProfileOpen(!isProfileOpen)}
                       className="flex items-center space-x-3 focus:outline-none"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-[0px]">
@@ -621,100 +630,101 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
 
                     {/* Dropdown Menu */}
                     {isProfileOpen && (
-                      <div className="absolute z-20 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5">
-                        <Link
-                          to="/profile"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                        >
-                          <svg
-                            className="mr-3 h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
-                          View Profile
-                        </Link>
-                        {/* <a
-                          href="/avatar"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                        >
-                          <svg
-                            className="mr-3 h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                          Edit Avatar
-                        </a> */}
-                        {/* <a
-                          href="/settings"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                        >
-                          <svg
-                            className="mr-3 h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          Settings
-                        </a> */}
-                        {/* <button
-                          onClick={() => setIsDarkMode(!isDarkMode)}
-                          className="w-full flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                        >
-                          <svg
-                            className="mr-3 h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d={
-                                isDarkMode
-                                  ? "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                                  : "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                              }
-                            />
-                          </svg>
-                          {isDarkMode ? "Light Mode" : "Dark Mode"}
-                        </button> */}
-                        <div className="border-t border-gray-700">
+                      <div
+                        className={`md:absolute md:top-full md:right-0 md:mt-3 md:w-72 md:rounded-2xl md:shadow-2xl fixed bottom-0 left-0 right-0 h-3/4 w-full rounded-t-3xl shadow-2xl py-6 bg-gray-800 md:border md:border-gray-700 ring-1 ring-black ring-opacity-5 md:z-20 z-50 overflow-y-auto transition-transform duration-300 ease-in-out ${isProfileOpen ? "translate-y-0" : "translate-y-full md:translate-y-0"}`}
+                      >
+                        <div className="md:hidden flex justify-between items-center px-6 mb-5">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
+                              Profile menu
+                            </p>
+                            <h3 className="text-lg font-semibold text-white">
+                              Your account
+                            </h3>
+                          </div>
                           <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="text-gray-400 hover:text-white"
                           >
                             <svg
-                              className="mr-3 h-5 w-5 text-red-400"
+                              className="h-6 w-6"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 px-6 py-3 rounded-xl text-base text-gray-100 hover:bg-gray-800 transition-colors"
+                        >
+                          <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500">
+                            {user?.image_url ? (
+                              <img
+                                src={user.image_url}
+                                alt="Profile"
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full bg-gray-700 flex items-center justify-center text-sm text-white">
+                                {user?.username?.charAt(0) ?? "U"}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-white">
+                              View Profile
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Manage your profile
+                            </p>
+                          </div>
+                        </Link>
+                        <div className="mt-3 border-t border-gray-700"></div>
+                        <Link
+                          to="/settings"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 px-6 py-3 text-base text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                        >
+                          <Settings className="h-5 w-5 text-gray-400" />
+                          <div>
+                            <p className="font-medium">Settings</p>
+                            <p className="text-xs text-gray-500">
+                              Account preferences
+                            </p>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/settings#appearance"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 px-6 py-3 text-base text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                        >
+                          <Sun className="h-5 w-5 text-yellow-400" />
+                          <div>
+                            <p className="font-medium">Appearance</p>
+                            <p className="text-xs text-gray-500">
+                              Theme and display mode
+                            </p>
+                          </div>
+                        </Link>
+                        <div className="mt-4 border-t border-gray-700 pt-4">
+                          <button
+                            onClick={() => {
+                              handleLogout();
+                              setIsProfileOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-6 py-3 rounded-xl text-base text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors"
+                          >
+                            <svg
+                              className="h-6 w-6"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
