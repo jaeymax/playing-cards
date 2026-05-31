@@ -223,7 +223,7 @@ const PlayWithFriend = () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]);
 
   useEffect(() => {
     if (!user) return;
@@ -381,7 +381,7 @@ const PlayWithFriend = () => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [firstOpponent, secondOpponent, thirdOpponent, soundOn]
+    [firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]
   );
 
   const shuffledDeckCallback = (cards: any) => {

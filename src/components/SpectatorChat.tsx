@@ -66,7 +66,7 @@ const SpectatorChat = ({
   return (
     <div className="bg-slate-900/40 backdrop-blur-m border-t border-blue-400/20 px-4 py-4 lg:px-8 lg:py-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-white text-lg font-bold mb-3">Spectator Chat</h2>
+        <h2 className="text-white text-lg font-bold mb-3">Chat</h2>
 
         {/* Messages Container */}
         <div

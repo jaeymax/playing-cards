@@ -173,7 +173,7 @@ const PlayVsComputer = () => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]
   );
 
   const shuffledDeckCallback = useCallback((cards: any) => {
@@ -220,7 +220,7 @@ const PlayVsComputer = () => {
       socket?.off("dealtCards", dealtCardsCallback);
       socket?.off("shuffledDeck", shuffledDeckCallback);
     };
-  }, [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
+  }, [me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]);
 
   useEffect(() => {
     if (game) {

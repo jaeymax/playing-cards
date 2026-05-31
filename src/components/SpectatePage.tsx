@@ -226,7 +226,7 @@ const SpectatePage = () => {
       socket?.off("dealtCards", handleDealtCards);
       socket?.off("shuffledDeck", handleShuffledDeck);
     };
-  }, [socket, playerOne, playerTwo, playerThree, playerFour, soundOn]);
+  }, [socket, playerOne, playerTwo, playerThree, playerFour, soundOn, isShuffling, isDealing]);
 
   const handleConnect = () => {
     socket?.emit("join-room", code);
@@ -351,7 +351,7 @@ const SpectatePage = () => {
         setIsDealing
       );
     },
-    [playerTwo, playerThree, playerFour]
+    [playerTwo, playerThree, playerFour, isShuffling, isDealing, soundOn]
   );
 
   const handleShuffledDeck = (cards: any) => {

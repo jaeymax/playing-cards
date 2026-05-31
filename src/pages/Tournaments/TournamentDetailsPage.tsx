@@ -204,6 +204,18 @@ const TournamentDetailsPage: React.FC = () => {
       if (!user) return;
       if (!socket) return;
       if (!tournamentLobbyData) return;
+      if(!id)return;
+
+      socket.on("connect", () => {
+       // alert("Socket connected, joining tournament room");
+        socket.emit("joinTournamentRoom", {
+        tournamentId: id,
+        userId: user?.id,
+        gameCode: extractGameCodeFromTournamentData(tournamentLobbyData),
+      });
+      });
+
+
       socket.emit("joinTournamentRoom", {
         tournamentId: id,
         userId: user?.id,
@@ -224,7 +236,7 @@ const TournamentDetailsPage: React.FC = () => {
           gameCode: extractGameCodeFromTournamentData(tournamentLobbyData),
         });
       };
-    }, [user, socket, tournamentLobbyData]);
+    }, [user, socket, id, tournamentLobbyData]);
   
     const handleTournamentEndedModalClose = () => {
       setShowTournamentEndedModal(false);

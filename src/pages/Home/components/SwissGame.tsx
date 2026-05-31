@@ -30,10 +30,27 @@ import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 import GameNotFoundPage from "@/components/GameNotFoundPage";
 import GameForfeitedPage from "@/components/GameForfeitedPage";
 import GameEndedPage from "@/components/GameEndedPage";
+import { baseUrl } from "@/config/api";
+import BottomBar from "@/components/BottomBar";
+import ChatNotification from "@/components/ChatNotification";
 
 interface SwissGameProps {
   tournamentId: number;
 }
+
+
+interface Message {
+  user_id: number | undefined;
+  username: string | undefined;
+  game_code: string;
+  avatar: string | undefined;
+  message: string;
+  type: "text" | "audio";
+  timestamp: string;
+  mime_type?: string;
+  audio?: ArrayBuffer;
+}
+
 
 
 const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
@@ -82,6 +99,12 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
   const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
 
+    const [typingPlayer, setTypingPlayer] = useState<any>(null);
+      const [showChat, setShowChat] = useState(false);
+       const [unreadCount, setUnreadCount] = useState(0);
+       const [messages, setMessages] = useState<Message[]>([]);
+       const [notification, setNotification] = useState<Message | null>(null);
+
   const getPlayerByPosition = (player_position: number) => {
     return players.find((player) => player.position === player_position);
   };
@@ -91,6 +114,8 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
 
     return cards.find((card) => card.player_id === player?.id);
   };
+
+  (typingPlayer && messages && setTypingPlayer)
 
   //customLog('players', players);
 
@@ -262,26 +287,26 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
   useEffect(() => {
     if (!user) return;
 
-    // const fetchMessages = async () => {
-    //   try {
-    //     const response = await fetch(`${baseUrl}/messages/games/${code}`);
-    //     if (!response.ok) throw new Error("Failed to fetch messages");
-    //     const data = await response.json();
-    //     setMessages(data);
-    //   } catch (error) {
-    //     console.error("Error fetching messages:", error);
-    //   }
-    // };
-    // fetchMessages();
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/messages/games/${code}`);
+        if (!response.ok) throw new Error("Failed to fetch messages");
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
 
     socket?.on("connect", handleConnect);
     socket?.on("gameData", getGameDataCallback);
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
-    //socket?.on("chatMessage", chatMessageCallback);
+      socket?.on("chatMessage", chatMessageCallback);
 
-    //socket?.on("voiceMessage", voiceMessageCallback);
+      socket?.on("voiceMessage", voiceMessageCallback);
 
     if (socket?.connected) {
       handleConnect();
@@ -293,8 +318,8 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("connect", handleConnect);
       socket?.off("game-not-found", handleGameNotFound);
-      //socket?.off("chatMessage", chatMessageCallback);
-      //socket?.off("voiceMessage", voiceMessageCallback);
+      socket?.off("chatMessage", chatMessageCallback);
+      socket?.off("voiceMessage", voiceMessageCallback);
     };
   }, [user, code, socket]);
 
@@ -306,7 +331,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]);
 
   useEffect(() => {
     if (game) {
@@ -352,6 +377,28 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
 
     return () => clearInterval(interval);
   }, [turn_ends_at, matchForfeiter]);
+
+
+  const chatMessageCallback = (message: Message) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+    console.log("Received chat message:", message);
+  };
+
+  const voiceMessageCallback = (message: any) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+
+    console.log("Received voice message:", message);
+  };
 
   const turnStartedCallback = (data: {
     current_turn_user_id: number;
@@ -471,7 +518,7 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]
   );
 
   if(gameNotFound){
@@ -489,6 +536,13 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
+       {notification && !showChat && (
+        <ChatNotification
+          message={notification}
+          onClose={() => setNotification(null)}
+          onClick={() => setShowChat(true)}
+        />
+      )}
       <div className="min-h-screen relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
         {remainingSeconds > 0 && game?.current_turn_user_id !== user?.id && (
           <TimerBar
@@ -662,6 +716,22 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
       </div>
+
+      <BottomBar
+        unreadCount={unreadCount}
+        showChat={showChat}
+        onToggleChat={() => {
+          setShowChat(!showChat);
+          setUnreadCount(0);
+        }}
+        socket={socket}
+        gameCode={code}
+        setSoundOn={setSoundOn}
+        soundOn={soundOn}
+        onLeaveRoom={()=>{}}
+        setMessages={setMessages}
+      />
+
       <WinnerModal
         isOpen={gameEnded}
         onClose={() => setGameEnded(false)}

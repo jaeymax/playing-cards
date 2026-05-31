@@ -30,6 +30,23 @@ import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 import GameForfeitedPage from "@/components/GameForfeitedPage";
 import GameEndedPage from "@/components/GameEndedPage";
 import GameNotFoundPage from "@/components/GameNotFoundPage";
+import GameChat from "@/components/GameChat";
+import BottomBar from "@/components/BottomBar";
+import { baseUrl } from "@/config/api";
+import ChatNotification from "@/components/ChatNotification";
+
+interface Message {
+  user_id: number | undefined;
+  username: string | undefined;
+  game_code: string;
+  avatar: string | undefined;
+  message: string;
+  type: "text" | "audio";
+  timestamp: string;
+  mime_type?: string;
+  audio?: ArrayBuffer;
+}
+
 
 // interface Message {
 //   user_id: number | undefined;
@@ -80,6 +97,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
   const [processingForfeit, setProcessingForfeit] = useState<any>(false);
   const [soundOn, setSoundOn] = useState(true);
 
+
   gameNotFound && true && setSoundOn;
 
   // Refs for card positions
@@ -92,6 +110,12 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
   const opponentOnePlayAreaRef = useRef<HTMLDivElement>(null);
   const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
   const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
+
+   const [typingPlayer, setTypingPlayer] = useState<any>(null);
+    const [showChat, setShowChat] = useState(false);
+     const [unreadCount, setUnreadCount] = useState(0);
+     const [messages, setMessages] = useState<Message[]>([]);
+     const [notification, setNotification] = useState<Message | null>(null);
 
   const getPlayerByPosition = (player_position: number) => {
     return players.find((player) => player.position === player_position);
@@ -275,26 +299,25 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
   useEffect(() => {
     if (!user) return;
 
-    // const fetchMessages = async () => {
-    //   try {
-    //     const response = await fetch(`${baseUrl}/messages/games/${code}`);
-    //     if (!response.ok) throw new Error("Failed to fetch messages");
-    //     const data = await response.json();
-    //     setMessages(data);
-    //   } catch (error) {
-    //     console.error("Error fetching messages:", error);
-    //   }
-    // };
-    // fetchMessages();
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/messages/games/${code}`);
+        if (!response.ok) throw new Error("Failed to fetch messages");
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
 
     socket?.on("connect", handleConnect);
     socket?.on("gameData", getGameDataCallback);
     socket?.on("updatedGameData", getUpdatedGameData);
     socket?.on("game-not-found", handleGameNotFound);
     socket?.on("gameMessage", gameMessageCallback);
-    //socket?.on("chatMessage", chatMessageCallback);
-
-    //socket?.on("voiceMessage", voiceMessageCallback);
+    socket?.on("chatMessage", chatMessageCallback);
+    socket?.on("voiceMessage", voiceMessageCallback);
 
     if (socket?.connected) {
       handleConnect();
@@ -306,8 +329,8 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("connect", handleConnect);
       socket?.off("game-not-found", handleGameNotFound);
-      //socket?.off("chatMessage", chatMessageCallback);
-      //socket?.off("voiceMessage", voiceMessageCallback);
+      socket?.off("chatMessage", chatMessageCallback);
+      socket?.off("voiceMessage", voiceMessageCallback);
     };
   }, [user, code, socket]);
 
@@ -319,7 +342,7 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn]);
+  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]);
 
   useEffect(() => {
     if (game) {
@@ -365,6 +388,31 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
 
     return () => clearInterval(interval);
   }, [turn_ends_at, matchForfeiter]);
+
+
+  const chatMessageCallback = (message: Message) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+    console.log("Received chat message:", message);
+  };
+
+  console.log("Messages:", messages);
+
+  const voiceMessageCallback = (message: any) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+
+    console.log("Received voice message:", message);
+  };
+
 
   const turnStartedCallback = (data: {
     current_turn_user_id: number;
@@ -484,10 +532,29 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn]
+    [me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]
   );
 
   //customLog('losing player', losingPlayer);
+  const handleSendMessage = (message: string) => {
+      logEvent(analytics, "message_sent", {
+        gameCode: code,
+        messageLength: message.length,
+      });
+      const messageData: Message = {
+        user_id: user?.id,
+        game_code: code as string,
+        username: user?.username,
+        avatar: user?.image_url,
+        type: "text",
+        message: message,
+        timestamp: new Date().toISOString(),
+      };
+  
+      setMessages((prev) => [...prev, messageData]);
+      socket?.emit("sendMessage", messageData);
+    };
+  
 
 
   if(gameNotFound){
@@ -504,6 +571,15 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
+
+      {notification && !showChat && (
+        <ChatNotification
+          message={notification}
+          onClose={() => setNotification(null)}
+          onClick={() => setShowChat(true)}
+        />
+      )}
+
       <div className="min-h-screen relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
         {remainingSeconds > 0 && game?.current_turn_user_id !== user?.id && (
           <TimerBar
@@ -676,7 +752,35 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
           points={me?.score}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
+
+          <GameChat
+          socket={socket}
+          gameCode={code || ""}
+          currentUser={user}
+          typingPlayer={typingPlayer}
+          setTypingPlayer={setTypingPlayer}
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+        />
+
       </div>
+
+      <BottomBar
+        unreadCount={unreadCount}
+        showChat={showChat}
+        onToggleChat={() => {
+          setShowChat(!showChat);
+          setUnreadCount(0);
+        }}
+        socket={socket}
+        gameCode={code}
+        setSoundOn={setSoundOn}
+        soundOn={soundOn}
+        onLeaveRoom={()=>{}}
+        setMessages={setMessages}
+      />
       <WinnerModal
         isOpen={gameEnded}
         onClose={() => setGameEnded(false)}

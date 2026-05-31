@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatNotificationProps {
   message: {
     username?: string;
+    avatar?: string;
     message: string;
     type?: "text" | "audio";
   };
@@ -27,6 +29,7 @@ const ChatNotification = ({
   }, [onClose]);
 
   const isAudio = message.type === "audio";
+  //const initials = message.username?.trim().charAt(0).toUpperCase() || "?";
 
   const handleClick = () => {
     setIsClosing(true);
@@ -77,6 +80,19 @@ const ChatNotification = ({
         `}
       </style>
       <div className="flex items-start gap-3">
+        <Avatar className="h-8 w-8">
+          {message.avatar ? (
+            <AvatarImage
+              src={message.avatar}
+              alt={`${message.username ?? "User"} avatar`}
+            />
+          ) : (
+            <AvatarImage
+              src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+              alt={`${message.username ?? "User"} avatar`}
+            />
+          )}
+        </Avatar>
         <div className="flex-1">
           <p className="font-semibold text-sm text-blue-400">
             {message.username}

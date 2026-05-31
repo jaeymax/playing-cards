@@ -6,6 +6,7 @@ import {
   CheckIcon,
   SpeakerWaveIcon,
     SpeakerXMarkIcon,
+    ShareIcon,
 } from "@heroicons/react/24/solid";
 import { useAppContext } from "@/contexts/AppContext";
 
@@ -16,6 +17,11 @@ interface BottomBarProps {
   onLeaveRoom: () => void;
   onRecord?: () => void;
   setSoundOn: React.Dispatch<React.SetStateAction<boolean>>;
+  showChatIcon?: boolean;
+  showMicIcon?: boolean;
+  showShareIcon?: boolean;
+  showLeaveIcon?: boolean;
+  showSoundIcon?: boolean;
   soundOn: boolean;
   socket?: any;
   gameCode?: string;
@@ -28,6 +34,11 @@ const BottomBar: React.FC<BottomBarProps> = ({
   showChat,
   onToggleChat,
   onLeaveRoom,
+  showChatIcon = true,
+  showMicIcon = true,
+  showShareIcon = true,
+  showLeaveIcon = true,
+  showSoundIcon = true,
   socket,
     setSoundOn,
     soundOn,
@@ -126,10 +137,32 @@ const BottomBar: React.FC<BottomBarProps> = ({
     }
   };
 
+  const onShare = () => {
+    const shareData = {
+      title: "Join my card game!",
+      text: "I'm playing a card game. Join me!",
+      url: `${window.location.href}/spectate`,
+    };
+
+    if (navigator.share) {
+      navigator
+        .share(shareData)
+        .then(() => console.log("Game link shared successfully"))
+      .catch((err) => console.error("Error sharing:", err));
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard
+        .writeText(shareData.url)
+        .then(() => alert("Game link copied to clipboard!"))
+        .catch((err) => console.error("Error copying to clipboard:", err));
+    }
+  };
+
   return (
     <div className="fixed bottom-20 left- right-1 z-[99999] px-  borde">
       <div className="w-full h-full bg-gray-900/0 backdrop-blur- borde border-gray-700/40 rounded-sm shadw-2xl flex flex-col gap-5 items-center justify-around py-1 md:py-2 px-2">
          {/* --- Speaker Icon --- */}
+      {    showSoundIcon && (
         <button
           onClick={() => {
             // Toggle sound on/off
@@ -148,8 +181,28 @@ const BottomBar: React.FC<BottomBarProps> = ({
            Sound
           </span>
         </button>
+      )
+      }
+
+        {/* Share Icon */}
+
+        {
+          showShareIcon && (
+            <button
+              onClick={onShare}
+              className="flex flex-col items-center justify-center gap-1"
+            >
+              <ShareIcon className="h-7 w-7 hover:text-gray-500 text-white opacity-90 hover:opacity-100 transition" />
+              <span className="text-xs text-gray-300">
+                Share
+              </span>
+            </button>
+          )
+        }
 
         {/* --- Chat Icon --- */}
+        {
+          showChatIcon && (
         <button
           onClick={onToggleChat}
           className="relative flex flex-col items-center justify-center gap-1"
@@ -167,8 +220,12 @@ const BottomBar: React.FC<BottomBarProps> = ({
             {showChat ? "Chat" : "Chat"}
           </span>
         </button>
+          )
+        }
 
         {/* --- Microphone Icon --- */}
+        {
+          showMicIcon && (
         <button
           onClick={toggleRecording}
           className="flex flex-col items-center justify-center gap-1"
@@ -191,8 +248,12 @@ const BottomBar: React.FC<BottomBarProps> = ({
             {recording ? `Recording ${time}s` : audioSent ? "Sent!" : "Mic"}
           </span>
         </button>
+          )
+        }
 
         {/* --- Leave Room Icon --- */}
+        {
+          showLeaveIcon && (
         <button
           onClick={onLeaveRoom}
           disabled={isLoading}
@@ -203,6 +264,8 @@ const BottomBar: React.FC<BottomBarProps> = ({
             {isLoading ? "Leaving..." : "Leave"}
           </span>
         </button>
+          )
+        }
       </div>
       {/* {audioURL && (
         <div className="mt-3">
