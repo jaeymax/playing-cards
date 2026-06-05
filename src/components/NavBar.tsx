@@ -386,7 +386,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   return (
     <>
       <nav className="bg-gray-800 border-b z-50 border-gray-700">
-        <div className="max-w-[1920px] mx-auto px-4 borde">
+        <div className="mx-auto px-4 borde">
           <div className="flex justify-between items-center h-16">
             {/* Left side - adjusted with additional spacing */}
             <div className="flex items-center gap-5 borde">
@@ -631,7 +631,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                     {/* Dropdown Menu */}
                     {isProfileOpen && (
                       <div
-                        className={`md:absolute md:top-full md:right-0 md:mt-3 md:w-72 md:rounded-2xl md:shadow-2xl fixed bottom-0 left-0 right-0 h-3/4 w-full rounded-t-3xl shadow-2xl py-6 bg-gray-800 md:border md:border-gray-700 ring-1 ring-black ring-opacity-5 md:z-20 z-50 overflow-y-auto transition-transform duration-300 ease-in-out ${isProfileOpen ? "translate-y-0" : "translate-y-full md:translate-y-0"}`}
+                        className={`fixed bottom-0 left- right-0 h-3/5 w-full rounded-t-2xl shadow-2xl py-6 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5 z-50 overflow-y-auto transition-transform duration-3000 ease-in-out md:absolute md:top-full md:right-0 md:mt- md:w-72 md:h-[300px] md:rounded-lg md:shadow-xl md:border md:border-gray-700 md:z-20 ${isProfileOpen ? "translate-y-0" : "translate-y-full md:translate-y-0"}`}
                       >
                         <div className="md:hidden flex justify-between items-center px-6 mb-5">
                           <div>
@@ -642,7 +642,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                               Your account
                             </h3>
                           </div>
-                          <button
+                          {/* <button
                             onClick={() => setIsProfileOpen(false)}
                             className="text-gray-400 hover:text-white"
                           >
@@ -659,7 +659,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                                 d="M6 18L18 6M6 6l12 12"
                               />
                             </svg>
-                          </button>
+                          </button> */}
                         </div>
                         <Link
                           to="/profile"
@@ -667,17 +667,13 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                           className="flex items-center gap-3 px-6 py-3 rounded-xl text-base text-gray-100 hover:bg-gray-800 transition-colors"
                         >
                           <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500">
-                            {user?.image_url ? (
+                            {
                               <img
-                                src={user.image_url}
+                                src={user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
                                 alt="Profile"
                                 className="h-full w-full object-cover"
                               />
-                            ) : (
-                              <div className="h-full w-full bg-gray-700 flex items-center justify-center text-sm text-white">
-                                {user?.username?.charAt(0) ?? "U"}
-                              </div>
-                            )}
+                }
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-white">
@@ -688,7 +684,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                             </p>
                           </div>
                         </Link>
-                        <div className="mt-3 border-t border-gray-700"></div>
+                        <div className="mt-3 b order-t border-gray-700"></div>
                         <Link
                           to="/settings"
                           onClick={() => setIsProfileOpen(false)}
@@ -702,7 +698,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                             </p>
                           </div>
                         </Link>
-                        <Link
+                        {/* <Link
                           to="/settings#appearance"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 px-6 py-3 text-base text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
@@ -714,7 +710,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                               Theme and display mode
                             </p>
                           </div>
-                        </Link>
+                        </Link> */}
                         <div className="mt-4 border-t border-gray-700 pt-4">
                           <button
                             onClick={() => {

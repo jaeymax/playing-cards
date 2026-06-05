@@ -20,12 +20,23 @@ interface User {
   tournaments_played:number;
   tournaments_won:number;
   balance:string;
+  global_rank:number;
+  max_winning_streak:number;
+  current_winning_streak:number;
+  podium_finishes:number;
+  country:string;
   rank:number;
   is_guest:boolean;
   rating:number;
+  peak_rating:number;
+  next_rank:string;
+  next_rank_rating:number;
   location:string;
   created_at:string;
   updated_at:string;
+  gold_medals:number,
+  silver_medals:number;
+  bronze_medals:number;
   id:number;
   role:string;
   bio:string;
