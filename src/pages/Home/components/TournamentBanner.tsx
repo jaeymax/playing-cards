@@ -79,27 +79,27 @@ const useCountdown = (targetDate: string) => {
   return { timeLeft, isExpired };
 };
 
-const TournamentSkeleton: React.FC = () => {
-  return (
-    <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1">
-      <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="w-full lg:w-auto">
-            <div className="h-6 bg-gray-700 rounded mb-2 w-40 animate-pulse"></div>
-            <div className="h-4 bg-gray-700 rounded w-60 animate-pulse"></div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-            <div className="text-center w-full sm:w-auto">
-              <div className="h-8 bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
-              <div className="h-3 bg-gray-700 rounded w-24 animate-pulse"></div>
-            </div>
-            <div className="h-10 bg-gray-700 rounded w-32 animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// const TournamentSkeleton: React.FC = () => {
+//   return (
+//     <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1">
+//       <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+//         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+//           <div className="w-full lg:w-auto">
+//             <div className="h-6 bg-gray-700 rounded mb-2 w-40 animate-pulse"></div>
+//             <div className="h-4 bg-gray-700 rounded w-60 animate-pulse"></div>
+//           </div>
+//           <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+//             <div className="text-center w-full sm:w-auto">
+//               <div className="h-8 bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
+//               <div className="h-3 bg-gray-700 rounded w-24 animate-pulse"></div>
+//             </div>
+//             <div className="h-10 bg-gray-700 rounded w-32 animate-pulse"></div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 const TournamentBanner: React.FC = () => {
   const navigate = useNavigate();
@@ -134,6 +134,8 @@ const TournamentBanner: React.FC = () => {
           "0"
         )}:${String(seconds).padStart(2, "0")}`;
   };
+
+  (isLoading && true)
 
   const handleJoinTournament = () => {
     if(tournamentData?.status === "completed"){
@@ -181,8 +183,12 @@ const TournamentBanner: React.FC = () => {
     navigate(`/tournaments/${tournamentData?.id}`);
   };
 
-  if (isLoading) {
-    return <TournamentSkeleton />;
+  // if (isLoading) {
+  //   return <TournamentSkeleton />;
+  // }
+
+  if(!tournamentData){
+    return;
   }
 
   return (

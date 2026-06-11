@@ -33,6 +33,7 @@ import GameEndedPage from "@/components/GameEndedPage";
 import { baseUrl } from "@/config/api";
 import BottomBar from "@/components/BottomBar";
 import ChatNotification from "@/components/ChatNotification";
+import GameChat from "@/components/GameChat";
 
 interface SwissGameProps {
   tournamentId: number;
@@ -452,6 +453,25 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
     console.log("losing player in gameovercallback", losingPlayer);
   };
 
+  const handleSendMessage = (message: string) => {
+        logEvent(analytics, "message_sent", {
+          gameCode: code,
+          messageLength: message.length,
+        });
+        const messageData: Message = {
+          user_id: user?.id,
+          game_code: code as string,
+          username: user?.username,
+          avatar: user?.image_url,
+          type: "text",
+          message: message,
+          timestamp: new Date().toISOString(),
+        };
+    
+        setMessages((prev) => [...prev, messageData]);
+        socket?.emit("sendMessage", messageData);
+      };
+
   const playedCardCallback = ({
     card_id,
     player_id,
@@ -715,6 +735,19 @@ const SwissGame: React.FC<SwissGameProps> = ({tournamentId}) => {
           points={me?.score}
           styles="left-1/2 -translate-x-1/2 bottom-1"
         />
+
+          <GameChat
+          socket={socket}
+          gameCode={code || ""}
+          currentUser={user}
+          typingPlayer={typingPlayer}
+          setTypingPlayer={setTypingPlayer}
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+        />
+
       </div>
 
       <BottomBar
