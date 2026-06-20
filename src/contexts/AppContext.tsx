@@ -25,12 +25,15 @@ interface User {
   current_winning_streak:number;
   podium_finishes:number;
   country:string;
-  rank:number;
+  next_rank:string;
+  current_rank_min_rating:number;
+  rank_color:string;
+  rank:string;
+  rating_to_next_rank:number;
+  next_rank_min_rating:number;
   is_guest:boolean;
   rating:number;
   peak_rating:number;
-  next_rank:string;
-  next_rank_rating:number;
   location:string;
   created_at:string;
   updated_at:string;

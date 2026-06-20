@@ -14,6 +14,7 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+import RatingGraph from "./components/RatingGraph";
 
 type ProfileTab =
   | "overview"
@@ -276,7 +277,18 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const ratingProgress = ((PLAYER.rating - 2700) / (3000 - 2700)) * 100;
+ // const ratingProgress = ((PLAYER.rating - 2700) / (3000 - 2700)) * 100;
+ const getRatingProgress = () => {
+  if(!user?.is_rated) return 0;
+  const progress = ((user?.rating - user?.current_rank_min_rating) / (user?.next_rank_min_rating - user?.current_rank_min_rating)) * 100;
+  return progress;
+ }
+
+  // const ratingProgress = user?.is_rated
+  //   ? ((user.next_rank_min_rating - user.rating)  /
+  //       (user.rating_to_next_rank - 10000)) *
+  //     100
+  //   : 0;
   const seasonDelta = PLAYER.rating - PLAYER.ratingHistory[0].rating;
 
   const getTournamentWinRate = () => {
@@ -339,12 +351,12 @@ const ProfilePage: React.FC = () => {
             <div className="flex-1">
               {/* Username + Rank */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 text-center sm:text-left">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 break-all">
+                <h1 style={{color: user?.rank_color}} className="text-2xl sm:text-3xl font-bold text-gray-100 break-all">
                   {user?.username}
                 </h1>
 
-                <span className="self-center sm:self-auto bg-orange-500/15 border border-orange-500/35 text-orange-400 text-xs font-semibold px-2.5 py-1 rounded-full w-fit">
-                  👑 {PLAYER.rank || "Unranked"}
+                <span style={{color: user?.rank_color, borderColor: user?.rank_color}} className="self-center sm:self-auto b-orange-500/15 border border-orange-500/35 text-orange-400 text-xs font-semibold px-2.5 py-1 rounded-full w-fit">
+                 {user?.rank || "Unranked"}
                 </span>
               </div>
 
@@ -371,6 +383,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Actions */}
+              {!user?.is_guest && (
               <div className="mt-4 flex justify-center sm:justify-start">
                 <button
                   onClick={handleEditClick}
@@ -379,27 +392,32 @@ const ProfilePage: React.FC = () => {
                   Edit Profile
                 </button>
               </div>
+              )}
 
               {/* Rating Progress */}
+              {
+                user?.is_rated && (
               <div className="mt-5">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
                   <span className="text-xs text-gray-400">
                     {user?.rating.toLocaleString()} /{" "}
-                    {PLAYER.nextRankRating.toLocaleString()} → {PLAYER.nextRank}
+                    {user?.next_rank_min_rating?.toLocaleString()} → {user?.next_rank}
                   </span>
 
                   <span className="text-xs font-semibold text-orange-500">
-                    {PLAYER.nextRankRating - PLAYER.rating} pts to go
+                    {user?.rating_to_next_rank} pts to go
                   </span>
                 </div>
 
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden w-full sm:max-w-md">
                   <div
                     className="h-full bg-gradient-to-r from-purple-600 to-orange-500 rounded-full transition-all duration-1000"
-                    style={{ width: `${ratingProgress}%` }}
+                    style={{ width: `${getRatingProgress()}%` }}
                   />
                 </div>
               </div>
+                )
+              }
 
               {/* Mobile Rating Block */}
               <div className="mt-5 sm:hidden text-center">
@@ -407,7 +425,7 @@ const ProfilePage: React.FC = () => {
                   RATING
                 </div>
 
-                <div className="text-4xl font-bold font-serif text-gray-100 mt-1">
+                <div className="text-4xl font-bold text-gray-100 mt-1">
                   <AnimatedNumber
                     value={user?.rating as number}
                     duration={1400}
@@ -427,13 +445,21 @@ const ProfilePage: React.FC = () => {
                 RATING
               </div>
 
-              <div className="text-4xl font-bold font-serif text-gray-100 mt-1">
+              {
+                user?.is_rated ? (
+              <div className="text-4xl font-bold text-gray-100 mt-1">
                 <AnimatedNumber
                   value={user?.rating as number}
                   duration={1400}
                   format={(v) => v.toLocaleString()}
                 />
-              </div>
+              </div  >
+                ):(
+                  <p className="text-3xl font-bold text-gray-100 mt-1" >
+                    Unrated
+                  </p>
+                )
+              }
 
               <div className="text-xs text-gray-500 mt-1">
                 Peak {user?.peak_rating?.toLocaleString()}
@@ -522,7 +548,7 @@ const ProfilePage: React.FC = () => {
               emoji="🥇"
               count={(user?.gold_medals as number) || 0}
               label="Gold"
-              bgClass="bg-yellow-500 bg-opacity-10"
+              bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-yellow-400"
             />
             <MedalBadge
@@ -536,7 +562,7 @@ const ProfilePage: React.FC = () => {
               emoji="🥉"
               count={(user?.bronze_medals as number) || 0}
               label="Bronze"
-              bgClass="bg-orange-700 bg-opacity-10"
+              bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-orange-400"
             />
             <MedalBadge
@@ -547,7 +573,7 @@ const ProfilePage: React.FC = () => {
                 (user?.bronze_medals || 0)
               }
               label="Total"
-              bgClass="bg-purple-500 bg-opacity-10"
+              bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-purple-300"
             />
           </div>
@@ -561,7 +587,7 @@ const ProfilePage: React.FC = () => {
             </h2>
             <div className="flex-1 h-px bg-gray-700" />
             <span className="text-xs font-semibold text-green-400 whitespace-nowrap">
-              ▲ +{seasonDelta} this season
+              ▲ +{seasonDelta} since last tournament
             </span>
           </div>
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
@@ -584,7 +610,7 @@ const ProfilePage: React.FC = () => {
                   tick={{ fill: "#7c6e9c", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => v.toLocaleString()}
+                  
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
@@ -610,6 +636,8 @@ const ProfilePage: React.FC = () => {
                 />
               </AreaChart>
             </ResponsiveContainer>
+
+
             <div className="flex gap-4 mt-4 px-1">
               <span className="flex items-center gap-2 text-xs text-gray-400">
                 <span className="w-2 h-2 rounded-full bg-yellow-400" />
@@ -623,8 +651,20 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
+              <RatingGraph
+  history={[
+    { date: "Jan", rating: 1180 },
+    { date: "Feb", rating: 1230 },
+    { date: "Mar", rating: 1390 },
+    { date: "Apr", rating: 1450 },
+    { date: "May", rating: 1620 },
+    { date: "Jun", rating: 1810 },
+    { date: "Jul", rating: 1960 },
+    { date: "Aug", rating: 2140 },
+  ]}
+/>
         {/* Skills and Facts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-6">
           {/* Skills */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
             <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">
