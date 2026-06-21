@@ -32,6 +32,7 @@ import AnnouncementsPage from "./pages/Announcements/AnnouncementsPage";
 import RecentActivitiesPage from "./pages/Activities/RecentActivitiesPage";
 import ConnectionStatusIndicator from "./components/ConnectionStatusIndicator";
 import GameModal from "./components/GameModal";
+import { registerSW } from 'virtual:pwa-register'
 
 
 //Import Mixpanel SDK
@@ -53,7 +54,15 @@ mixpanel.init(import.meta.env.VITE_APP_MIXPANEL_TOKEN, {
   record_sessions_percent: 100,
 })
 
+registerSW({
+  onNeedRefresh() {
+    console.log("New update available")
+  },
 
+  onOfflineReady() {
+    console.log("App ready offline")
+  }
+})
 
 
 function App() {

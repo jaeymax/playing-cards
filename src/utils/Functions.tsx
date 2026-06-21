@@ -927,6 +927,11 @@ export function customLog(...args: any[]) {
   }
 }
 
+export function isPWA() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+  (window.navigator as any).standalone === true;
+}
+
 // export const getPlayerByPosition = (player_position: number, players) => {
 //   return players.find((player) => player.position === player_position);
 // };
