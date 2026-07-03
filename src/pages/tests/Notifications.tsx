@@ -104,7 +104,7 @@ const NotificationsPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
     } catch (error) {

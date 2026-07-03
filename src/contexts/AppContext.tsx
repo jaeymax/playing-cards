@@ -7,30 +7,36 @@ import React, {
 } from "react";
 
 import { baseUrl } from "@/config/api";
-import { authHeaders, customLog, getToken, removeToken } from "@/utils/Functions";
+import {
+  authHeaders,
+  customLog,
+  getToken,
+  removeToken,
+} from "@/utils/Functions";
 import mixpanel from "mixpanel-browser";
 
 interface User {
   username: string;
   email: string;
   image_url: string;
-  games_played:number;
-  games_won:number;
-  is_rated:boolean;
-  tournaments_played:number;
-  tournaments_won:number;
-  balance:string;
-  rank:number;
-  is_guest:boolean;
-  rating:number;
-  location:string;
-  created_at:string;
-  updated_at:string;
-  id:number;
-  role:string;
-  bio:string;
-  phone:string;
-  dob:string;
+  games_played: number;
+  games_won: number;
+  is_rated: boolean;
+  tournaments_played: number;
+  tournaments_won: number;
+  balance: string;
+  rank: number;
+  is_guest: boolean;
+  notification_enabled: boolean;
+  rating: number;
+  location: string;
+  created_at: string;
+  updated_at: string;
+  id: number;
+  role: string;
+  bio: string;
+  phone: string;
+  dob: string;
 }
 
 interface AppState {
@@ -78,94 +84,101 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationsError, setNotificationsError] = useState<string|null>(null);
+  const [notificationsError, setNotificationsError] = useState<string | null>(
+    null,
+  );
   const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   customLog("User in context:", user);
 
   useEffect(() => {
-      if (!user) return;
-      // Simulate fetching notifications from an API
-      const fetchNotifications = async () => {
-        // Replace this with actual API call
-        setNotificationsLoading(true);
-        setNotificationsError(null);
-        try{
-          const fetchedNotifications = await fetch(`${baseUrl}/notifications/user/${user?.id}`,  {
+    if (!user) return;
+    // Simulate fetching notifications from an API
+    const fetchNotifications = async () => {
+      // Replace this with actual API call
+      setNotificationsLoading(true);
+      setNotificationsError(null);
+      console.log('user in fetch notifications', user);
+      try {
+        const fetchedNotifications = await fetch(
+          `${baseUrl}/notifications/user/${user?.id}`,
+          {
             method: "GET",
             headers: {
-              "Content-Type": "application/json", 
-              ...authHeaders()
+              "Content-Type": "application/json",
+              ...await authHeaders(),
             },
-          });
-          if(!fetchedNotifications.ok){
-              throw new Error(
-                fetchedNotifications.status === 500 ? "Network error. Please check your internet connection":"Failed to fetch notifications"
-              )
-          }
+          },
+        );
+        if (!fetchedNotifications.ok) {
+          throw new Error(
+            fetchedNotifications.status === 500
+              ? "Network error. Please check your internet connection"
+              : "Failed to fetch notifications",
+          );
+        }
 
         const data = await fetchedNotifications.json();
 
-          setNotifications(data);
-        }catch(err:any){
-            console.log(err, "Error fetching notifications");
-            setNotificationsError(err.message || "An error occured. Please try again")
-        }finally{
-          setNotificationsLoading(false);
-        }
-      };
+        setNotifications(data);
+      } catch (err: any) {
+        console.log(err, "Error fetching notifications");
+        setNotificationsError(
+          err.message || "An error occured. Please try again",
+        );
+      } finally {
+        setNotificationsLoading(false);
+      }
+    };
 
-  
-      fetchNotifications();
-    }, [user]);
+    fetchNotifications();
+  }, [user]);
 
-
-
-    
   useEffect(() => {
-    const accessToken = getToken();
-    
-    if (accessToken && !user) {
-      setIsLoading(true);
-      fetch(`${baseUrl}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => {
-          
-         // if (!response.ok) throw new Error("Failed to fetch user data");
+    const fetchCurrentUser = async () => {
+      const accessToken = await getToken();
 
-          if(response.status === 401 || response.status === 403){
-            removeToken();
-            throw new Error("Unauthorized");
-          }
-          return response.json();
+      console.log("Access token in AppContext:", accessToken);
+
+      if (accessToken && !user) {
+        setIsLoading(true);
+        fetch(`${baseUrl}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
         })
-        .then((userData) => {
-         
-          
-          setUser(userData);
-          mixpanel.identify(userData.id);
-          mixpanel.people.set({
-            $email: userData.email, // only if you have it
-            $created: new Date(userData.created_at), // only if you have it
-            username: userData.username,
-            games_played: userData.games_played,
-      
+          .then((response) => {
+            // if (!response.ok) throw new Error("Failed to fetch user data");
+
+            if (response.status === 401 || response.status === 403) {
+              removeToken();
+              throw new Error("Unauthorized");
+            }
+            return response.json();
+          })
+          .then((userData) => {
+            setUser(userData);
+            mixpanel.identify(userData.id);
+            mixpanel.people.set({
+              $email: userData.email, // only if you have it
+              $created: new Date(userData.created_at), // only if you have it
+              username: userData.username,
+              games_played: userData.games_played,
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+            // removeToken();
+            //sessionStorage.removeItem("accessToken"); // Clear invalid token
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-         // removeToken();
-          //sessionStorage.removeItem("accessToken"); // Clear invalid token
-        })
-        .finally(() => {
-          setIsLoading(false);
-          
-        });
-    }
+      }
+    };
+
+    fetchCurrentUser();
   }, [user]);
 
   const toggleSidebar = () => {
@@ -214,7 +227,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         notifications,
         setNotifications,
         notificationsError,
-        notificationsLoading
+        notificationsLoading,
       }}
     >
       {children}

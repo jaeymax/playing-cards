@@ -47,7 +47,7 @@ const useCountdown = (targetDate: string) => {
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   const [isExpired, setIsExpired] = useState(
-    !targetDate || new Date(targetDate).getTime() <= new Date().getTime()
+    !targetDate || new Date(targetDate).getTime() <= new Date().getTime(),
   );
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const useCountdown = (targetDate: string) => {
     const initial = calculateTimeLeft();
     setTimeLeft(initial);
     setIsExpired(
-      !targetDate || new Date(targetDate).getTime() <= new Date().getTime()
+      !targetDate || new Date(targetDate).getTime() <= new Date().getTime(),
     );
 
     const timer = setInterval(() => {
@@ -111,7 +111,7 @@ const TournamentBanner: React.FC = () => {
     useState(false);
 
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(
-    null
+    null,
   );
 
   const { user } = useAppContext();
@@ -119,7 +119,7 @@ const TournamentBanner: React.FC = () => {
   const { timeLeft, isExpired } = useCountdown(
     tournamentData?.registered
       ? tournamentData?.start_date || ""
-      : tournamentData?.registration_closing_date || ""
+      : tournamentData?.registration_closing_date || "",
   );
 
   const formatCountdown = () => {
@@ -127,26 +127,25 @@ const TournamentBanner: React.FC = () => {
     return days > 0
       ? `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(
           2,
-          "0"
+          "0",
         )}:${String(seconds).padStart(2, "0")}`
       : `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
           2,
-          "0"
+          "0",
         )}:${String(seconds).padStart(2, "0")}`;
   };
 
-  (isLoading && true)
+  isLoading && true;
 
   const handleJoinTournament = () => {
-    if(tournamentData?.status === "completed"){
+    if (tournamentData?.status === "completed") {
       navigate(`/tournaments/${tournamentData?.id}/?tab=standings`);
       return;
-    }
-    else if(tournamentData?.status === "ongoing"){
+    } else if (tournamentData?.status === "ongoing") {
       navigate(`/tournaments/${tournamentData?.id}/?tab=bracket`);
       return;
     }
-   return navigate(`/tournaments/${tournamentData?.id}`);
+    return navigate(`/tournaments/${tournamentData?.id}`);
   };
 
   const getTournamentDetails = async () => {
@@ -174,12 +173,15 @@ const TournamentBanner: React.FC = () => {
   };
 
   useEffect(() => {
-    if (getToken() && !user) return;
-    getTournamentDetails();
+    const fetchTournamentDetails = async () => {
+      if ((await getToken()) && !user) return;
+      getTournamentDetails();
+    };
+
+    fetchTournamentDetails();
   }, [user]);
 
   const handleRegistration = () => {
- 
     navigate(`/tournaments/${tournamentData?.id}`);
   };
 
@@ -187,7 +189,7 @@ const TournamentBanner: React.FC = () => {
   //   return <TournamentSkeleton />;
   // }
 
-  if(!tournamentData){
+  if (!tournamentData) {
     return;
   }
 
@@ -216,8 +218,8 @@ const TournamentBanner: React.FC = () => {
                       : "Tournament started"
                     : "Registration closed"
                   : tournamentData?.registered
-                  ? "Tournament starts in"
-                  : "Registration ends in"}
+                    ? "Tournament starts in"
+                    : "Registration ends in"}
               </div>
             </div>
             {!tournamentData?.registered ? (

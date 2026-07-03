@@ -164,7 +164,7 @@ const TournamentLobbyPage: React.FC = () => {
       setError(null);
       const response = await fetch(`${baseUrl}/tournaments/${id}/lobby`, {
         method: "GET",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
+        headers: { "Content-Type": "application/json", ...await authHeaders() },
       });
 
       if (!response.ok) {

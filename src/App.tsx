@@ -64,6 +64,10 @@ registerSW({
   }
 })
 
+if("serviceWorker" in navigator){
+  console.log('Service worker is supported');
+}
+
 
 function App() {
   const { overlay, user } = useAppContext();

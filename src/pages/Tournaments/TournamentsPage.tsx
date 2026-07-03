@@ -115,7 +115,7 @@ const TournamentsPage: React.FC = () => {
           method: "GET",
           headers:{
               "Content-Type": "application/json",
-              ...authHeaders()
+              ...await authHeaders()
           }
         }
         

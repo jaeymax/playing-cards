@@ -36,7 +36,7 @@ const DepositSuccessPage = () => {
           {
             headers: {
               "Content-Type": "application/json",
-              ...authHeaders(),
+              ...await authHeaders(),
             },
           }
         );

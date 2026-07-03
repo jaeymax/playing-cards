@@ -39,7 +39,7 @@ const TournamentRegistrationModal: React.FC<
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
 

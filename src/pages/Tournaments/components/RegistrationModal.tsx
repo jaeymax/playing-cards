@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { authHeaders } from "@/utils/Functions";
+import { authHeaders, isPWA } from "@/utils/Functions";
 import { baseUrl } from "@/config/api";
 import { useNavigate } from "react-router-dom";
+
 
 interface RegistrationModalProps {
   tournamentId: number | undefined;
   setUserRegistered: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowInstallPrompt: React.Dispatch<React.SetStateAction<boolean>>;
+  setTournamentReminderModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isOpen: boolean;
   onCancel: () => void;
 }
@@ -14,6 +17,7 @@ interface RegistrationModalProps {
 const RegistrationModal: React.FC<RegistrationModalProps> = ({
   tournamentId,
   setUserRegistered,
+  setShowInstallPrompt,
   isOpen,
   onCancel,
 }) => {
@@ -22,7 +26,6 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [success, setSuccess] = useState(false);
-
   const navigate = useNavigate();
 
   const handleGoToWallet = () => {
@@ -41,7 +44,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...authHeaders(),
+            ...await authHeaders(),
           },
         },
       );
@@ -72,6 +75,17 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSuccessConfirmation = () => {
+    onCancel();
+    if(!isPWA()){
+      setShowInstallPrompt(true);
+    }
+
+    // if(!user?.notification_enabled){
+    //   setTournamentReminderModalOpen(true);
+    // }
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -131,7 +145,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
          
           {success ? (
             <button
-              onClick={onCancel}
+              onClick={handleSuccessConfirmation}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               Got it!

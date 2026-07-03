@@ -1,6 +1,7 @@
 import { baseUrl } from "@/config/api";
 import shuffleSound from "@/sounds/riffle-card-shuffle-104313.mp3";
 import playedCardSound from "@/sounds/sound4.mp3";
+import localforage from "localforage";
 
 type SetGameCardsFunction = (cards: any[]) => void;
 type SetShufflingFunction = (isShuffling: boolean) => void;
@@ -403,12 +404,12 @@ export const dealCards = async (
   moveDrawPileOffScreen(cards, setGameCards);
 };
 
-export const removeToken = () => {
-  localStorage.removeItem("accessToken");
+export const removeToken = async () => {
+  await localforage.removeItem("accessToken");
 };
 
-export const getToken = () => {
-  const token = localStorage.getItem("accessToken");
+export const getToken = async () => {
+  const token = await localforage.getItem("accessToken");
   if (!token) {
     console.error("No token found in localStorage");
     return null;
@@ -416,12 +417,12 @@ export const getToken = () => {
   return token;
 };
 
-export const saveToken = (token: string) => {
-  localStorage.setItem("accessToken", token);
+export const saveToken = async (token: string) => {
+  await localforage.setItem("accessToken", token);
 };
 
 export async function ensureGuest() {
-  const token = getToken();
+  const token = await getToken();
 
   if (token) return;
 
@@ -451,7 +452,7 @@ export async function upgradeGuest(
 ) {
   const res = await fetch(`${baseUrl}/auth/upgrade`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { "Content-Type": "application/json", ...await authHeaders() },
     body: JSON.stringify({ username, email, password }),
   });
   const body = await res.json();
@@ -462,9 +463,9 @@ export async function upgradeGuest(
   }
 }
 
-export const authHeaders = () => {
+export const authHeaders = async () => {
   return {
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${await getToken()}`,
   };
 };
 
@@ -932,6 +933,10 @@ export function isPWA() {
   (window.navigator as any).standalone === true;
 }
 
+export const isIOS = () => {
+  const ua = window.navigator.userAgent || "";
+  return /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+};
 // export const getPlayerByPosition = (player_position: number, players) => {
 //   return players.find((player) => player.position === player_position);
 // };

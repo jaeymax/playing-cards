@@ -23,6 +23,8 @@ import TournamentEndedModal from "../Tournament/components/TournamentEndedModal"
 import { useSocket } from "@/contexts/SocketProvider";
 import TournamentInfo from "./components/TournamentInfo";
 import LoginRequiredModal from "../Home/components/LoginRequiredModal";
+import InstallPrompt from "./components/InstallPrompt";
+import TournamentReminderNotificationModal from "./components/TournamentReminderNotificationModal";
 
 const TournamentDetailsPage: React.FC = () => {
   const { id } = useParams();
@@ -66,8 +68,20 @@ const TournamentDetailsPage: React.FC = () => {
   const [matchForfeitedMessage, setMatchForfeitedMessage] =
     useState<string>("");
     const [myGameCode, setMyGameCode] = useState<string>("");
+    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [tournamentReminderModalOpen, setTournamentReminderModalOpen] = useState(false);
+  
 
     myGameCode && true;
+
+
+  useEffect(() => {
+    if (!user?.notification_enabled) {
+      setTournamentReminderModalOpen(true);
+    } else {
+      setTournamentReminderModalOpen(false);
+    }
+  },[user?.notification_enabled]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -164,7 +178,7 @@ const TournamentDetailsPage: React.FC = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
       if (!response.ok) {
@@ -424,7 +438,8 @@ const TournamentDetailsPage: React.FC = () => {
 
     )
    }
-
+      
+      <TournamentReminderNotificationModal tournamentReminderModalOpen={tournamentReminderModalOpen} setTournamentReminderModalOpen={setTournamentReminderModalOpen} />
       <main className="md:container mx-auto md:px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
           {/* Main Content */}
@@ -552,10 +567,13 @@ const TournamentDetailsPage: React.FC = () => {
           />
         </div>
       </main>
+      <InstallPrompt showInstallModal = {showInstallPrompt} setShowInstallModal={setShowInstallPrompt} />
       <RegistrationModal
         isOpen={registrationModalOpen}
         tournamentId={tournamentLobbyData?.tournament.id}
         setUserRegistered={setUserRegistered}
+        setTournamentReminderModalOpen={setTournamentReminderModalOpen}
+        setShowInstallPrompt={setShowInstallPrompt}
         onCancel={() => setRegistrationModalOpen(false)}
       />
       <PhoneNumberRequiredModal

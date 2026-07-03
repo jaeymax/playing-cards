@@ -95,7 +95,7 @@ const PhoneNumberRequiredModal: React.FC<PhoneNumberRequiredModalProps> = ({
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({ phone: phoneNumber }),
       });

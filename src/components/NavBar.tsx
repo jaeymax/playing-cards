@@ -2,7 +2,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { baseUrl } from "@/config/api";
+//import { baseUrl } from "@/config/api";
 import {removeToken } from "@/utils/Functions";
 import { Home, Info, ScrollText, Mail,  Medal, Trophy} from "lucide-react";
 
@@ -37,7 +37,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   const { lastMessage, sendMessage } = useSocket();
 
   const { isLoading } = useAppContext();
-  const [isMessagesLoading, setIsMessagesLoading] = useState(true);
+  const [isMessagesLoading] = useState(true);
 
   const { notifications } = useAppContext();
   //customLog("NavBar Notifications:", notifications);
@@ -268,25 +268,23 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const getGlobalChatMessages = async () => {
-    try {
-      setIsMessagesLoading(true);
-      const response = await fetch(`${baseUrl}/messages/global`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch messages");
-      }
-      const data = await response.json();
-      setMessages(data);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setIsMessagesLoading(false);
-    }
-  };
+  // const getGlobalChatMessages = async () => {
+  //   try {
+  //     setIsMessagesLoading(true);
+  //     const response = await fetch(`${baseUrl}/messages/global`);
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch messages");
+  //     }
+  //     const data = await response.json();
+  //     setMessages(data);
+  //   } catch (error) {
+  //     console.error("Error fetching messages:", error);
+  //   } finally {
+  //     setIsMessagesLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    getGlobalChatMessages();
-  }, []);
+  
 
   useEffect(() => {
     scrollToBottom();

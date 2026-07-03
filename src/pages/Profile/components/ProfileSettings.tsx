@@ -49,7 +49,7 @@ const ProfileSettings: React.FC = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({ phone: settings.phone }),
       });

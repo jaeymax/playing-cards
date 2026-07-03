@@ -40,7 +40,7 @@ const ProfileHeader: React.FC = () => {
   const getUserProfile = async () => {
     try {
       const response = await fetch(`${baseUrl}/users/me`, {
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        headers: { ...await authHeaders(), "Content-Type": "application/json" },
       });
       if (!response.ok) {
         throw new Error("Failed to fetch profile");
@@ -68,7 +68,7 @@ const ProfileHeader: React.FC = () => {
       console.log("formData:", data);
 
       const resonse = await fetch(`${baseUrl}/profile/upload`, {
-        headers: { ...authHeaders() },
+        headers: { ...await authHeaders() },
         method: "POST",
         body: data,
       });

@@ -74,7 +74,7 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({ userId: user?.id || guest?.id }),
       });

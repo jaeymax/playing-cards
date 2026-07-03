@@ -55,7 +55,7 @@ const WalletPage = () => {
       const response = await fetch(`${baseUrl}/payout-method`, {
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
       if (response.ok) {
@@ -73,7 +73,7 @@ const WalletPage = () => {
       const response = await fetch(`${baseUrl}/wallet`, {
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
       if (response.ok) {
@@ -92,7 +92,7 @@ const WalletPage = () => {
       const response = await fetch(`${baseUrl}/wallet/transactions`, {
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
       });
       if (response.ok) {
@@ -116,7 +116,7 @@ const WalletPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({
           provider,
@@ -155,7 +155,7 @@ const WalletPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({ amount: parseFloat(withdrawAmount) }),
       });
@@ -190,7 +190,7 @@ const WalletPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...await authHeaders(),
         },
         body: JSON.stringify({ amount: parseFloat(depositAmount) }),
       });

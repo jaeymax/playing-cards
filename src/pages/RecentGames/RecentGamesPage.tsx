@@ -127,7 +127,7 @@ const RecentGamesPage: React.FC = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...authHeaders(),
+            ...await authHeaders(),
           },
         });
         if (!response.ok) {

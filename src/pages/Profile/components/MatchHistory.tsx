@@ -57,7 +57,7 @@ const MatchHistory: React.FC = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...authHeaders()
+            ...await authHeaders()
           },
         });
         const data = await response.json();
