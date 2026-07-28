@@ -1,11 +1,14 @@
 import { baseUrl } from "@/config/api";
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Player {
   username: string;
   rating: number;
   image_url: string | null;
-  rank: number;
+  global_rank:string;
+  rank: string;
+  rank_color:string;
 }
 
 const TopPlayers: React.FC = () => {
@@ -39,6 +42,8 @@ const TopPlayers: React.FC = () => {
     fetchTopPlayers();
   }, []);
 
+  const navigate = useNavigate();
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700">
       <div className="p-4 border-b border-gray-700">
@@ -68,7 +73,8 @@ const TopPlayers: React.FC = () => {
           </div>
         ) : (
           players.map((player, index) => (
-            <div key={index} className="flex items-center gap-4">
+            
+            <div key={index} className="flex items-center gap-4 cursor-pointer" onClick={()=> navigate(`/profile/${player.username}`)} >
               <div
                 className={`w-8 h-8 flex items-center justify-center rounded-full ${
                   index + 1 === 1
@@ -80,7 +86,7 @@ const TopPlayers: React.FC = () => {
                     : "bg-gray-700"
                 }`}
               >
-                {player.rank}
+                {player.global_rank}
               </div>
               <div className="w-8 h-8 bg-gray-700/30 rounded-full flex items-center justify-center">
                 {player.image_url ? (
@@ -94,10 +100,11 @@ const TopPlayers: React.FC = () => {
                 )}
               </div>
               <div className="flex-1">
-                <div className="text-white font-medium">{player.username}</div>
+                <div style={{color:player.rank_color}} className="text-white font-medium">{player.username}</div>
                 <div className="text-sm text-gray-400">{player.rating} pts</div>
               </div>
             </div>
+           
           ))
         )}
       </div>

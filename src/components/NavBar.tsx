@@ -2,7 +2,6 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useSocket } from "@/hooks/useSocket";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { baseUrl } from "@/config/api";
 import { removeToken } from "@/utils/Functions";
 import {
   Home,
@@ -12,7 +11,6 @@ import {
   Medal,
   Trophy,
   Settings,
-  Sun,
 } from "lucide-react";
 
 // Add Message type
@@ -46,7 +44,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   const { lastMessage, sendMessage } = useSocket();
 
   const { isLoading } = useAppContext();
-  const [isMessagesLoading, setIsMessagesLoading] = useState(true);
+  const [isMessagesLoading] = useState(true);
 
   const { notifications } = useAppContext();
   //customLog("NavBar Notifications:", notifications);
@@ -430,16 +428,16 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                 </div>
                 <div className="text-2xl hidden sm:flex font-extrabold tracking-tight">
                   <span
-                    style={{ fontFamily: "Great Vibes" }}
+                    style={{}}
                     className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white opacity-6 bg-clip-text text-transparent"
                   >
-                    Spar
+                    SPAR
                   </span>
                   <span
-                    style={{ fontFamily: "Great Vibes" }}
+                    style={{color:"#E8B93E"}}
                     className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent"
                   >
-                    play
+                    PLAY
                   </span>
                   <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-white text-transparent"></span>
                 </div>
@@ -662,7 +660,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                           </button> */}
                         </div>
                         <Link
-                          to="/profile"
+                          to={`/profile/${user?.username}`}
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 px-6 py-3 rounded-xl text-base text-gray-100 hover:bg-gray-800 transition-colors"
                         >

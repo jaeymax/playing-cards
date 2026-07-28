@@ -25,6 +25,7 @@ interface User {
   current_winning_streak:number;
   podium_finishes:number;
   country:string;
+  country_code:string;
   next_rank:string;
   current_rank_min_rating:number;
   rank_color:string;

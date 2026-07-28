@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface LeaderboardTableProps {
   currentFilter: string;
@@ -16,7 +17,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   currentFilter;
   searchQuery;
 
-
+  const navigate = useNavigate();
 
 
   // const players = [
@@ -42,7 +43,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   return (
     <div className="bg-gray-800 md:rounded-lg md:border border-gray-700">
       <div className="overflow-x-auto">
-        <table className="min-w-full border-t border-b border-gray-700">
+        <table className="min-w-full border-gray-700">
           <thead>
             <tr className="border-b border-gray-700">
               <th className="pl-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">
@@ -82,10 +83,10 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     </td>
                   </tr>
                 ))
-              : players.map((player: any, index: number) => (
-                  <tr key={index} className="hover:bg-gray-750">
+              : players?.map((player: any, index: number) => (
+                  <tr key={index} className="hover:bg-gray-750 cursor-pointer" onClick={() => navigate(`/profile/${player.username}`)}>
                     <td className="pl-6 borde py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                      #{player.rank}
+                      #{player.global_rank}
                     </td>
                     <td className="px-1 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -106,7 +107,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                             />
                           )}
                         </div>
-                        <span className="ml-3 text-white">
+                        <span style={{color:player.rank_color}} className="ml-3 text-whit">
                           {player.username.length > 10
                             ? player.username.slice(0, 10) + "..."
                             : player.username}

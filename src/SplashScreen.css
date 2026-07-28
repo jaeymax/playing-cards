@@ -1,0 +1,299 @@
+:root {
+  --black: #14110f;
+  --black-2: #1c1814;
+  --gold: #e8b93e;
+  --gold-dim: #8c6e24;
+  --red: #c8102e;
+  --green: #0b6e4f;
+  --cream: #f3ebda;
+}
+
+.splash-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  /* background: radial-gradient(circle at 50% 45%, #221d17 0%, var(--black) 62%); */
+}
+
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* ---------------- TABLE ---------------- */
+
+.table {
+  position: relative;
+  width: 220px;
+  height: 150px;
+}
+
+.card {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: 78px;
+  height: 108px;
+
+  margin: -54px 0 0 -39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+  /* border: 1.5px solid var(--gold-dim); */
+
+  background: linear-gradient(160deg, var(--black-2), #100d0a);
+
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.55);
+
+  font-size: 34px;
+
+  opacity: 0;
+
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(.4,0,.2,1);
+  animation-iteration-count: infinite;
+}
+
+.card::after {
+  content: attr(data-corner);
+  position: absolute;
+  top: 6px;
+  left: 8px;
+
+  font-family: monospace;
+  font-size: 11px;
+
+  opacity: .7;
+}
+
+.spade {
+  color: var(--cream);
+  animation: loopSpade 2.8s infinite;
+}
+
+.heart {
+  color: var(--red);
+  animation: loopHeart 2.8s .15s infinite;
+}
+
+.diamond {
+  color: var(--red);
+  animation: loopDiamond 2.8s .3s infinite;
+}
+
+.club {
+  color: var(--green);
+  animation: loopClub 2.8s .45s infinite;
+}
+
+/* ---------------- LOGO ---------------- */
+
+.wordmark {
+  font-family: "Space Grotesk", sans-serif;
+
+  font-weight: 700;
+  font-size: clamp(30px, 7vw, 40px);
+
+  letter-spacing: 2px;
+
+  color: var(--cream);
+
+  opacity: 0;
+
+  animation: fadeIn 1s ease .4s forwards;
+}
+
+.wordmark span {
+  color: var(--gold);
+}
+
+/* ---------------- LOADER ---------------- */
+
+.loader-line {
+  width: 120px;
+  height: 4px;
+
+  overflow: hidden;
+
+  border-radius: 2px;
+
+  background: var(--black-2);
+
+  opacity: 0;
+
+  animation: fadeIn .8s ease .9s forwards;
+}
+
+.loader-line::after {
+  content: "";
+
+  display: block;
+
+  width: 40%;
+  height: 100%;
+
+  background: repeating-linear-gradient(
+    90deg,
+    var(--gold) 0px,
+    var(--gold) 6px,
+    var(--red) 6px,
+    var(--red) 9px,
+    var(--green) 9px,
+    var(--green) 12px
+  );
+
+  animation: slide 1.1s ease-in-out infinite;
+}
+
+/* ---------------- EXIT ---------------- */
+
+.leaving .splash {
+  animation: fadeOut .5s ease forwards;
+}
+
+/* ---------------- KEYFRAMES ---------------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: scale(.98);
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(350%);
+  }
+}
+
+@keyframes loopSpade {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotate(0) scale(.8);
+  }
+
+  18% {
+    opacity: 1;
+    transform: rotate(-24deg) translateY(6px) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: rotate(-24deg) translateY(6px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(-24deg) translateY(-30px) scale(.9);
+  }
+}
+
+@keyframes loopHeart {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotate(0) scale(.8);
+  }
+
+  18% {
+    opacity: 1;
+    transform: rotate(-8deg) translateY(-6px) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: rotate(-8deg) translateY(-6px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(-8deg) translateY(-46px) scale(.9);
+  }
+}
+
+@keyframes loopDiamond {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotate(0) scale(.8);
+  }
+
+  18% {
+    opacity: 1;
+    transform: rotate(8deg) translateY(-6px) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: rotate(8deg) translateY(-6px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(8deg) translateY(-46px) scale(.9);
+  }
+}
+
+@keyframes loopClub {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotate(0) scale(.8);
+  }
+
+  18% {
+    opacity: 1;
+    transform: rotate(24deg) translateY(6px) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: rotate(24deg) translateY(6px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(24deg) translateY(-30px) scale(.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .wordmark,
+  .loader-line {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .loader-line::after {
+    animation: none !important;
+  }
+}

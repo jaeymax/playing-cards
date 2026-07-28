@@ -7,12 +7,14 @@ import {
   Tooltip,
   CartesianGrid,
   ReferenceArea,
-  ReferenceLine,
+ // ReferenceLine,
 } from "recharts";
 
 interface RatingPoint {
-  date: string;
-  rating: number;
+  tournament_id:number;
+  rating_after: number;
+  rating_before:number;
+  rating_change:number;
 }
 
 interface RatingGraphProps {
@@ -82,13 +84,15 @@ const getDivision = (rating: number) => {
 export default function RatingGraph({
   history,
 }: RatingGraphProps) {
-  if (!history.length) return null;
+  if (!history || !history.length) return null;
+  console.log('history', history);
 
   const latestRating =
-    history[history.length - 1].rating;
+    history[history.length - 1].rating_after;
 
-  const currentDivision =
-    getDivision(latestRating);
+  const currentDivision = getDivision(latestRating);
+
+  (currentDivision && true)
 
   return (
     <div className="w-full h-[300px] md:h-[450px] rounded-lg border border-gray-700 bg-gray-800 p-4">
@@ -131,7 +135,7 @@ export default function RatingGraph({
           />
 
           <XAxis
-            dataKey="date"
+            dataKey="tournament_id"
             stroke="#9CA3AF"
             tick={{ fill: "#9CA3AF", fontSize:11 }}
             axisLine={false}
@@ -139,6 +143,8 @@ export default function RatingGraph({
           />
 
           <YAxis
+            domain={[0, 3000]}
+            ticks={divisions.map((d) => d.min)}
             stroke="#9CA3AF"
             tick={{ fill: "#9CA3AF", fontSize:11 }}
             axisLine={false}
@@ -167,7 +173,7 @@ export default function RatingGraph({
           {/* Rating Line */}
           <Line
             type="monotone"
-            dataKey="rating"
+            dataKey="rating_after"
             stroke={"#fbbf24"}
             strokeWidth={3}
             dot={{

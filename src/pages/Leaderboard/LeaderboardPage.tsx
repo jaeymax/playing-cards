@@ -22,7 +22,7 @@ const LeaderboardPage: React.FC = () => {
           const response = await fetch(`${baseUrl}/leaderboard`);
           const data = await response.json();
           setPlayers(data);
-          setTopPlayers(data.slice(0, 3)); // Assuming the API returns players sorted by rank
+          setTopPlayers(data?.slice(0, 3)); // Assuming the API returns players sorted by rank
           setLoading(false);
           console.log("players", data);
         } catch (error) {

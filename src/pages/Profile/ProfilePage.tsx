@@ -1,27 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "@/components/NavBar";
-import { removeToken } from "@/utils/Functions";
+import { authHeaders, customLog, removeToken } from "@/utils/Functions";
 import { useAppContext } from "@/contexts/AppContext";
 import Modal from "@/components/Modal";
 import { countries } from "@/data/countries";
-import {
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-} from "recharts";
+// import {
+//   LineChart,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   Area,
+//   AreaChart,
+// } from "recharts";
 import RatingGraph from "./components/RatingGraph";
+import { baseUrl } from "@/config/api";
+import SplashScreen from "../Home/components/SplashScreen";
 
-type ProfileTab =
-  | "overview"
-  | "matches"
-  | "statistics"
-  | "achievements"
-  | "settings";
 
 // Mock player data - replace with actual user data from context
 const PLAYER = {
@@ -159,71 +155,70 @@ function MedalBadge({
   );
 }
 
-function SkillBar({
-  label,
-  value,
-  color,
-  delay,
-}: {
-  label: string;
-  value: number;
-  color: string;
-  delay: number;
-}) {
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setWidth(value), 100 + delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
+// function SkillBar({
+//   label,
+//   value,
+//   color,
+//   delay,
+// }: {
+//   label: string;
+//   value: number;
+//   color: string;
+//   delay: number;
+// }) {
+//   const [width, setWidth] = useState(0);
+//   useEffect(() => {
+//     const t = setTimeout(() => setWidth(value), 100 + delay);
+//     return () => clearTimeout(t);
+//   }, [value, delay]);
 
-  return (
-    <div className="mb-3">
-      <div className="flex justify-between mb-1">
-        <span className="text-xs text-purple-200 font-medium">{label}</span>
-        <span className="text-xs font-bold" style={{ color }}>
-          {value}
-        </span>
-      </div>
-      <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-        <div
-          style={{
-            height: "100%",
-            width: `${width}%`,
-            background: color,
-            borderRadius: "999px",
-            transition: "width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="mb-3">
+//       <div className="flex justify-between mb-1">
+//         <span className="text-xs text-purple-200 font-medium">{label}</span>
+//         <span className="text-xs font-bold" style={{ color }}>
+//           {value}
+//         </span>
+//       </div>
+//       <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+//         <div
+//           style={{
+//             height: "100%",
+//             width: `${width}%`,
+//             background: color,
+//             borderRadius: "999px",
+//             transition: "width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)",
+//           }}
+//         />
+//       </div>
+//     </div>
+//   );
+// }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0];
-  const idx = PLAYER.ratingHistory.findIndex((r) => r.t === label);
-  const delta = idx > 0 ? d.value - PLAYER.ratingHistory[idx - 1].rating : 0;
-  return (
-    <div className="bg-gray-900 border border-purple-400 border-opacity-25 rounded-lg p-3">
-      <div className="text-xs text-purple-200 mb-1 font-semibold">{label}</div>
-      <div className="text-lg font-bold text-white font-serif">
-        {d.value.toLocaleString()}
-      </div>
-      {delta !== 0 && (
-        <div
-          className="text-xs mt-1"
-          style={{ color: delta > 0 ? "#4ade80" : "#f87171" }}
-        >
-          {delta > 0 ? "▲" : "▼"} {Math.abs(delta)}
-        </div>
-      )}
-    </div>
-  );
-};
+// const CustomTooltip = ({ active, payload, label }: any) => {
+//   if (!active || !payload?.length) return null;
+//   const d = payload[0];
+//   const idx = PLAYER.ratingHistory.findIndex((r) => r.t === label);
+//   const delta = idx > 0 ? d.value - PLAYER.ratingHistory[idx - 1].rating : 0;
+//   return (
+//     <div className="bg-gray-900 border border-purple-400 border-opacity-25 rounded-lg p-3">
+//       <div className="text-xs text-purple-200 mb-1 font-semibold">{label}</div>
+//       <div className="text-lg font-bold text-white font-serif">
+//         {d.value.toLocaleString()}
+//       </div>
+//       {delta !== 0 && (
+//         <div
+//           className="text-xs mt-1"
+//           style={{ color: delta > 0 ? "#4ade80" : "#f87171" }}
+//         >
+//           {delta > 0 ? "▲" : "▼"} {Math.abs(delta)}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
 const ProfilePage: React.FC = () => {
-  
   const { user, updateUser } = useAppContext();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -231,8 +226,111 @@ const ProfilePage: React.FC = () => {
     phone: "",
     country: "",
   });
+  // get username from URL params
+  const { username } = useParams<{ username: string }>();
   const [visible, setVisible] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const countryCode = (
+    userProfile?.country_code as string | undefined
+  )?.toLowerCase() as keyof typeof countries | undefined;
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    isVisible: boolean;
+  }>({ message: "", type: "success", isVisible: false });
   const navigate = useNavigate();
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  (toast && true)
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // TODO: Implement image upload logic here
+      console.log("Selected file:", file);
+      setFile(file);
+    }
+  };
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type, isVisible: true });
+  };
+
+  const fetchUserProfile = async () => {
+    // Implementation for fetching user profile
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${baseUrl}/users/${username}`, {
+        headers: { ...authHeaders() },
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        customLog("Fetched user profile:", userData);
+        setUserProfile(userData);
+        if (userData.id === user?.id) {
+          updateUser(userData);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [username]);
+
+  useEffect(() => {
+    if (file) {
+      handleImageUpload();
+    }
+  }, [file]);
+
+  const handleImageUpload = async () => {
+    console.log("handleImageUpload called");
+    console.log("File to upload:", file);
+    setUploading(true);
+    try {
+      console.log("Uploading file:", file);
+      const data = new FormData();
+      data.append("file", file as Blob);
+      console.log("formData:", data);
+
+      const resonse = await fetch(`${baseUrl}/profile/upload`, {
+        headers: { ...authHeaders() },
+        method: "POST",
+        body: data,
+      });
+
+      if (!resonse.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await resonse.json();
+      console.log("Upload result:", result);
+      showToast("Image uploaded successfully!", "success");
+      updateUser({ ...user, image_url: result.fileUrl } as any);
+      setUserProfile((prevProfile: any) => ({
+        ...prevProfile,
+        image_url: result.fileUrl,
+      }));
+      // await fetchUserProfile();
+    } catch (error) {
+      console.error("Upload failed:", error);
+      showToast("Failed to upload image", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50);
@@ -256,10 +354,11 @@ const ProfilePage: React.FC = () => {
   const handleSaveChanges = async () => {
     try {
       // Call API to update user profile
-      const response = await fetch("/api/user/profile", {
-        method: "PUT",
+      const response = await fetch(`${baseUrl}/users/${user?.id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          ...authHeaders(),
         },
         body: JSON.stringify({
           phone: editFormData.phone,
@@ -269,27 +368,36 @@ const ProfilePage: React.FC = () => {
 
       if (response.ok) {
         const updatedUser = await response.json();
-        updateUser(updatedUser);
+        updateUser({ ...user, ...updatedUser });
+        setUserProfile((prevProfile: any) => ({
+          ...prevProfile,
+          ...updatedUser,
+        }));
         setIsEditModalOpen(false);
+        showToast("Profile updated successfully!", "success");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
+      showToast("Failed to update profile", "error");
     }
   };
 
- // const ratingProgress = ((PLAYER.rating - 2700) / (3000 - 2700)) * 100;
- const getRatingProgress = () => {
-  if(!user?.is_rated) return 0;
-  const progress = ((user?.rating - user?.current_rank_min_rating) / (user?.next_rank_min_rating - user?.current_rank_min_rating)) * 100;
-  return progress;
- }
+  // const ratingProgress = ((PLAYER.rating - 2700) / (3000 - 2700)) * 100;
+  const getRatingProgress = () => {
+    if (!user?.is_rated) return 0;
+    const progress =
+      ((user?.rating - user?.current_rank_min_rating) /
+        (user?.next_rank_min_rating - user?.current_rank_min_rating)) *
+      100;
+    return progress;
+  };
 
   // const ratingProgress = user?.is_rated
   //   ? ((user.next_rank_min_rating - user.rating)  /
   //       (user.rating_to_next_rank - 10000)) *
   //     100
   //   : 0;
-  const seasonDelta = PLAYER.rating - PLAYER.ratingHistory[0].rating;
+  //const seasonDelta = PLAYER.rating - PLAYER.ratingHistory[0].rating;
 
   const getTournamentWinRate = () => {
     return user?.tournaments_played
@@ -317,6 +425,12 @@ const ProfilePage: React.FC = () => {
       : "0.0";
   };
 
+
+  if(loading) {
+    return <SplashScreen leaving={false} />
+  }
+
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <NavBar showSignUps={true} />
@@ -335,7 +449,7 @@ const ProfilePage: React.FC = () => {
                 <div className="w-full h-full rounded-full bg-gray-900 overflow-hidden">
                   <img
                     src={
-                      user?.image_url ||
+                      userProfile?.image_url ||
                       "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
                     }
                     className="w-full h-full object-cover"
@@ -344,19 +458,77 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-2 border-gray-900" />
+              {user?.id !== userProfile?.id && (
+                <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-2 border-gray-900" />
+              )}
+
+              {user?.id === userProfile?.id && (
+                <div className="absolute bottom-0 right-0">
+                  <button
+                    onClick={handleImageClick}
+                    className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors"
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <svg
+                        className="w-4 h-4 text-gray-300 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-4 h-4 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Main Content */}
             <div className="flex-1">
               {/* Username + Rank */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 text-center sm:text-left">
-                <h1 style={{color: user?.rank_color}} className="text-2xl sm:text-3xl font-bold text-gray-100 break-all">
-                  {user?.username}
+                <h1
+                  style={{ color: userProfile?.rank_color }}
+                  className="text-2xl sm:text-3xl font-bold text-gray-100 break-all"
+                >
+                  {userProfile?.username}
                 </h1>
 
-                <span style={{color: user?.rank_color, borderColor: user?.rank_color}} className="self-center sm:self-auto b-orange-500/15 border border-orange-500/35 text-orange-400 text-xs font-semibold px-2.5 py-1 rounded-full w-fit">
-                 {user?.rank || "Unranked"}
+                <span
+                  style={{
+                    color: userProfile?.rank_color,
+                    borderColor: userProfile?.rank_color,
+                  }}
+                  className="self-center sm:self-auto b-orange-500/15 border border-orange-500/35 text-orange-400 text-xs font-semibold px-2.5 py-1 rounded-full w-fit"
+                >
+                  {userProfile?.rank || "Unranked"}
                 </span>
               </div>
 
@@ -364,60 +536,67 @@ const ProfilePage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-center sm:text-left">
                 <p className="text-xs text-gray-500">
                   Member since{" "}
-                  {new Date(user?.created_at as string).toLocaleDateString(
-                    "en-GB",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    },
-                  )}
+                  {new Date(
+                    userProfile?.created_at as string,
+                  ).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                   {" · "}
                   Last active {PLAYER.lastActive}
                 </p>
 
                 {/* Location */}
-                <span className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-300 w-fit self-center sm:self-auto">
-                  📍 Ghana
-                </span>
+                {countryCode && (
+                  <span className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-300 w-fit self-center sm:self-auto">
+                    {countryCode ? countries[countryCode] : ""}
+                    {countryCode && (
+                      <img
+                        className=""
+                        src={`https://flagcdn.com/16x12/${countryCode}.png`}
+                        alt={userProfile?.country_name}
+                      />
+                    )}
+                  </span>
+                )}
               </div>
 
               {/* Actions */}
-              {!user?.is_guest && (
-              <div className="mt-4 flex justify-center sm:justify-start">
-                <button
-                  onClick={handleEditClick}
-                  className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition"
-                >
-                  Edit Profile
-                </button>
-              </div>
+              {!userProfile?.is_guest && userProfile?.id === user?.id && (
+                <div className="mt-4 flex justify-center sm:justify-start">
+                  <button
+                    onClick={handleEditClick}
+                    className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
               )}
 
               {/* Rating Progress */}
-              {
-                user?.is_rated && (
-              <div className="mt-5">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
-                  <span className="text-xs text-gray-400">
-                    {user?.rating.toLocaleString()} /{" "}
-                    {user?.next_rank_min_rating?.toLocaleString()} → {user?.next_rank}
-                  </span>
+              {userProfile?.is_rated && (
+                <div className="mt-5">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
+                    <span className="text-xs text-gray-400">
+                      {userProfile?.rating.toLocaleString()} /{" "}
+                      {userProfile?.next_rank_min_rating?.toLocaleString()} →{" "}
+                      {userProfile?.next_rank}
+                    </span>
 
-                  <span className="text-xs font-semibold text-orange-500">
-                    {user?.rating_to_next_rank} pts to go
-                  </span>
-                </div>
+                    <span className="text-xs font-semibold text-orange-500">
+                      {userProfile?.rating_to_next_rank} pts to go
+                    </span>
+                  </div>
 
-                <div className="h-2 bg-gray-700 rounded-full overflow-hidden w-full sm:max-w-md">
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-600 to-orange-500 rounded-full transition-all duration-1000"
-                    style={{ width: `${getRatingProgress()}%` }}
-                  />
+                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden w-full sm:max-w-md">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-600 to-orange-500 rounded-full transition-all duration-1000"
+                      style={{ width: `${getRatingProgress()}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-                )
-              }
+              )}
 
               {/* Mobile Rating Block */}
               <div className="mt-5 sm:hidden text-center">
@@ -445,24 +624,20 @@ const ProfilePage: React.FC = () => {
                 RATING
               </div>
 
-              {
-                user?.is_rated ? (
-              <div className="text-4xl font-bold text-gray-100 mt-1">
-                <AnimatedNumber
-                  value={user?.rating as number}
-                  duration={1400}
-                  format={(v) => v.toLocaleString()}
-                />
-              </div  >
-                ):(
-                  <p className="text-3xl font-bold text-gray-100 mt-1" >
-                    Unrated
-                  </p>
-                )
-              }
+              {userProfile?.is_rated ? (
+                <div className="text-4xl font-bold text-gray-100 mt-1">
+                  <AnimatedNumber
+                    value={userProfile?.rating as number}
+                    duration={1400}
+                    format={(v) => v.toLocaleString()}
+                  />
+                </div>
+              ) : (
+                <p className="text-3xl font-bold text-gray-100 mt-1">Unrated</p>
+              )}
 
               <div className="text-xs text-gray-500 mt-1">
-                Peak {user?.peak_rating?.toLocaleString()}
+                Peak {userProfile?.peak_rating?.toLocaleString()}
               </div>
             </div>
           </div>
@@ -475,7 +650,7 @@ const ProfilePage: React.FC = () => {
             label="Tournaments won"
             value={
               <AnimatedNumber
-                value={(user?.tournaments_won as number) || 0}
+                value={(userProfile?.tournaments_won as number) || 0}
                 duration={1000}
               />
             }
@@ -487,7 +662,7 @@ const ProfilePage: React.FC = () => {
             label="Tournaments played"
             value={
               <AnimatedNumber
-                value={(user?.tournaments_played as number) || 0}
+                value={(userProfile?.tournaments_played as number) || 0}
                 duration={1000}
               />
             }
@@ -499,7 +674,7 @@ const ProfilePage: React.FC = () => {
             label="Matches played"
             value={
               <AnimatedNumber
-                value={(user?.games_played as number) || 0}
+                value={(userProfile?.games_played as number) || 0}
                 duration={1200}
                 format={(v) => v.toLocaleString()}
               />
@@ -512,7 +687,7 @@ const ProfilePage: React.FC = () => {
             label="Podium finishes"
             value={
               <AnimatedNumber
-                value={(user?.podium_finishes as number) || 0}
+                value={(userProfile?.podium_finishes as number) || 0}
                 duration={1000}
               />
             }
@@ -522,14 +697,14 @@ const ProfilePage: React.FC = () => {
           <StatCard
             icon="🔥"
             label="Current streak"
-            value={`${user?.current_winning_streak || 0}W`}
-            sub={`Best: ${user?.max_winning_streak || 0}W`}
+            value={`${userProfile?.current_winning_streak || 0}W`}
+            sub={`Best: ${userProfile?.max_winning_streak || 0}W`}
             accent="#e8613a"
           />
           <StatCard
             icon="🌍"
             label="Global rank"
-            value={`# ${user?.is_guest ? "Unranked" : user?.global_rank}`}
+            value={`# ${userProfile?.is_guest ? "Unranked" : userProfile?.global_rank}`}
             sub="Worldwide"
             accent="#f59e0b"
           />
@@ -546,21 +721,21 @@ const ProfilePage: React.FC = () => {
           <div className="grid grid-cols-4 gap-3">
             <MedalBadge
               emoji="🥇"
-              count={(user?.gold_medals as number) || 0}
+              count={(userProfile?.gold_medals as number) || 0}
               label="Gold"
               bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-yellow-400"
             />
             <MedalBadge
               emoji="🥈"
-              count={(user?.silver_medals as number) || 0}
+              count={(userProfile?.silver_medals as number) || 0}
               label="Silver"
               bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-gray-300"
             />
             <MedalBadge
               emoji="🥉"
-              count={(user?.bronze_medals as number) || 0}
+              count={(userProfile?.bronze_medals as number) || 0}
               label="Bronze"
               bgClass="bg-gray-400 bg-opacity-10"
               textClass="text-orange-400"
@@ -568,9 +743,9 @@ const ProfilePage: React.FC = () => {
             <MedalBadge
               emoji="🎖️"
               count={
-                (user?.gold_medals || 0) +
-                (user?.silver_medals || 0) +
-                (user?.bronze_medals || 0)
+                (userProfile?.gold_medals || 0) +
+                (userProfile?.silver_medals || 0) +
+                (userProfile?.bronze_medals || 0)
               }
               label="Total"
               bgClass="bg-gray-400 bg-opacity-10"
@@ -580,7 +755,7 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Rating Chart */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">
               Rating History
@@ -606,11 +781,10 @@ const ProfilePage: React.FC = () => {
                   tickLine={false}
                 />
                 <YAxis
-                  domain={["dataMin - 80", "dataMax + 40"]}
+                  domain={["0", "4000"]}
                   tick={{ fill: "#7c6e9c", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
-                  
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
@@ -637,7 +811,6 @@ const ProfilePage: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
 
-
             <div className="flex gap-4 mt-4 px-1">
               <span className="flex items-center gap-2 text-xs text-gray-400">
                 <span className="w-2 h-2 rounded-full bg-yellow-400" />
@@ -649,23 +822,12 @@ const ProfilePage: React.FC = () => {
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
 
-              <RatingGraph
-  history={[
-    { date: "Jan", rating: 1180 },
-    { date: "Feb", rating: 1230 },
-    { date: "Mar", rating: 1390 },
-    { date: "Apr", rating: 1450 },
-    { date: "May", rating: 1620 },
-    { date: "Jun", rating: 1810 },
-    { date: "Jul", rating: 1960 },
-    { date: "Aug", rating: 2140 },
-  ]}
-/>
+        <RatingGraph history={userProfile?.rating_history} />
         {/* Skills and Facts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-6">
-          {/* Skills */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-6">
+         
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
             <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">
               Skill Breakdown
@@ -681,7 +843,7 @@ const ProfilePage: React.FC = () => {
             ))}
           </div>
 
-          {/* Facts */}
+        
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
             <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">
               Quick Facts
@@ -724,7 +886,7 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Logout Modal */}
