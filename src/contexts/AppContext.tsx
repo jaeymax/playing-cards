@@ -19,24 +19,39 @@ interface User {
   username: string;
   email: string;
   image_url: string;
-  games_played: number;
-  games_won: number;
-  is_rated: boolean;
-  tournaments_played: number;
-  tournaments_won: number;
-  balance: string;
-  rank: number;
-  is_guest: boolean;
-  notification_enabled: boolean;
-  rating: number;
-  location: string;
-  created_at: string;
-  updated_at: string;
-  id: number;
-  role: string;
-  bio: string;
-  phone: string;
-  dob: string;
+  games_played:number;
+  games_won:number;
+  is_rated:boolean;
+  tournaments_played:number;
+  tournaments_won:number;
+  balance:string;
+  global_rank:number;
+  max_winning_streak:number;
+  current_winning_streak:number;
+  podium_finishes:number;
+  country:string;
+  country_code:string;
+  next_rank:string;
+  current_rank_min_rating:number;
+  rank_color:string;
+  notification_enabled:boolean;
+  rank:string;
+  rating_to_next_rank:number;
+  next_rank_min_rating:number;
+  is_guest:boolean;
+  rating:number;
+  peak_rating:number;
+  location:string;
+  created_at:string;
+  updated_at:string;
+  gold_medals:number,
+  silver_medals:number;
+  bronze_medals:number;
+  id:number;
+  role:string;
+  bio:string;
+  phone:string;
+  dob:string;
 }
 
 interface AppState {

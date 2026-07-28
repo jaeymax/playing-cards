@@ -1,6 +1,7 @@
 import React from "react";
 import HeroSection from "./components/HeroSection";
 import NavBar from "@/components/NavBar";
+//import BottomNav from "@/components/BottomNav";
 import TopPlayers from "./components/TopPlayers";
 import RecentGames from "./components/RecentGames";
 import InstallBanner from "./components/InstallBanner";
@@ -45,6 +46,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* <BottomNav /> */}
       <Footer />
     </div>
   );

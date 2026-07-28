@@ -218,7 +218,7 @@ const TournamentDetailsPage: React.FC = () => {
       if (!user) return;
       if (!socket) return;
       if (!tournamentLobbyData) return;
-      if(!id)return;
+      if (!id) return;
 
       socket.on("connect", () => {
        // alert("Socket connected, joining tournament room");
@@ -228,7 +228,6 @@ const TournamentDetailsPage: React.FC = () => {
         gameCode: extractGameCodeFromTournamentData(tournamentLobbyData),
       });
       });
-
 
       socket.emit("joinTournamentRoom", {
         tournamentId: id,
@@ -251,7 +250,9 @@ const TournamentDetailsPage: React.FC = () => {
         });
       };
     }, [user, socket, id, tournamentLobbyData]);
-  
+
+
+   
     const handleTournamentEndedModalClose = () => {
       setShowTournamentEndedModal(false);
       setActiveTab("standings");

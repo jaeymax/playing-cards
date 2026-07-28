@@ -4,6 +4,7 @@ interface TopThreeProps {
   currentFilter: string;
   topPlayers?: {
     rank: number;
+    global_rank: string;
     username: string;
     rating: number;
     win_rate: number;
@@ -31,21 +32,21 @@ const TopThree: React.FC<TopThreeProps> = ({ currentFilter, topPlayers }) => {
     <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
       {topPlayers?.map((player) => (
         <div
-          key={player.rank}
+          key={player.global_rank}
           className={`relative bg-gray-800 rounded-lg p-6 border border-gray-700 flex flex-col items-center transform transition hover:scale-[1.02] ${
-            player.rank == 1 ? "md:-mt-4" : ""
+            parseInt(player.global_rank) == 1 ? "md:-mt-4" : ""
           }`}
         >
           <div
             className={`absolute -top-3 left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-              player.rank == 1
+              parseInt(player.global_rank) == 1
                 ? "bg-yellow-500"
-                : player.rank == 2
+                : parseInt(player.global_rank) == 2
                 ? "bg-gray-400"
                 : "bg-orange-600"
             }`}
           >
-            {player.rank}
+            {player.global_rank}
           </div>
 
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 p-1 mb-4">

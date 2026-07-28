@@ -98,7 +98,7 @@ function App() {
           <Route path="/deposit/success" element={<DepositSuccessPage />} />
           <Route element={<PrivateRoute />}>
             {/* Protected routes go here */}
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/admin" element={<DashboardPage />} />
