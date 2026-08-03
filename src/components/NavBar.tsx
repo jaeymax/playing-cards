@@ -45,7 +45,6 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
 
   const { isLoading } = useAppContext();
   const [isMessagesLoading] = useState(true);
-
   const { notifications } = useAppContext();
   //customLog("NavBar Notifications:", notifications);
   const notificationCount = notifications.filter((n) => !n.is_read).length;
@@ -291,8 +290,6 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
   //   }
   // };
 
-  
-
   // useEffect(() => {
   //   scrollToBottom();
   // }, [messages]);
@@ -379,6 +376,8 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
     </div>
   );
 
+  console.log("user in navbar:", user);
+
   return (
     <>
       <nav className="bg-gray-800 border-b z-50 border-gray-700">
@@ -432,7 +431,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                     SPAR
                   </span>
                   <span
-                    style={{color:"#E8B93E"}}
+                    style={{ color: "#E8B93E" }}
                     className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-white text-transparent"
                   >
                     PLAY
@@ -512,21 +511,12 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   <div className="relative">
                     <button
                       onClick={() => navigate("/wallet")}
-                      className="mt-3 rounded-lg text-gray-400 hover:text-white"
+                      className="flex items-center gap-2 rounded-full border border-gray-500/30 bg-gradient-to-r from-gray-900 to-gray-800 px-3 py-1.5 shadow-md transition-all duration-200 hover:scale-105"
                     >
-                      <svg
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V5a3 3 0 00-3-3H6a3 3 0 00-3 3v11a3 3 0 003 3z"
-                        />
-                      </svg>
+
+                      <span className="font-semibold text-xs">
+                        ₵ {user?.balance}
+                      </span>
                     </button>
                   </div>
 
@@ -665,11 +655,14 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                           <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500">
                             {
                               <img
-                                src={user.image_url || "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
+                                src={
+                                  user.image_url ||
+                                  "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                                }
                                 alt="Profile"
                                 className="h-full w-full object-cover"
                               />
-                }
+                            }
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-white">

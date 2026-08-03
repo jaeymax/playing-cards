@@ -26,6 +26,8 @@ interface User {
   tournaments_won:number;
   balance:string;
   global_rank:number;
+  online_status:boolean;
+  last_active:string;
   max_winning_streak:number;
   current_winning_streak:number;
   podium_finishes:number;
@@ -195,6 +197,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     fetchCurrentUser();
   }, [user]);
+
+  console.log("User in AppContext:", user);
 
   const toggleSidebar = () => {
     setSidebarOpen((prev) => {

@@ -37,7 +37,7 @@
   height: 150px;
 }
 
-.card {
+.card_display {
   position: absolute;
 
   left: 50%;
@@ -68,7 +68,7 @@
   animation-iteration-count: infinite;
 }
 
-.card::after {
+.card_display::after {
   content: attr(data-corner);
   position: absolute;
   top: 6px;

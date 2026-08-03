@@ -1,6 +1,6 @@
 import { baseUrl } from "@/config/api";
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface Player {
   username: string;
@@ -111,12 +111,12 @@ const TopPlayers: React.FC = () => {
       {/* CTA Button View Leaderboared */}
       {!loading && !error && (
         <div className="p-3 border-t border-gray-700 text-center">
-          <a
-            href="/leaderboard"
+          <Link
+            to="/leaderboard"
             className="inline-block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-lg hover:bg-blue-900"
           >
             View Leaderboard
-          </a>
+          </Link>
         </div>
       )}
     </div>

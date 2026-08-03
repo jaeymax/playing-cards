@@ -17,53 +17,54 @@ import { countries } from "@/data/countries";
 import RatingGraph from "./components/RatingGraph";
 import { baseUrl } from "@/config/api";
 import SplashScreen from "../Home/components/SplashScreen";
+import { formatDistanceToNow } from "date-fns";
 
 
 // Mock player data - replace with actual user data from context
-const PLAYER = {
-  username: "KingSlayer",
-  initials: "KS",
-  memberSince: "Jan 2023",
-  lastActive: "Today",
-  rating: 2847,
-  peakRating: 2901,
-  rank: "Grandmaster",
-  nextRank: "Mythic",
-  nextRankRating: 3000,
-  tournamentsPlayed: 134,
-  tournamentsWon: 41,
-  matchesPlayed: 1209,
-  matchWinRate: 58.2,
-  top3Finishes: 87,
-  bestStreak: 9,
-  currentStreak: 7,
-  globalPercentile: 1,
-  avgAccuracy: 82,
-  avgMoveSpeed: 4.2,
-  medals: { gold: 41, silver: 28, bronze: 18 },
-  skills: [
-    { label: "Aggression", value: 91, color: "#e8613a" },
-    { label: "Defense", value: 74, color: "#3b82f6" },
-    { label: "Consistency", value: 83, color: "#22c55e" },
-    { label: "Adaptability", value: 68, color: "#a78bfa" },
-    { label: "Clutch factor", value: 95, color: "#f59e0b" },
-  ],
-  ratingHistory: [
-    { t: "T1", rating: 1000, won: false },
-    { t: "T2", rating: 2534, won: true },
-    { t: "T3", rating: 2518, won: false },
-    { t: "T4", rating: 2570, won: true },
-    { t: "T5", rating: 2605, won: true },
-    { t: "T6", rating: 2648, won: true },
-    { t: "T7", rating: 2620, won: false },
-    { t: "T8", rating: 2700, won: true },
-    { t: "T9", rating: 2741, won: false },
-    { t: "T10", rating: 2789, won: true },
-    { t: "T11", rating: 2810, won: false },
-    { t: "T12", rating: 2847, won: true },
-    { t: "T13", rating: 3847, won: true },
-  ],
-};
+// const PLAYER = {
+//   username: "KingSlayer",
+//   initials: "KS",
+//   memberSince: "Jan 2023",
+//   lastActive: "Today",
+//   rating: 2847,
+//   peakRating: 2901,
+//   rank: "Grandmaster",
+//   nextRank: "Mythic",
+//   nextRankRating: 3000,
+//   tournamentsPlayed: 134,
+//   tournamentsWon: 41,
+//   matchesPlayed: 1209,
+//   matchWinRate: 58.2,
+//   top3Finishes: 87,
+//   bestStreak: 9,
+//   currentStreak: 7,
+//   globalPercentile: 1,
+//   avgAccuracy: 82,
+//   avgMoveSpeed: 4.2,
+//   medals: { gold: 41, silver: 28, bronze: 18 },
+//   skills: [
+//     { label: "Aggression", value: 91, color: "#e8613a" },
+//     { label: "Defense", value: 74, color: "#3b82f6" },
+//     { label: "Consistency", value: 83, color: "#22c55e" },
+//     { label: "Adaptability", value: 68, color: "#a78bfa" },
+//     { label: "Clutch factor", value: 95, color: "#f59e0b" },
+//   ],
+//   ratingHistory: [
+//     { t: "T1", rating: 1000, won: false },
+//     { t: "T2", rating: 2534, won: true },
+//     { t: "T3", rating: 2518, won: false },
+//     { t: "T4", rating: 2570, won: true },
+//     { t: "T5", rating: 2605, won: true },
+//     { t: "T6", rating: 2648, won: true },
+//     { t: "T7", rating: 2620, won: false },
+//     { t: "T8", rating: 2700, won: true },
+//     { t: "T9", rating: 2741, won: false },
+//     { t: "T10", rating: 2789, won: true },
+//     { t: "T11", rating: 2810, won: false },
+//     { t: "T12", rating: 2847, won: true },
+//     { t: "T13", rating: 3847, won: true },
+//   ],
+// };
 
 type AnimatedNumberProps = {
   value: number;
@@ -268,15 +269,15 @@ const ProfilePage: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await fetch(`${baseUrl}/users/${username}`, {
-        headers: { ...authHeaders() },
+        headers: await authHeaders(),
       });
       if (response.ok) {
         const userData = await response.json();
         customLog("Fetched user profile:", userData);
         setUserProfile(userData);
-        if (userData.id === user?.id) {
-          updateUser(userData);
-        }
+        // if (userData.id === user?.id) {
+        //   updateUser(userData);
+        // }
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -306,7 +307,7 @@ const ProfilePage: React.FC = () => {
       console.log("formData:", data);
 
       const resonse = await fetch(`${baseUrl}/profile/upload`, {
-        headers: { ...authHeaders() },
+        headers: await authHeaders(),
         method: "POST",
         body: data,
       });
@@ -358,7 +359,7 @@ const ProfilePage: React.FC = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders(),
+          ...(await authHeaders()),
         },
         body: JSON.stringify({
           phone: editFormData.phone,
@@ -386,8 +387,8 @@ const ProfilePage: React.FC = () => {
   const getRatingProgress = () => {
     if (!user?.is_rated) return 0;
     const progress =
-      ((user?.rating - user?.current_rank_min_rating) /
-        (user?.next_rank_min_rating - user?.current_rank_min_rating)) *
+      ((userProfile?.rating - userProfile?.current_rank_min_rating) /
+        (userProfile?.next_rank_min_rating - userProfile?.current_rank_min_rating)) *
       100;
     return progress;
   };
@@ -397,30 +398,30 @@ const ProfilePage: React.FC = () => {
   //       (user.rating_to_next_rank - 10000)) *
   //     100
   //   : 0;
-  //const seasonDelta = PLAYER.rating - PLAYER.ratingHistory[0].rating;
+  const seasonDelta = userProfile?.rating_history[userProfile?.rating_history.length - 1]?.rating_change
 
   const getTournamentWinRate = () => {
-    return user?.tournaments_played
+    return userProfile?.tournaments_played
       ? (
-          (((user?.tournaments_won as number) /
-            user?.tournaments_played) as number) * 100
+          (((userProfile?.tournaments_won as number) /
+            userProfile?.tournaments_played) as number) * 100
         ).toFixed(1)
       : "0.0";
   };
 
   const getMatchesWinRate = () => {
-    return user?.games_played
+    return userProfile?.games_played
       ? (
-          (((user?.games_won as number) / user?.games_played) as number) * 100
+          (((userProfile?.games_won as number) / userProfile?.games_played) as number) * 100
         ).toFixed(1)
       : "0.0";
   };
 
   const getPodiumRate = () => {
-    return user?.tournaments_played
+    return userProfile?.tournaments_played
       ? (
-          (((user?.podium_finishes as number) /
-            user?.tournaments_played) as number) * 100
+          (((userProfile?.podium_finishes as number) /
+            userProfile?.tournaments_played) as number) * 100
         ).toFixed(1)
       : "0.0";
   };
@@ -458,7 +459,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
 
-              {user?.id !== userProfile?.id && (
+              {user?.id !== userProfile?.id && userProfile?.online_status == true && (
                 <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-2 border-gray-900" />
               )}
 
@@ -544,7 +545,17 @@ const ProfilePage: React.FC = () => {
                     year: "numeric",
                   })}
                   {" · "}
-                  Last active {PLAYER.lastActive}
+                  {
+                    userProfile.online_status == true ? (
+                      <>
+                      Online
+                      </>
+                    ):(<>
+Last active {formatDistanceToNow(new Date(userProfile.last_active), {
+                      addSuffix: true,
+                    })}
+                    </>)
+                  }
                 </p>
 
                 {/* Location */}
@@ -606,14 +617,14 @@ const ProfilePage: React.FC = () => {
 
                 <div className="text-4xl font-bold text-gray-100 mt-1">
                   <AnimatedNumber
-                    value={user?.rating as number}
+                    value={userProfile?.rating as number}
                     duration={1400}
                     format={(v) => v.toLocaleString()}
                   />
                 </div>
 
                 <div className="text-xs text-gray-500 mt-1">
-                  Peak {user?.peak_rating?.toLocaleString()}
+                  Peak {userProfile?.peak_rating?.toLocaleString()}
                 </div>
               </div>
             </div>
@@ -755,17 +766,26 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Rating Chart */}
-        {/* <div className="mb-6">
+        <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">
               Rating History
             </h2>
-            <div className="flex-1 h-px bg-gray-700" />
-            <span className="text-xs font-semibold text-green-400 whitespace-nowrap">
+            <div className="flex-1 h-px bg-gray-700" /> 
+            {
+              seasonDelta < 0 ? (
+                 <span className="text-xs font-semibold text-red-400 whitespace-nowrap">
+              ▼ {seasonDelta} since last tournament
+            </span>
+              ): (
+                 <span className="text-xs font-semibold text-green-400 whitespace-nowrap">
               ▲ +{seasonDelta} since last tournament
             </span>
+              )
+            }
+ 
           </div>
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          {/* <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={PLAYER.ratingHistory}>
                 <defs>
@@ -794,6 +814,7 @@ const ProfilePage: React.FC = () => {
                   strokeWidth={2.5}
                   fill="url(#ratingGrad)"
                   dot={(props) => {
+                    console.log("dot props:", props);
                     const d = PLAYER.ratingHistory[props.index];
                     return (
                       <circle
@@ -821,8 +842,8 @@ const ProfilePage: React.FC = () => {
                 Other result
               </span>
             </div>
-          </div>
-        </div> */}
+          </div> */}
+        </div>
 
         <RatingGraph history={userProfile?.rating_history} />
         {/* Skills and Facts */}

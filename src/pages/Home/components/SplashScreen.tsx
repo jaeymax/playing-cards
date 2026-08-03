@@ -11,16 +11,16 @@ export default function SplashScreen({
     <div className={`splash-wrapper ${leaving ? "leaving" : ""}`}>
       <div className="splash">
         <div className="table">
-          <div className="card spade" data-corner="K">
+          <div className="card_display spade" data-corner="K">
             <img className="w-full h-full image-cover" src="https://sparplay-image-uploads.s3.us-east-1.amazonaws.com/king-of-spades.jpg" alt="" />
           </div>
-          <div className="card heart" data-corner="K">
+          <div className="card_display heart" data-corner="K">
             <img className="w-full h-full image-cover" src="https://sparplay-image-uploads.s3.us-east-1.amazonaws.com/king-of-hearts.jpg" alt="" />
           </div>
-          <div className="card diamond" data-corner="K">
+          <div className="card_display diamond" data-corner="K">
             <img className="w-full h-full image-cover" src="https://sparplay-image-uploads.s3.us-east-1.amazonaws.com/king-of-diamonds.jpg" alt="" />
           </div>
-          <div className="card club" data-corner="K">
+          <div className="card_display club" data-corner="K">
             <img className="w-full h-full image-cover" src="https://sparplay-image-uploads.s3.us-east-1.amazonaws.com/king-of-clubs.jpg" alt="" />
           </div>
         </div>

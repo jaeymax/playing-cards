@@ -112,12 +112,12 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       {/* Left: Call to Action */}
       <div className="space-y-6">
-        <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 text-white">
+        {/* <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 text-white">
           Welcome to 
           <span className="ml-3" >SPAR</span>
           <span style={{color:"#E8B93E"}} >PLAY</span>
           
-        </h1>
+        </h1> */}
         <p className="text-sm md:text-lg text-gray-300">
           SPARPLAY is a digital adaptation of the Popular Ghanaian Spar card
           game. Play with friends, compete in tournaments, or battle the

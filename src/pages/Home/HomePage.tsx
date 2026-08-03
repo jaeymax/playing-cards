@@ -20,6 +20,7 @@ const HomePage: React.FC = () => {
       <InstallBanner />
       <NavBar showSignUps={true} />
       <div className="container mx-auto px-4 py-8 space-y-16 flex-1">
+            {/* <TournamentBanner /> */}
         <HeroSection />
 
         {/* Main Grid Layout */}
