@@ -134,7 +134,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
             onClick={handleInviteModalClicked}
             className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
-            Invite Friend
+            Play with Friends
           </button>
           <button
             onClick={handlePlayVsComputerModalClicked}
