@@ -571,7 +571,6 @@ const SingleEliminationGame: React.FC<SingleEliminationGameProps> = ({
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
-
       {notification && !showChat && (
         <ChatNotification
           message={notification}

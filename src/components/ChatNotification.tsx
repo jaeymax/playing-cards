@@ -20,85 +20,89 @@ const ChatNotification = ({
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Start closing after 3 seconds
+    const closeTimer = setTimeout(() => {
       setIsClosing(true);
-      setTimeout(onClose, 300);
+
+      // Wait for the 300ms exit animation
+      const removeTimer = setTimeout(() => {
+        onClose();
+      }, 300);
+
+      return () => clearTimeout(removeTimer);
     }, 3000);
 
-    return () => clearTimeout(timer);
-  }, [onClose]);
+    return () => clearTimeout(closeTimer);
+  }, []); // IMPORTANT: don't depend on onClose
 
   const isAudio = message.type === "audio";
-  //const initials = message.username?.trim().charAt(0).toUpperCase() || "?";
 
   const handleClick = () => {
+    if (isClosing) return;
+
     setIsClosing(true);
+
     setTimeout(() => {
       onClick?.();
       onClose();
     }, 300);
   };
 
+  if (!message) return null;
+
   return (
     <div
       onClick={handleClick}
-      className={`z-[100000000000000000000000000000] fixed md:top-4 top-2 md:right-4 mx-2 md:max-w-sm w-[calc(100%-16px)] bg-green-900/100 backdrop-blur-s text-white p-4 rounded-lg shadow-lg borde border-gray-700/20 transform transition-all duration-300 cursor-pointer ${
-        isClosing
-          ? "md:opacity-0 md:translate-x-full opacity-0 -translate-y-full"
-          : "md:opacity-100 md:translate-x-0 opacity-100 translate-y-0"
-      }`}
-      style={{
-        animation: `${
-          isClosing ? "mobileSlideOut" : "mobileSlideIn"
-        } 0.3s ease-out forwards`,
-      }}
+      className={`
+        fixed
+        z-[999999]
+        md:top-4
+        top-2
+        md:right-4
+        right-0
+        mx-2
+        md:max-w-sm
+        w-[calc(100%-16px)]
+        bg-green-900
+        backdrop-blur-sm
+        text-white
+        p-4
+        rounded-lg
+        shadow-lg
+        border
+        border-gray-700/20
+        cursor-pointer
+        transition-all
+        duration-300
+        ease-out
+
+        ${
+          isClosing
+            ? "opacity-0 translate-y-[-100%] md:translate-y-0 md:translate-x-full"
+            : "opacity-100 translate-y-0 md:translate-x-0"
+        }
+      `}
     >
-      <style>
-        {`
-          @media (max-width: 768px) {
-            @keyframes mobileSlideIn {
-              from {
-                opacity: 0;
-                transform: translateY(-100%);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
+      <div className="flex items-center gap-3">
+        <Avatar className="h-10 w-10 shrink-0">
+          <AvatarImage
+            src={
+              message.avatar ||
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
             }
-            @keyframes mobileSlideOut {
-              from {
-                opacity: 1;
-                transform: translateY(0);
-              }
-              to {
-                opacity: 0;
-                transform: translateY(-100%);
-              }
-            }
-          }
-        `}
-      </style>
-      <div className="flex items-start gap-3">
-        <Avatar className="h-8 w-8">
-          {message.avatar ? (
-            <AvatarImage
-              src={message.avatar}
-              alt={`${message.username ?? "User"} avatar`}
-            />
-          ) : (
-            <AvatarImage
-              src={"https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"}
-              alt={`${message.username ?? "User"} avatar`}
-            />
-          )}
+            alt={`${message.username ?? "User"} avatar`}
+          />
         </Avatar>
-        <div className="flex-1">
-          <p className="font-semibold text-sm text-blue-400">
+
+        <div className="min-w-0">
+          <p className="font-semibold">
             {message.username}
           </p>
-          <p className="text-sm text-gray-100">
-            {isAudio ? "🎤 Sent a voice message" : message.message}
+
+          <p className="text-sm text-gray-200 truncate">
+            {isAudio
+              ? "🎤 Sent a voice message"
+              : message.message}
           </p>
         </div>
       </div>
