@@ -25,6 +25,8 @@ const PlayCashForfeitModal = ({
 
   const winnerProfit = Math.max(winnerPayout - stake, 0);
 
+  (onClose)
+
   useEffect(() => {
     if (!isOpen || !isWinner) return;
 

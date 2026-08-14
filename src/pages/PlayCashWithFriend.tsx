@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -11,13 +11,13 @@ import {
   Share2,
   ShieldCheck,
   Coins,
-  Users,
+ // Users,
   Trophy,
   Settings2,
   X,
   Loader2,
   AlertCircle,
-  Play,
+//  Play,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import Setting from "./Setting";
@@ -33,8 +33,6 @@ import GameChat from "@/components/GameChat";
 import BottomBar from "@/components/BottomBar";
 import Modal from "@/components/Modal";
 import WinnerModal from "@/components/WinnerModal";
-import GameOverModal from "@/components/GameOverModal";
-import ScoresTable from "@/components/ScoresTable";
 import DeckArea from "@/components/DeckArea";
 
 import {
@@ -61,58 +59,58 @@ import TimerBar from "@/components/TimerBar";
 import PlayCashForfeitModal from "@/components/PlayCashForfeitModal";
 import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 
-interface CashChallenge {
-  id: number;
-  stake: number;
-  platformFee?: number;
-  winnerPayout?: number;
-  status:
-    | "waiting"
-    | "accepted"
-    | "in_progress"
-    | "completed"
-    | "cancelled"
-    | "expired";
-  creatorId: number;
-  opponentId?: number | null;
-  winnerId?: number | null;
-}
+// interface CashChallenge {
+//   id: number;
+//   stake: number;
+//   platformFee?: number;
+//   winnerPayout?: number;
+//   status:
+//     | "waiting"
+//     | "accepted"
+//     | "in_progress"
+//     | "completed"
+//     | "cancelled"
+//     | "expired";
+//   creatorId: number;
+//   opponentId?: number | null;
+//   winnerId?: number | null;
+// }
 
-interface Game {
-  id: number;
-  game_code: string;
+// interface Game {
+//   id: number;
+//   game_code: string;
 
-  creator_id: number;
-  player_ids?: number[];
+//   creator_id: number;
+//   player_ids?: number[];
 
-  // Your existing game configuration
-  winPoints?: number;
-  includeAces?: boolean;
-  includeSixes?: boolean;
-  isRated?: boolean;
-  numPlayers?: number;
-  current_player_position?: number;
-  // Cash challenge information
-  challenge?: CashChallenge | null;
+//   // Your existing game configuration
+//   winPoints?: number;
+//   includeAces?: boolean;
+//   includeSixes?: boolean;
+//   isRated?: boolean;
+//   numPlayers?: number;
+//   current_player_position?: number;
+//   // Cash challenge information
+//   challenge?: CashChallenge | null;
 
-  cards: Array<{
-    id: number;
-    player_id: number;
-    status: "in_deck" | "in_hand" | "played";
-    suit: "hearts" | "diamonds" | "clubs" | "spades";
-    rank: string;
-  }>;
+//   cards: Array<{
+//     id: number;
+//     player_id: number;
+//     status: "in_deck" | "in_hand" | "played";
+//     suit: "hearts" | "diamonds" | "clubs" | "spades";
+//     rank: string;
+//   }>;
 
-  // Adjust this to whatever your backend calls it
-  status?: string;
+//   // Adjust this to whatever your backend calls it
+//   status?: string;
 
-  // Useful if your server sends this
-  players?: Array<{
-    id: number;
-    username?: string;
-    avatar?: string;
-  }>;
-}
+//   // Useful if your server sends this
+//   players?: Array<{
+//     id: number;
+//     username?: string;
+//     avatar?: string;
+//   }>;
+// }
 
 const PlayCashWithFriend = () => {
   const navigate = useNavigate();
@@ -723,10 +721,7 @@ const PlayCashWithFriend = () => {
    *
    * Adjust these conditions to match your backend.
    */
-  const gameHasStarted =
-    challengeStatus === "in_progress" ||
-    game?.status === "in_progress" ||
-    game?.status === "started";
+  
 
   const challengeIsFinished =
     challengeStatus === "completed" ||
@@ -851,7 +846,7 @@ const PlayCashWithFriend = () => {
 
   if (challengeStatus === "waiting" && isHost) {
     return (
-      <div className="min-h-screen bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover b-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] text-white">
+      <div className="min-h-screen  bg-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] text-white">
         {/* Background glow */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-green-400/10 blur-[120px]" />
@@ -1044,101 +1039,151 @@ const PlayCashWithFriend = () => {
    * --------------------------------------------------
    */
   if (challengeStatus === "waiting" && !isHost) {
-    return (
-      <div className="min-h-screen b-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover px-4 py-8 text-white">
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center">
-          <div className="w-full">
-            {/* Top badge */}
-            <div className="mb-5 flex justify-center">
-              <div className="flex items-center gap-2 rounded-full border border-green-400/20 bg-green-400/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-green-400">
-                <Coins className="h-3.5 w-3.5" />
-                Cash Challenge
-              </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] b-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rr3.jpg')] bg-cover bg-center px-3 py-4 sm:px-4 sm:py-8 text-white">
+
+      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md items-center sm:min-h-[calc(100vh-4rem)]">
+
+        <div className="w-full">
+
+          {/* TOP BADGE */}
+          <div className="mb-3 sm:mb-5 flex justify-center">
+
+            <div className="flex items-center gap-1.5 rounded-full border border-green-400/20 bg-green-400/10 px-3 py-1.5 text-[10px] sm:px-4 sm:py-2 sm:text-xs font-bold uppercase tracking-wider text-green-400">
+
+              <Coins className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+
+              Cash Challenge
+
             </div>
 
-            {/* Main challenge */}
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl">
-              {/* Challenger */}
-              <div className="border-b border-white/10 px-6 pb-6 pt-7 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-2xl">
+          </div>
+
+
+          {/* MAIN CHALLENGE CARD */}
+          <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl">
+
+            {/* SCROLLABLE CONTENT */}
+            <div className="max-h-[calc(100vh-150px) overflow--auto">
+
+              {/* CHALLENGER */}
+              <div className="border-b border-white/10 px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 text-center">
+
+                <div className="mx-auto flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-500/10 text-xl sm:text-2xl">
                   ⚔️
                 </div>
 
-                <h1 className="mt-4 text-xl font-black">
+                <h1 className="mt-3 sm:mt-4 text-lg sm:text-xl font-black">
                   You've been challenged!
                 </h1>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-[11px] sm:text-sm text-gray-500">
                   Join the match and put your skills to the test.
                 </p>
+
               </div>
 
-              {/* Money */}
-              <div className="p-6">
-                <div className="rounded-3xl border border-green-400/20 bg-gradient-to-br from-green-500/10 to-transparent p-5 text-center">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
-                    Entry stake
+
+              {/* CONTENT */}
+              <div className="p-4 sm:p-6">
+
+                {/* MONEY */}
+                <div className="rounded-2xl sm:rounded-3xl border border-green-400/20 bg-gradient-to-br from-green-500/10 to-transparent p-4 sm:p-5 text-center">
+
+                  <p className="text-[9px] sm:text-xs font-bold uppercase tracking-[0.18em] sm:tracking-[0.2em] text-gray-500">
+                    Entry Stake
                   </p>
 
-                  <p className="mt-2 text-5xl font-black tracking-tight">
+                  <p className="mt-1 text-3xl sm:text-5xl font-black tracking-tight">
                     ₵{stake.toFixed(2)}
                   </p>
 
-                  <p className="mt-2 text-xs text-gray-500">
-                    You'll stake ₵{stake.toFixed(2)} from your wallet
+                  <p className="mt-1 text-[10px] sm:text-xs text-gray-500">
+                    Will be deducted from your wallet
                   </p>
+
                 </div>
 
-                {/* Prize breakdown */}
-                <div className="mt-4 rounded-2xl bg-white/[0.03] p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Total pot</span>
 
-                    <span className="font-bold">₵{(stake * 2).toFixed(2)}</span>
+                {/* PRIZE BREAKDOWN */}
+                <div className="mt-3 sm:mt-4 rounded-xl sm:rounded-2xl bg-white/[0.03] p-3 sm:p-4">
+
+                  <div className="flex items-center justify-between">
+
+                    <span className="text-xs sm:text-sm text-gray-400">
+                      Total pot
+                    </span>
+
+                    <span className="text-sm sm:text-base font-bold">
+                      ₵{(stake * 2).toFixed(2)}
+                    </span>
+
                   </div>
 
+
                   {platformFee > 0 && (
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
+                    <div className="mt-2 flex items-center justify-between">
+
+                      <span className="text-[11px] sm:text-sm text-gray-500">
                         Platform fee
                       </span>
 
-                      <span className="text-sm text-gray-500">
+                      <span className="text-[11px] sm:text-sm text-gray-500">
                         ₵{platformFee.toFixed(2)}
                       </span>
+
                     </div>
                   )}
 
-                  <div className="mt-3 border-t border-white/5 pt-3">
+
+                  <div className="mt-2 border-t border-white/5 pt-2">
+
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-sm text-gray-300">
-                        <Trophy className="h-4 w-4 text-yellow-400" />
+
+                      <span className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-300">
+
+                        <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400" />
+
                         Winner receives
+
                       </span>
 
-                      <span className="text-lg font-black text-green-400">
+                      <span className="text-base sm:text-lg font-black text-green-400">
                         ₵{prize.toFixed(2)}
                       </span>
+
                     </div>
+
                   </div>
+
                 </div>
 
-                {/* Game settings */}
-                <div className="mt-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Settings2 className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                      Game settings
+
+                {/* GAME SETTINGS */}
+                <div className="mt-3 sm:mt-4">
+
+                  <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
+
+                    <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
+
+                    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Game Settings
                     </span>
+
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+
+                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+
                     <Setting
                       label="Win points"
                       value={String(game?.winPoints ?? 10)}
                     />
 
-                    <Setting label="Players" value="2 Players" />
+                    <Setting
+                      label="Players"
+                      value="2 Players"
+                    />
 
                     <Setting
                       label="Aces"
@@ -1155,68 +1200,133 @@ const PlayCashWithFriend = () => {
                       value={game?.isRated ? "Yes" : "No"}
                     />
 
-                    <Setting label="Mode" value="Cash Match" />
+                    <Setting
+                      label="Mode"
+                      value="Cash Match"
+                    />
+
                   </div>
+
                 </div>
 
-                {/* Warning */}
-                <div className="mt-5 flex gap-3 rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-4">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
 
-                  <p className="text-xs leading-5 text-gray-400">
+                {/* WARNING */}
+                <div className="mt-3 sm:mt-5 flex gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-3 sm:p-4">
+
+                  <AlertCircle className="mt-0.5 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-yellow-400" />
+
+                  <p className="text-[10px] sm:text-xs leading-4 sm:leading-5 text-gray-400">
+
                     By accepting,{" "}
+
                     <strong className="text-gray-300">
                       ₵{stake.toFixed(2)}
                     </strong>{" "}
+
                     will be locked from your wallet. The winner receives{" "}
+
                     <strong className="text-green-400">
                       ₵{prize.toFixed(2)}
                     </strong>{" "}
+
                     after the match.
+
                   </p>
+
                 </div>
 
-                {/* Accept */}
+
+                {/* ACCEPT */}
                 <button
                   onClick={handleAccept}
                   disabled={processing || challengeStatus !== "waiting"}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-sm font-black text-black shadow-lg shadow-green-500/10 transition hover:bg-green-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="
+                    mt-3
+                    sm:mt-5
+                    flex
+                    w-full
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-xl
+                    sm:rounded-2xl
+                    bg-green-500
+                    py-3
+                    sm:py-4
+                    text-xs
+                    sm:text-sm
+                    font-black
+                    text-black
+                    shadow-lg
+                    shadow-green-500/10
+                    transition
+                    hover:bg-green-400
+                    active:scale-[0.98]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
                 >
+
                   {processing ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                       Accepting challenge...
                     </>
                   ) : (
                     <>
-                      <ShieldCheck className="h-5 w-5" />
+                      <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
                       Accept Challenge
                     </>
                   )}
+
                 </button>
 
-                {/* Decline */}
 
+                {/* DECLINE */}
                 <button
                   onClick={handleDecline}
                   disabled={processing}
-                  className="mt-3 w-full py-2 text-xs font-semibold text-gray-500 transition hover:text-red-400 disabled:opacity-50"
+                  className="
+                    mt-1
+                    sm:mt-3
+                    w-full
+                    py-1.5
+                    sm:py-2
+                    text-[10px]
+                    sm:text-xs
+                    font-semibold
+                    text-gray-500
+                    transition
+                    hover:text-red-400
+                    disabled:opacity-50
+                  "
                 >
                   Decline challenge
                 </button>
+
               </div>
+
             </div>
 
-            {/* Security footer */}
-            <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-gray-600">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Funds are protected until the match is settled.
-            </div>
           </div>
+
+
+          {/* SECURITY FOOTER */}
+          <div className="mt-3 sm:mt-5 flex items-center justify-center gap-1.5 text-[9px] sm:text-[11px] text-gray-600">
+
+            <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+
+            Funds are protected until the match is settled.
+
+          </div>
+
         </div>
+
       </div>
-    );
-  }
+
+    </div>
+  );
+}
 
   /* This will render when the challenge is in progress */
 

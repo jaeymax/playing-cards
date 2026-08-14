@@ -113,40 +113,41 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       {/* Left: Call to Action */}
       <div className="space-y-6">
         {/* <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 text-white">
-          Welcome to 
+          Welcome to
           <span className="ml-3" >SPAR</span>
           <span style={{color:"#E8B93E"}} >PLAY</span>
-          
+
         </h1> */}
         <p className="text-sm md:text-lg text-gray-300">
           SPARPLAY is a digital adaptation of the Popular Ghanaian Spar card
           game. Play with friends, compete in tournaments, or battle the
-          computer and climb the global leaderboards. 
+          computer and climb the global leaderboards.
         </p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex gap-4">
           {/* <button
             onClick={handlePlayNowModalClicked}
             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg transform transition hover:scale-105"
           >
             Play Now
           </button> */}
-<button
+          <button
   onClick={handleInviteModalClicked}
   className="
-    px-7 py-3
-    bg-blue-600
-    hover:bg-blue-500
+    px-4 py-3
+    bg-green-600
+    hover:bg-green-500
     text-white
+    hover:scale-105
     font-semibold
-    rounded-lg
-    transition-colors duration-200
+    rounded-sm
+    transform transition
   "
 >
   Play with Friends
 </button>
           <button
             onClick={handlePlayVsComputerModalClicked}
-            className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transform transition hover:scale-105"
+            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-sm transform transition hover:scale-105"
           >
             Play vs Computer
           </button>
