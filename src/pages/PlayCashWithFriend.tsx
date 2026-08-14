@@ -1,4 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Copy,
   Check,
@@ -11,7 +17,49 @@ import {
   X,
   Loader2,
   AlertCircle,
+  Play,
 } from "lucide-react";
+import { useNavigate, useParams } from "react-router";
+import Setting from "./Setting";
+import { useAppContext } from "@/contexts/AppContext";
+import { useSocket } from "@/contexts/SocketProvider";
+import ChatNotification from "@/components/ChatNotification";
+import PlayerInfo from "@/components/PlayerInfo";
+import OpponentArea from "@/components/OpponentArea";
+import GameMessage from "@/components/GameMessage";
+import PlayerArea from "@/components/PlayerArea";
+import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
+import GameChat from "@/components/GameChat";
+import BottomBar from "@/components/BottomBar";
+import Modal from "@/components/Modal";
+import WinnerModal from "@/components/WinnerModal";
+import GameOverModal from "@/components/GameOverModal";
+import ScoresTable from "@/components/ScoresTable";
+import DeckArea from "@/components/DeckArea";
+
+import {
+  authHeaders,
+  dealCards,
+  ensureGuest,
+  getPlayerIds,
+  getToken,
+  handleGameMessage,
+  handlePlayedCard,
+  playPlayedCardSound,
+  playShuffleSound,
+  reconcileCards,
+  shuffleCards,
+} from "@/utils/Functions";
+import GameNotFoundPage from "@/components/GameNotFoundPage";
+import { baseUrl } from "@/config/api";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/firebase/config";
+import { Message } from "./PlayWithFriend";
+import GameControls from "@/components/GameControls";
+import PlayCashGameOver from "@/components/PlayCashGameOver";
+import TimerBar from "@/components/TimerBar";
+import PlayCashForfeitModal from "@/components/PlayCashForfeitModal";
+import ProcessingForfeitModal from "@/components/ProcessingForfeitModal";
 
 interface CashChallenge {
   id: number;
@@ -43,9 +91,17 @@ interface Game {
   includeSixes?: boolean;
   isRated?: boolean;
   numPlayers?: number;
-
+  current_player_position?: number;
   // Cash challenge information
   challenge?: CashChallenge | null;
+
+  cards: Array<{
+    id: number;
+    player_id: number;
+    status: "in_deck" | "in_hand" | "played";
+    suit: "hearts" | "diamonds" | "clubs" | "spades";
+    rank: string;
+  }>;
 
   // Adjust this to whatever your backend calls it
   status?: string;
@@ -58,80 +114,605 @@ interface Game {
   }>;
 }
 
-interface PlayCashWithFriendProps {
-  game?: Game;
-
-  currentUserId?: number;
-
-  /**
-   * True when the current user created the challenge.
-   */
-  isHost?: boolean;
-
-  /**
-   * Called when opponent accepts the challenge.
-   * Your parent/page should make the API request here.
-   */
-  onAcceptChallenge?: () => Promise<void> | void;
-
-  /**
-   * Called when opponent declines the challenge.
-   */
-  onDeclineChallenge?: () => Promise<void> | void;
-
-  /**
-   * Called when the host wants to cancel the challenge.
-   */
-  onCancelChallenge?: () => Promise<void> | void;
-
-  /**
-   * Render your existing actual Spar game here once
-   * the challenge has been accepted and the server
-   * has started the game.
-   */
-  children?: React.ReactNode;
-}
-
-const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
-  game = {
-    id: 0,
-    game_code: "",
-    creator_id: 0,
-    status: "waiting",
-    challenge: {
-      id: 0,
-      stake: 0,
-      status: "waiting",
-      creatorId: 0,
-    },
-},
-  currentUserId = 0,
-  isHost = false,
-  onAcceptChallenge,
-  onDeclineChallenge,
-  onCancelChallenge,
-  children,
-}) => {
+const PlayCashWithFriend = () => {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [game, setGame] = useState<any | null>({
+    id: 1,
+    game_code: "ABC123",
+    creator_id: 1,
+    winPoints: 10,
+    includeAces: true,
+    includeSixes: false,
+    isRated: true,
+    numPlayers: 2,
+    challenge: {
+      id: 1,
+      stake: 10,
+      platformFee: 1,
+      winnerPayout: 19,
+      status: "waiting",
+      creatorId: 1,
+      opponentId: null,
+      winnerId: null,
+    },
+    cards: [],
+    status: "waiting",
+    players: [
+      { id: 1, username: "Player1", avatar: "avatar1.png" },
+      { id: 2, username: "Player2", avatar: "avatar2.png" },
+    ],
+  });
+
+  const [turn_ends_at, setTurnEndsAt] = useState<number>(0);
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const { code } = useParams();
+  const [isDealing, setIsDealing] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [showDealButton, setShowDealButton] = useState(false);
+  const [showShuffleButton, setShowShuffleButton] = useState(false);
+  const [me, setMe] = useState<any>(null);
+  const [gameCards, setGameCards] = useState<any[]>([]);
+  const [shuffledAtLeastOnce, setShuffledAtLeastOnce] = useState(false);
+  const [players, setPlayers] = useState<any[]>([]);
+  const [firstOpponent, setFirstOpponent] = useState<any>(null);
+  const [secondOpponent, setSecondOpponent] = useState<any>(null);
+  const [thirdOpponent, setThirdOpponent] = useState<any>(null);
+  const { socket } = useSocket();
+  const { user, updateUser } = useAppContext();
+  const [showChat, setShowChat] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [message, setMessage] = useState<string>("Waiting for players...");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [notification, setNotification] = useState<Message | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
+  const [gameNotFound, setGameNotFound] = useState(false);
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showForfeitModal, setShowForfeitModal] = useState(false);
+  const [processingForfeit, setProcessingForfeit] = useState(false);
 
-  const challenge = game.challenge;
 
-  const gameLink = `${window.location.origin}/cash-game/${game.game_code}`;
+  const [gameEnded, setGameEnded] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [winningPlayer, setWinningPlayer] = useState<any>(null);
+  const [typingPlayer, setTypingPlayer] = useState<any>(null);
+
+  const deckRef = useRef<HTMLDivElement>(null);
+  const playerHandRef = useRef<HTMLDivElement>(null);
+  const playerPlayAreaRef = useRef<HTMLDivElement>(null);
+  const opponentOneHandRef = useRef<HTMLDivElement>(null);
+  const opponentTwoHandRef = useRef<HTMLDivElement>(null);
+  const opponentThreeHandRef = useRef<HTMLDivElement>(null);
+  const opponentOnePlayAreaRef = useRef<HTMLDivElement>(null);
+  const opponentTwoPlayAreaRef = useRef<HTMLDivElement>(null);
+  const opponentThreePlayAreaRef = useRef<HTMLDivElement>(null);
+
+  const getPlayerByPosition = (player_position: number) => {
+    return players.find((player) => player.position === player_position);
+  };
+
+  const getCardByPlayerPosition = (player_position: number, cards: any[]) => {
+    const player = getPlayerByPosition(player_position);
+
+    return cards.find((card) => card.player_id === player?.id);
+  };
+
+  useEffect(() => {
+    if (game?.current_player_position === me?.position) {
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("");
+        } else {
+          setMessage("Waiting for dealer to shuffle and deal");
+        }
+      } else {
+        setMessage("Your turn! Click to play");
+      }
+    } else {
+      const player = players.find(
+        (player: any) => player.position === game?.current_player_position,
+      );
+      if (game?.cards.every((card: any) => card.status === "in_deck")) {
+        if (me?.is_dealer) {
+          setMessage("Click to shuffle or deal");
+        } else {
+          setMessage("");
+        }
+      } else {
+        setMessage(`${player?.user.username}'s turn`);
+      }
+      //setMessage(`${player?.user.username}'s turn`);
+    }
+  }, [game]);
+
+  useEffect(() => {
+    if (!turn_ends_at) {
+      setRemainingSeconds(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const endTime = new Date(turn_ends_at).getTime();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      setRemainingSeconds(remaining);
+
+      if (remaining === 0 && game.status == 'in_progress') {
+        setProcessingForfeit(true);
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [turn_ends_at]);
+
+  
+  useEffect(() => {
+    if (game) {
+      socket?.on("playedCard", playedCardCallback);
+      socket?.on("gameEnded", gameEndedCallback);
+      socket?.on("startNewHand", startNewHandCallback);
+      socket?.on("gameOver", gameOverCallback);
+      //socket?.on("rematch", rematchCallback);
+    }
+    return () => {
+      socket?.off("playedCard", playedCardCallback);
+      socket?.off("gameEnded", gameEndedCallback);
+      socket?.off("startNewHand", startNewHandCallback);
+      socket?.off("gameOver", gameOverCallback);
+      //socket?.off("rematch", rematchCallback);
+    };
+  }, [socket, gameCards, game, soundOn]);
+
+  useEffect(() => {
+    const authToken = getToken();
+
+    if (!authToken && !user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
+
+  const handleLogin = () => {
+    setShowLoginPrompt(false);
+    navigate("/signin", { state: { from: window.location.pathname } }); // Pass current page path
+  };
+
+  const handlePlayAsGuest = async () => {
+    setShowLoginPrompt(false);
+    const user = await ensureGuest();
+    if (user) {
+      updateUser(user);
+    }
+  };
+
+  const chatMessageCallback = (message: Message) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+    console.log("Received chat message:", message);
+  };
+
+  const voiceMessageCallback = (message: any) => {
+    if (!showChat) {
+      setUnreadCount((prev) => prev + 1);
+      setNotification(message);
+    }
+
+    setMessages((prev) => [...prev, message]);
+
+    console.log("Received voice message:", message);
+  };
+
+  const gameEndedCallback = (data: any) => {
+    console.log("gameEnded", data);
+    logEvent(analytics, "hand_ended", {
+      winningPlayer: data.winner.user.username,
+      winningPosition: data.winner.position,
+    });
+    setGameEnded(true);
+    setWinningPlayer(data.winner);
+  };
+
+  const gameOverCallback = (winnerData: any) => {
+    setShuffledAtLeastOnce(false);
+    setTurnEndsAt(0);
+    console.log("Game over");
+    logEvent(analytics, "game_ended", {
+      winningPlayer: winnerData.winner.user.username,
+      winningPosition: winnerData.winner.position,
+    });
+    setGameOver(true);
+    setWinningPlayer(winnerData.winner);
+    console.log("Winner data:", winnerData);
+  };
+
+  useEffect(() => {
+    socket?.on("dealtCards", dealtCardsCallback);
+    socket?.on("shuffledDeck", shuffledDeckCallback);
+
+    return () => {
+      socket?.off("shuffledDeck", shuffledDeckCallback);
+      socket?.off("dealtCards", dealtCardsCallback);
+    };
+  }, [
+    socket,
+    me,
+    firstOpponent,
+    secondOpponent,
+    thirdOpponent,
+    soundOn,
+    isShuffling,
+    isDealing,
+  ]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/messages/games/${code}`);
+        if (!response.ok) throw new Error("Failed to fetch messages");
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
+
+    socket?.on("connect", handleConnect);
+    socket?.on("gameData", getGameDataCallback);
+    socket?.on("updatedGameData", getUpdatedGameData);
+    socket?.on("game-not-found", handleGameNotFound);
+    socket?.on("gameMessage", gameMessageCallback);
+    socket?.on("chatMessage", chatMessageCallback);
+
+    socket?.on("voiceMessage", voiceMessageCallback);
+
+    if (socket?.connected) {
+      handleConnect();
+    }
+
+    return () => {
+      socket?.off("gameData", getGameDataCallback);
+      socket?.off("updatedGameData", getUpdatedGameData);
+      socket?.off("gameMessage", gameMessageCallback);
+      socket?.off("connect", handleConnect);
+      socket?.off("game-not-found", handleGameNotFound);
+      socket?.off("chatMessage", chatMessageCallback);
+      socket?.off("voiceMessage", voiceMessageCallback);
+    };
+  }, [user, code, socket]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "Are you sure you want to leave the game?";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  const getMyData = (data: any[], cards: []) => {
+    const myData = data.find((player) => player.user.id === user?.id);
+    const showGameButtons = cards.every(
+      (card: any) => card.status == "in_deck",
+    );
+
+    if (myData?.is_dealer && showGameButtons) {
+      setShowDealButton(true);
+      setShowShuffleButton(true);
+    }
+    setMe(myData);
+  };
+
+  const getOpponentsData = (data: any[]) => {
+    const opponents = data.filter((player) => player.user.id !== user?.id);
+    if (opponents.length > 0) setFirstOpponent(opponents[0]);
+    if (opponents.length > 1) setSecondOpponent(opponents[1]);
+    if (opponents.length > 2) setThirdOpponent(opponents[2]);
+  };
+
+  const getUpdatedGameData = (data: any) => {
+    console.log("Updated game data received:", data);
+    setGame(data);
+    setTurnEndsAt(data.turn_ends_at);
+    const myData = data.players.find(
+      (player: any) => player.user.id === user?.id,
+    );
+    setMe(myData);
+    getOpponentsData(data.players);
+
+    if(data.status == "forfeited"){
+      setShowForfeitModal(true);
+      setProcessingForfeit(false);
+      const winner = data.players.find((player:any) => player.user.id != data.forfeited_by);
+      setWinningPlayer(winner);
+    }
+  };
+
+  const getGameDataCallback = (data: any) => {
+    console.log("Game data received:", data);
+    setGame(data);
+    setTurnEndsAt(data.turn_ends_at);
+    setPlayers(data.players);
+    data.cards.forEach((card: any, i: number) => {
+      card.pos_x = card.pos_x * i;
+      card.pos_y = card.pos_y * i;
+    });
+    const { meId, firstOpponentId, secondOpponentId, thirdOpponentId } =
+      getPlayerIds(data.players, user);
+    reconcileCards(
+      data.cards,
+      setGameCards,
+      meId,
+      firstOpponentId,
+      secondOpponentId,
+      thirdOpponentId,
+      deckRef,
+      playerHandRef,
+      opponentOneHandRef,
+      opponentTwoHandRef,
+      opponentThreeHandRef,
+      playerPlayAreaRef,
+      opponentOnePlayAreaRef,
+      opponentTwoPlayAreaRef,
+      opponentThreePlayAreaRef,
+    );
+    //setGameCards(data.cards);
+    getMyData(data.players, data.cards);
+    getOpponentsData(data.players);
+     if(data.status == "forfeited"){
+      setShowForfeitModal(true);
+      setProcessingForfeit(false);
+      const winner = data.players.find((player:any) => player.user.id != data.forfeited_by);
+      setWinningPlayer(winner);
+    }
+  };
+
+  const dealtCardsCallback = useCallback(
+    (cards: any) => {
+      console.log("DealtCards", cards);
+      setGameCards(cards);
+      dealCards(
+        cards,
+        soundOn,
+        me?.id,
+        firstOpponent?.id,
+        secondOpponent?.id,
+        thirdOpponent?.id,
+        {
+          playerHandRef,
+          opponentOneHandRef,
+          opponentTwoHandRef,
+          opponentThreeHandRef,
+          deckRef,
+        },
+        setGameCards,
+        isDealing,
+        isShuffling,
+        setIsDealing,
+      );
+      setShowDealButton(false);
+      setShowShuffleButton(false);
+    },
+    [
+      firstOpponent,
+      secondOpponent,
+      thirdOpponent,
+      soundOn,
+      isShuffling,
+      isDealing,
+    ],
+  );
+
+  const shuffledDeckCallback = (cards: any) => {
+    setShuffledAtLeastOnce(true);
+    console.log("ShuffleCards", cards);
+    setGameCards(cards);
+    if (soundOn) playShuffleSound();
+    shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
+  };
+
+  const playedCardCallback = ({
+    card_id,
+    player_id,
+    trick_number,
+  }: {
+    card_id: number;
+    player_id: number;
+    trick_number: number;
+  }) => {
+    handlePlayedCard({
+      soundOn,
+      card_id,
+      player_id,
+      trick_number,
+      gameCards,
+      game,
+      me,
+      firstOpponent,
+      secondOpponent,
+      thirdOpponent,
+      deckRef,
+      playerPlayAreaRef,
+      opponentOnePlayAreaRef,
+      opponentTwoPlayAreaRef,
+      opponentThreePlayAreaRef,
+      setGameCards,
+      playSound: playPlayedCardSound,
+    });
+  };
+
+  const startNewHandCallback = (data: any) => {
+    setShuffledAtLeastOnce(false);
+    console.log("Start new hand:", data);
+    logEvent(analytics, "new_hand_started", { handNumber: data.hand_number });
+    //setGameEnded(false);
+    //setWinningPlayer(null);
+    setTurnEndsAt(data.turn_ends_at);
+    setPlayers(data.players);
+    getMyData(data.players, data.cards);
+    getOpponentsData(data.players);
+    setGame(data);
+    setGameCards(data.cards);
+  };
+
+  const gameMessageCallback = (message: string) => {
+    handleGameMessage(message, setMessage);
+  };
+
+  const handleShuffle = () => {
+    socket?.emit("shuffleDeck", code);
+  };
+
+  const handleDeal = () => {
+    socket?.emit("dealCards", code);
+  };
+
+  const handleConnect = () => {
+    socket?.emit("join-room", code);
+    socket?.emit("getGameData", code);
+  };
+
+  const handleGameNotFound = () => {
+    console.error("Game not found with code:", code);
+    setGameNotFound(true);
+  };
+
+  const handleSendMessage = (message: string) => {
+    logEvent(analytics, "message_sent", {
+      gameCode: code,
+      messageLength: message.length,
+    });
+    const messageData: Message = {
+      user_id: user?.id,
+      game_code: code as string,
+      username: user?.username,
+      avatar: user?.image_url,
+      type: "text",
+      message: message,
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, messageData]);
+    socket?.emit("sendMessage", messageData);
+  };
+
+  const handleLeaveRoom = () => {
+    logEvent(analytics, "leave_game_initiated", { gameCode: code });
+    setShowLeaveConfirmation(true);
+  };
+
+  const handleConfirmLeave = () => {
+    logEvent(analytics, "left_game", { gameCode: code });
+    setShowLeaveConfirmation(false);
+    navigate("/");
+  };
+
+  const handleCancelLeave = () => {
+    setShowLeaveConfirmation(false);
+  };
+
+  // if (gameNotFound) {
+  //   return <GameNotFoundPage gameCode={code} />;
+  // }
+
+  const onAcceptChallenge = async () => {
+    // make a post api request to baseur/challenges/accept and add challenge_id in the body of the request
+
+    try {
+      const response = await fetch(`${baseUrl}/challenges/accept`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await authHeaders()),
+        },
+        body: JSON.stringify({ challenge_id: game?.challenge?.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to accept challenge");
+      }
+
+      const data = await response.json();
+
+      console.log("Challenge accepted:", data);
+    } catch (error) {
+      console.error("Error accepting challenge:", error);
+    }
+
+    // return new Promise<void>((resolve) => {
+    //   setTimeout(() => {
+    //     console.log("Challenge accepted");
+    //     resolve();
+    //   }, 2000);
+    // });
+  };
+
+  const onDeclineChallenge = async () => {
+    // Simulate API call
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.log("Challenge declined");
+        resolve();
+      }, 2000);
+    });
+  };
+
+  const onCancelChallenge = async () => {
+    // Simulate API call
+    // make a post api request to baseur/challenges/cancel and add challenge_id in the body of the request
+
+    try {
+      const response = await fetch(`${baseUrl}/challenges/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await authHeaders()),
+        },
+        body: JSON.stringify({ challenge_id: game?.challenge?.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to cancel challenge");
+      }
+
+      const data = await response.json();
+
+      console.log("Challenge cancelled:", data);
+    } catch (error) {
+      console.error("Error cancelling challenge:", error);
+    } 
+
+  };
+
+  const challenge = game?.challenge;
+
+  const isHost = challenge.creator_id === user?.id; // Replace with actual logic to determine if the current user is the host
+
+  const gameLink = `${window.location.origin}/cash-game/${code}`;
 
   const stake = Number(challenge?.stake || 0);
-  const platformFee = Number(challenge?.platformFee || 0);
+  const platformFee = Number(challenge?.platform_fee || 0);
 
   const prize = useMemo(() => {
-    if (challenge?.winnerPayout !== undefined) {
-      return Number(challenge.winnerPayout);
+    if (challenge?.winner_payout !== undefined) {
+      return Number(challenge.winner_payout);
     }
 
     // If your backend sends the fee separately,
     // this calculates the expected winner payout.
     return Math.max(0, stake * 2 - platformFee);
-  }, [challenge?.winnerPayout, stake, platformFee]);
+  }, [challenge?.winner_payout, stake, platformFee]);
 
   const challengeStatus = challenge?.status || "waiting";
 
@@ -144,8 +725,8 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
    */
   const gameHasStarted =
     challengeStatus === "in_progress" ||
-    game.status === "in_progress" ||
-    game.status === "started";
+    game?.status === "in_progress" ||
+    game?.status === "started";
 
   const challengeIsFinished =
     challengeStatus === "completed" ||
@@ -222,17 +803,8 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
     }
   };
 
-  /*
-   * --------------------------------------------------
-   * ACTUAL GAME
-   * --------------------------------------------------
-   *
-   * Once both players have accepted and the server
-   * changes the state, this component simply hands
-   * control to your existing game UI.
-   */
-  if (gameHasStarted && !challengeIsFinished) {
-    return <>{children}</>;
+  if (gameNotFound) {
+    return <GameNotFoundPage gameCode={code} />;
   }
 
   /*
@@ -243,8 +815,8 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
 
   if (challengeIsFinished) {
     return (
-      <div className="min-h-screen bg-[#07130d] text-white flex items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d1c14] p-6 text-center shadow-2xl">
+      <div className="min-h-screen bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-[#07130d] text-white flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-3xl border p-6 text-center border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
             {challengeStatus === "completed" ? (
               <Trophy className="h-7 w-7 text-yellow-400" />
@@ -277,9 +849,9 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
    * --------------------------------------------------
    */
 
-  if (isHost) {
+  if (challengeStatus === "waiting" && isHost) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] text-white">
+      <div className="min-h-screen bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover b-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] text-white">
         {/* Background glow */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-green-400/10 blur-[120px]" />
@@ -360,9 +932,7 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
                 {/* Link */}
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-2">
                   <div className="min-w-0 flex-1 px-2">
-                    <p className="truncate text-sm text-gray-300">
-                      {gameLink}
-                    </p>
+                    <p className="truncate text-sm text-gray-300">{gameLink}</p>
                   </div>
 
                   <button
@@ -417,14 +987,13 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
                 </div>
 
                 {/* Cancel */}
-                {onCancelChallenge && (
-                  <button
-                    onClick={() => setShowCancelConfirm(true)}
-                    className="mt-5 w-full text-xs font-medium text-gray-500 transition hover:text-red-400"
-                  >
-                    Cancel challenge
-                  </button>
-                )}
+
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="mt-5 w-full text-xs font-medium text-gray-500 transition hover:text-red-400"
+                >
+                  Cancel challenge
+                </button>
               </div>
             </div>
           </div>
@@ -437,8 +1006,8 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
               <h3 className="text-lg font-bold">Cancel challenge?</h3>
 
               <p className="mt-2 text-sm leading-6 text-gray-400">
-                Your locked stake will be released if the challenge has not
-                been accepted yet.
+                Your locked stake will be released if the challenge has not been
+                accepted yet.
               </p>
 
               <div className="mt-6 flex gap-3">
@@ -474,167 +1043,160 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
    * OPPONENT VIEW
    * --------------------------------------------------
    */
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] px-4 py-8 text-white">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center">
-        <div className="w-full">
-          {/* Top badge */}
-          <div className="mb-5 flex justify-center">
-            <div className="flex items-center gap-2 rounded-full border border-green-400/20 bg-green-400/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-green-400">
-              <Coins className="h-3.5 w-3.5" />
-              Cash Challenge
-            </div>
-          </div>
-
-          {/* Main challenge */}
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl">
-            {/* Challenger */}
-            <div className="border-b border-white/10 px-6 pb-6 pt-7 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-2xl">
-                ⚔️
+  if (challengeStatus === "waiting" && !isHost) {
+    return (
+      <div className="min-h-screen b-gradient-to-br from-[#062e16] via-[#06451f] to-[#02190b] bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover px-4 py-8 text-white">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center">
+          <div className="w-full">
+            {/* Top badge */}
+            <div className="mb-5 flex justify-center">
+              <div className="flex items-center gap-2 rounded-full border border-green-400/20 bg-green-400/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-green-400">
+                <Coins className="h-3.5 w-3.5" />
+                Cash Challenge
               </div>
-
-              <h1 className="mt-4 text-xl font-black">
-                You've been challenged!
-              </h1>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Join the match and put your skills to the test.
-              </p>
             </div>
 
-            {/* Money */}
-            <div className="p-6">
-              <div className="rounded-3xl border border-green-400/20 bg-gradient-to-br from-green-500/10 to-transparent p-5 text-center">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
-                  Entry stake
-                </p>
-
-                <p className="mt-2 text-5xl font-black tracking-tight">
-                  ₵{stake.toFixed(2)}
-                </p>
-
-                <p className="mt-2 text-xs text-gray-500">
-                  You'll stake ₵{stake.toFixed(2)} from your wallet
-                </p>
-              </div>
-
-              {/* Prize breakdown */}
-              <div className="mt-4 rounded-2xl bg-white/[0.03] p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">
-                    Total pot
-                  </span>
-
-                  <span className="font-bold">
-                    ₵{(stake * 2).toFixed(2)}
-                  </span>
+            {/* Main challenge */}
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl">
+              {/* Challenger */}
+              <div className="border-b border-white/10 px-6 pb-6 pt-7 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-2xl">
+                  ⚔️
                 </div>
 
-                {platformFee > 0 && (
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      Platform fee
-                    </span>
+                <h1 className="mt-4 text-xl font-black">
+                  You've been challenged!
+                </h1>
 
-                    <span className="text-sm text-gray-500">
-                      ₵{platformFee.toFixed(2)}
-                    </span>
-                  </div>
-                )}
+                <p className="mt-1 text-sm text-gray-500">
+                  Join the match and put your skills to the test.
+                </p>
+              </div>
 
-                <div className="mt-3 border-t border-white/5 pt-3">
+              {/* Money */}
+              <div className="p-6">
+                <div className="rounded-3xl border border-green-400/20 bg-gradient-to-br from-green-500/10 to-transparent p-5 text-center">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+                    Entry stake
+                  </p>
+
+                  <p className="mt-2 text-5xl font-black tracking-tight">
+                    ₵{stake.toFixed(2)}
+                  </p>
+
+                  <p className="mt-2 text-xs text-gray-500">
+                    You'll stake ₵{stake.toFixed(2)} from your wallet
+                  </p>
+                </div>
+
+                {/* Prize breakdown */}
+                <div className="mt-4 rounded-2xl bg-white/[0.03] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-sm text-gray-300">
-                      <Trophy className="h-4 w-4 text-yellow-400" />
-                      Winner receives
-                    </span>
+                    <span className="text-sm text-gray-400">Total pot</span>
 
-                    <span className="text-lg font-black text-green-400">
-                      ₵{prize.toFixed(2)}
-                    </span>
+                    <span className="font-bold">₵{(stake * 2).toFixed(2)}</span>
+                  </div>
+
+                  {platformFee > 0 && (
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        Platform fee
+                      </span>
+
+                      <span className="text-sm text-gray-500">
+                        ₵{platformFee.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mt-3 border-t border-white/5 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-sm text-gray-300">
+                        <Trophy className="h-4 w-4 text-yellow-400" />
+                        Winner receives
+                      </span>
+
+                      <span className="text-lg font-black text-green-400">
+                        ₵{prize.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Game settings */}
-              <div className="mt-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <Settings2 className="h-4 w-4 text-gray-500" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                    Game settings
-                  </span>
+                {/* Game settings */}
+                <div className="mt-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Settings2 className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Game settings
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Setting
+                      label="Win points"
+                      value={String(game?.winPoints ?? 10)}
+                    />
+
+                    <Setting label="Players" value="2 Players" />
+
+                    <Setting
+                      label="Aces"
+                      value={game?.includeAces ? "Included" : "Excluded"}
+                    />
+
+                    <Setting
+                      label="Sixes"
+                      value={game?.includeSixes ? "Included" : "Excluded"}
+                    />
+
+                    <Setting
+                      label="Rated"
+                      value={game?.isRated ? "Yes" : "No"}
+                    />
+
+                    <Setting label="Mode" value="Cash Match" />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Setting
-                    label="Win points"
-                    value={String(game.winPoints ?? 10)}
-                  />
+                {/* Warning */}
+                <div className="mt-5 flex gap-3 rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-4">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
 
-                  <Setting
-                    label="Players"
-                    value="2 Players"
-                  />
-
-                  <Setting
-                    label="Aces"
-                    value={game.includeAces ? "Included" : "Excluded"}
-                  />
-
-                  <Setting
-                    label="Sixes"
-                    value={game.includeSixes ? "Included" : "Excluded"}
-                  />
-
-                  <Setting
-                    label="Rated"
-                    value={game.isRated ? "Yes" : "No"}
-                  />
-
-                  <Setting
-                    label="Mode"
-                    value="Cash Match"
-                  />
+                  <p className="text-xs leading-5 text-gray-400">
+                    By accepting,{" "}
+                    <strong className="text-gray-300">
+                      ₵{stake.toFixed(2)}
+                    </strong>{" "}
+                    will be locked from your wallet. The winner receives{" "}
+                    <strong className="text-green-400">
+                      ₵{prize.toFixed(2)}
+                    </strong>{" "}
+                    after the match.
+                  </p>
                 </div>
-              </div>
 
-              {/* Warning */}
-              <div className="mt-5 flex gap-3 rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-4">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
+                {/* Accept */}
+                <button
+                  onClick={handleAccept}
+                  disabled={processing || challengeStatus !== "waiting"}
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-sm font-black text-black shadow-lg shadow-green-500/10 transition hover:bg-green-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Accepting challenge...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-5 w-5" />
+                      Accept Challenge
+                    </>
+                  )}
+                </button>
 
-                <p className="text-xs leading-5 text-gray-400">
-                  By accepting, <strong className="text-gray-300">₵{stake.toFixed(2)}</strong>{" "}
-                  will be locked from your wallet. The winner receives{" "}
-                  <strong className="text-green-400">
-                    ₵{prize.toFixed(2)}
-                  </strong>{" "}
-                  after the match.
-                </p>
-              </div>
+                {/* Decline */}
 
-              {/* Accept */}
-              <button
-                onClick={handleAccept}
-                disabled={processing || challengeStatus !== "waiting"}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-sm font-black text-black shadow-lg shadow-green-500/10 transition hover:bg-green-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Accepting challenge...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-5 w-5" />
-                    Accept Challenge
-                  </>
-                )}
-              </button>
-
-              {/* Decline */}
-              {onDeclineChallenge && (
                 <button
                   onClick={handleDecline}
                   disabled={processing}
@@ -642,37 +1204,343 @@ const PlayCashWithFriend: React.FC<PlayCashWithFriendProps> = ({
                 >
                   Decline challenge
                 </button>
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* Security footer */}
-          <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-gray-600">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Funds are protected until the match is settled.
+            {/* Security footer */}
+            <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-gray-600">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Funds are protected until the match is settled.
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
-/**
- * Small reusable game-setting item.
- */
-const Setting: React.FC<{
-  label: string;
-  value: string;
-}> = ({ label, value }) => {
+  /* This will render when the challenge is in progress */
+
   return (
-    <div className="rounded-xl bg-white/[0.03] px-3 py-2.5">
-      <p className="text-[10px] uppercase tracking-wider text-gray-600">
-        {label}
-      </p>
+    <div className="relative borde bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
+      {notification && !showChat && (
+        <ChatNotification
+          message={notification}
+          onClose={() => setNotification(null)}
+          onClick={() => setShowChat(true)}
+        />
+      )}
 
-      <p className="mt-1 truncate text-xs font-semibold text-gray-300">
-        {value}
-      </p>
+      <div className="min-h-screen relative bg-green800 bg\-[url(./assets/background1.jpg)] bg-cover gap-4 bg-center w-full flex flex-col justify-between pb-24">
+         {remainingSeconds > 0 && game?.current_turn_user_id !== user?.id && (
+          <TimerBar
+            remainingSeconds={remainingSeconds}
+            position="top"
+            isCurrentPlayer={false}
+          />
+        )}
+        
+        <PlayerInfo
+          name={firstOpponent?.user.username || "Waiting..."}
+          player_position={firstOpponent?.position || 0}
+          current_player_position={game?.current_player_position || 0}
+          avatar={
+            firstOpponent?.user.image_url ||
+            "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+          }
+          points={firstOpponent?.score || 0}
+          is_typing={typingPlayer?.user_id === firstOpponent?.user.id}
+          styles="left-1/2 -translate-x-1/2 top-1"
+        />
+
+        {secondOpponent && (
+          <PlayerInfo
+            player_position={secondOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
+            name={secondOpponent?.user.username || "Opponent 2"}
+            avatar={
+              secondOpponent?.user.image_url ||
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
+            points={secondOpponent?.score}
+            is_typing={typingPlayer?.user_id === secondOpponent?.user.id}
+            styles="top-1/2 -translate-y-1/2 left-1"
+          />
+        )}
+        {thirdOpponent && (
+          <PlayerInfo
+            player_position={thirdOpponent?.position || 0}
+            current_player_position={game?.current_player_position || 0}
+            name={thirdOpponent?.user.username || "Opponent 3"}
+            avatar={
+              thirdOpponent?.user.image_url ||
+              "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+            }
+            points={thirdOpponent?.score}
+            is_typing={typingPlayer?.user_id === thirdOpponent?.user.id}
+            styles="top-1/2 -translate-y-1/2 right-1"
+          />
+        )}
+
+        <GameControls
+          showButtons={showDealButton && showShuffleButton}
+          isDealing={isDealing}
+          isShuffling={isShuffling}
+          shuffledAtLeastOnce={shuffledAtLeastOnce}
+          onDeal={handleDeal}
+          onShuffle={handleShuffle}
+        />
+
+        <OpponentArea
+          id="opponentArea1"
+          ref={opponentOneHandRef}
+          className="borde absolute left-1/2 -translate-x-1/2 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        />
+
+        <OpponentArea
+          id="opponentArea2"
+          ref={opponentTwoHandRef}
+          className="borde border-red-500 rotate-90 absolute -left-0 sm:left-0 top-1/3 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        />
+
+        <OpponentArea
+          id="opponentArea3"
+          ref={opponentThreeHandRef}
+          className="borde border-green-500 absolute rotate-90 top-1/3 -right-0 sm:right-0 mt-[100px] container opponent-area borde flex gap- mx-auto w-full mtx-20"
+        />
+
+        <div className="borde z-[100000] w-ful absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+          <div
+            className="flex-col items-center h-[90px w-full opponent-one-play-area  flex borde border-red-500 relative"
+            id="player-2"
+            ref={opponentOnePlayAreaRef}
+          >
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="card-slot"
+                data-position={5 - index - 1}
+              ></div>
+            ))}
+          </div>
+
+          <div className="borde gap-10 justify-betwee items-cente flex border-black">
+            <div
+              className="opponent-two-play-area flex  borde border-blac w-ful"
+              ref={opponentTwoPlayAreaRef}
+            >
+              {[...Array(5)].map((_, index) => (
+                <div
+                  key={index}
+                  className="card-slot-2"
+                  data-position={5 - index - 1}
+                ></div>
+              ))}
+            </div>
+
+            <DeckArea ref={deckRef} gameCards={gameCards} game={game} me={me} />
+
+            <div
+              className="opponent-three-play-area flex borde border-black w-ful"
+              ref={opponentThreePlayAreaRef}
+            >
+              {[...Array(5)].map((_, index) => (
+                <div
+                  key={index}
+                  className="card-slot-2"
+                  data-position={index}
+                ></div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="flex w-full player-play-area items-center flex-col borde border-blue-600 relative"
+            id="player-1"
+            ref={playerPlayAreaRef}
+          >
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="card-slot"
+                data-position={index}
+              ></div>
+            ))}
+          </div>
+        </div>
+
+        <GameMessage message={message} gameEnded={gameEnded} />
+
+        <PlayerArea
+          id="playerArea"
+          ref={playerHandRef}
+          className="container borde border-yellow-500 absolute bottom-0 sm:bottom-10 left-1/2 -translate-x-1/2 mb-20 player-area flex gap- mx-auto w-full"
+        />
+
+         {remainingSeconds > 0 && game?.current_turn_user_id === user?.id && (
+          <TimerBar
+            remainingSeconds={remainingSeconds}
+            position="bottom"
+            isCurrentPlayer={true}
+          />
+        )}
+
+        <LeadingPlayerInfo
+          game={game}
+          getPlayerByPosition={getPlayerByPosition}
+          getCardByPlayerPosition={getCardByPlayerPosition}
+        />
+
+        <PlayerInfo
+          player_position={me?.position || 0}
+          current_player_position={game?.current_player_position || 0}
+          name={me?.user.username || "Player"}
+          avatar={
+            me?.user.image_url ||
+            "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+          }
+          points={me?.score || 0}
+          styles="left-1/2 -translate-x-1/2 bottom-1"
+        />
+
+        {/* <div className="">
+          <AudioRecorder onAudioReady={handleAudio} />
+        </div> */}
+
+        <GameChat
+          socket={socket}
+          gameCode={code || ""}
+          currentUser={user}
+          typingPlayer={typingPlayer}
+          setTypingPlayer={setTypingPlayer}
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+        />
+      </div>
+
+      {/* Bottom Bar */}
+      <BottomBar
+        unreadCount={unreadCount}
+        showChat={showChat}
+        onToggleChat={() => {
+          setShowChat(!showChat);
+          setUnreadCount(0);
+        }}
+        socket={socket}
+        gameCode={code}
+        setSoundOn={setSoundOn}
+        soundOn={soundOn}
+        onLeaveRoom={handleLeaveRoom}
+        setMessages={setMessages}
+      />
+
+      <WinnerModal
+        isOpen={gameEnded}
+        onClose={() => setGameEnded(false)}
+        winningPlayer={winningPlayer}
+        currentPlayer={me}
+        onPlayNextHand={() => {
+          setGameEnded(false);
+          socket?.emit("readyForNextHand", { code, winningPlayer });
+        }}
+        onLeaveGame={() => navigate("/")}
+      />
+
+      {gameOver && (
+        // <GameOverModal
+        //   isOpen={gameOver}
+        //   onClose={() => setGameOver(false)}
+        //   winningPlayer={winningPlayer}
+        //   currentPlayer={me}
+        //   onRematch={() => {
+        //     setGameOver(false);
+        //     socket?.emit("rematch", { code, winningPlayer });
+        //   }}
+        //   onLeaveGame={() => navigate("/")}
+        // />
+        <PlayCashGameOver
+          isOpen={gameOver}
+          onClose={() => setGameOver(false)}
+          winningPlayer={winningPlayer}
+          currentPlayer={me}
+          stake={stake}
+          winnerPayout={prize}
+          onLeaveGame={() => navigate("/")}
+        />
+
+      )}
+
+       <PlayCashForfeitModal
+          isOpen = {showForfeitModal}
+          onClose={()=>setShowForfeitModal(false)}
+          winningPlayer={winningPlayer}
+          currentPlayer={me}
+          stake={stake}
+          winnerPayout={prize}
+          onLeaveGame={()=>navigate('/')}       
+       />
+
+      <ProcessingForfeitModal
+        isOpen = {processingForfeit}
+      />
+
+      {showLoginPrompt && (
+        <Modal
+          title=""
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Welcome!</h2>
+            <p className="mb-4">Would you like to log in or play as a guest?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={handleLogin}
+              >
+                Log In
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+                onClick={handlePlayAsGuest}
+              >
+                Play as Guest
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showLeaveConfirmation && (
+        <Modal
+          title=""
+          isOpen={showLeaveConfirmation}
+          onClose={handleCancelLeave}
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Leave Game?</h2>
+            <p className="mb-4">
+              Are you sure you want to leave the game? Your game progress will
+              be lost.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+                onClick={handleCancelLeave}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={handleConfirmLeave}
+              >
+                Leave Game
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

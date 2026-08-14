@@ -35,7 +35,7 @@ import LeadingPlayerInfo from "@/components/LeadingPlayerInfo";
 import BottomBar from "@/components/BottomBar";
 import GameNotFoundPage from "@/components/GameNotFoundPage";
 
-interface Message {
+export interface Message {
   user_id: number | undefined;
   username: string | undefined;
   game_code: string;
@@ -159,12 +159,6 @@ const PlayWithFriend = () => {
 
   useEffect(() => {
     const authToken = getToken();
-    // const getGuestCredentials = async () => {
-    //   const user = await ensureGuest();
-    //   if (user) {
-    //     updateUser(user);
-    //   }
-    // };
 
     if (!authToken && !user) {
       setShowLoginPrompt(true);
@@ -262,7 +256,7 @@ const PlayWithFriend = () => {
       socket?.off("chatMessage", chatMessageCallback);
       socket?.off("voiceMessage", voiceMessageCallback);
     };
-  }, [user, code, socket]);
+  }, [user, code, socket]); 
 
   useEffect(() => {
     if (user) {

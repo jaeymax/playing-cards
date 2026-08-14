@@ -93,7 +93,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/game/:code" element={<GameModal />} />
-          <Route path="/cash-game/:code" element={<PlayCashWithFriend onAcceptChallenge={() => {}} onCancelChallenge={()=>{}} onDeclineChallenge={()=>{}} />} />
+          <Route path="/cash-game/:code" element={<PlayCashWithFriend/>} />
           <Route path = "/game/:code/spectate" element = {<SpectatePage/>} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/wallet" element={<WalletPage />} />

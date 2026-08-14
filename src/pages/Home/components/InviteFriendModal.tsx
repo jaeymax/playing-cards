@@ -30,6 +30,7 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
   });
 
   const { user, updateUser } = useAppContext();
+  
 
   const navigate = useNavigate();
 
@@ -62,7 +63,7 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
       };
 
       console.log("Creating game with payload:", payload);
-      return;
+      
 
       const response = await fetch(`${baseUrl}/games/create`, {
         method: "POST",
@@ -91,6 +92,11 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
         isStakeGame: matchType === "stake",
         stake,
       });
+
+      if(payload.isStakeGame){
+        navigate(`/cash-game/${data.game.code}`);
+        return;
+      }
 
       navigate(`/game/${data.game.code}`, {
         state: {
