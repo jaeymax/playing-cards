@@ -173,7 +173,7 @@ const TournamentsPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading
             ? [...Array(6)].map((_, i) => <TournamentCardSkeleton key={i} />)
-            : filteredTournaments.map((tournament) => (
+            : filteredTournaments.sort((a,b)=> new Date(b.start_date).getTime() - new Date(a.start_date).getTime()).map((tournament) => (
                 <TournamentCard key={tournament.id} tournament={tournament} />
               ))}
         </div>

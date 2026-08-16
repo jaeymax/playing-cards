@@ -11,6 +11,7 @@ import TournamentBanner from "./components/TournamentBanner";
 //import OnlineFriends from "./components/OnlineFriends";
 // import RecentActivities from "./components/RecentActivities";
 import WeeklySingleEliminationChampions from "./components/WeeklySingleEliminationChampions";
+import OpenChallenges from "./components/OpenChallenges";
 //import OnlinePlayers from "./components/OnlinePlayers";
 //import WeeklySwissChampions from "./components/WeeklySwissChampions";
 
@@ -38,6 +39,7 @@ const HomePage: React.FC = () => {
           <div className="lg:col-span-6 space-y-8">
             <TournamentBanner />
             <RecentGames />
+            {/* <OpenChallenges/> */}
             {/* <RecentActivities /> */}
           </div>
 

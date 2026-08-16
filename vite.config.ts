@@ -16,7 +16,7 @@ export default defineConfig({
   plugins: [react(),
     VitePWA({
       registerType: 'autoUpdate',
-
+     // disable:true,
       manifest: {
         name: 'SparPlay',
         short_name: 'SparPlay',
