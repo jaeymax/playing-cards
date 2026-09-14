@@ -12,10 +12,17 @@ import TournamentBanner from "./components/TournamentBanner";
 // import RecentActivities from "./components/RecentActivities";
 import WeeklySingleEliminationChampions from "./components/WeeklySingleEliminationChampions";
 import OpenChallenges from "./components/OpenChallenges";
+import { useAppContext } from "@/contexts/AppContext";
 //import OnlinePlayers from "./components/OnlinePlayers";
 //import WeeklySwissChampions from "./components/WeeklySwissChampions";
 
 const HomePage: React.FC = () => {
+
+  const {user} = useAppContext()
+  const canViewPlayerIds = [18, 48, 20]
+  const canViewOpenChallenges = user && canViewPlayerIds.includes(user.id)
+
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 w-full flex flex-col">
       <InstallBanner />
@@ -46,6 +53,7 @@ const HomePage: React.FC = () => {
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             {/* <Announcements /> */}
+            {canViewOpenChallenges && <OpenChallenges/>}
           </div>
         </div>
       </div>

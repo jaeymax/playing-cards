@@ -364,7 +364,7 @@ const InviteFriendModal: React.FC<InviteFriendModalProps> = ({
 
         <div className="flex justify-center gap-4 sm:gap-6">
 
-          {[2, 3, 4].map((num) => (
+          {[2, 3, 4].filter((num)=> matchType == 'stake' ? num == 2 : true ).map((num) => (
 
             <button
               key={num}

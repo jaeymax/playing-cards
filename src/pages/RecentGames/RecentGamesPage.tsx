@@ -27,7 +27,7 @@ interface UserGame {
     | "cancelled"
     | "forfeited";
 
-  is_stake_game: boolean;
+  // is_stake_game: boolean;
   is_rated: boolean;
 
   players: GamePlayer[];
@@ -359,7 +359,7 @@ const GamesPage: React.FC = () => {
   ) => {
     navigate(`/game/${game.code}`, {
       state: {
-        gameType: game.is_stake_game
+        gameType: game.stake
           ? "cashChallenge"
           : "playWithFriend",
       },
@@ -426,7 +426,7 @@ const GamesPage: React.FC = () => {
 
             <div className="flex flex-wrap items-center gap-2">
 
-              {game.is_stake_game ? (
+              {game.stake ? (
                 <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-400">
                   💰 Cash Challenge
                 </span>
@@ -460,7 +460,7 @@ const GamesPage: React.FC = () => {
 
           </div>
 
-          {game.is_stake_game &&
+          {game.stake &&
             game.stake !== null && (
               <div className="shrink-0 text-right">
                 <p className="text-[9px] uppercase tracking-wider text-gray-600">
@@ -615,7 +615,7 @@ const GamesPage: React.FC = () => {
 
         {/* Cash prize */}
 
-        {game.is_stake_game &&
+        {game.stake &&
           game.prize !== null &&
           (game.status === "waiting" ||
             game.status === "in_progress") && (
@@ -652,7 +652,7 @@ const GamesPage: React.FC = () => {
                   : "Game completed"}
               </span>
 
-              {game.is_stake_game &&
+              {game.stake &&
                 game.winner === true &&
                 game.prize !== null && (
                   <span className="text-xs font-bold text-emerald-400">
@@ -766,8 +766,7 @@ const GamesPage: React.FC = () => {
               </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                Games and challenges you've
-                created.
+                
               </p>
             </div>
 

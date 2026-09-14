@@ -10,6 +10,10 @@ import animationVideo from "@/assets/animationVideo.webm";
 import { useSocket } from "@/contexts/SocketProvider";
 import Modal from "@/components/Modal";
 import { useNavigate } from "react-router-dom";
+import robotImage from '@/assets/robot.png'
+import friendsImage from '@/assets/friendship.png'
+//import CreateChallengeModal from "./CreateChallengeModal";
+import OpenChallenges from "./OpenChallenges";
 
 
 interface HeroSectionProps {}
@@ -280,20 +284,21 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
             </div>
           </div>
 
+            
+
           {/* YOUR EXISTING BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl">
             {/* Play Now */}
-            {/* ...your existing Play Now button... */}
 
             {/* PLAY NOW */}
             {/* <button
               onClick={handlePlayNowModalClicked}
               className="
-      group relative flex-1
-      flex items-center justify-center gap-2.5
-      px-6 py-3.5
-      rounded-xl
-      bg-[#17243a]
+              group relative flex-1
+              flex items-center justify-center gap-2.5
+              px-6 py-3.5
+              rounded-xl
+              bg-[#17243a]
       text-blue-300
       font-semibold
       border border-blue-500/20
@@ -379,13 +384,13 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         flex items-center justify-center
         w-8 h-8
         rounded-lg
-        bg-emerald-500/10
-        border border-emerald-400/10
-        group-hover:bg-emerald-500/15
+        b-emerald-500/10
+        boder border-emerald-400/10
+        goup-hover:bg-emerald-500/15
         transition-colors
       "
               >
-                <svg
+                {/* <svg
                   className="w-4.5 h-4.5"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -400,7 +405,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
              M22 21v-2a4 4 0 00-3-3.87
              M16 3.13a4 4 0 010 7.75"
                   />
-                </svg>
+                </svg> */}
+                <img src={friendsImage} alt="" />
               </div>
 
               <span>Play with Friends</span>
@@ -430,13 +436,13 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         flex items-center justify-center
         w-8 h-8
         rounded-lg
-        bg-violet-500/10
-        border border-violet-400/10
-        group-hover:bg-violet-500/15
+        b-violet-500/10
+        borde border-violet-400/10
+        grop-hover:bg-violet-500/15
         transition-colors
       "
               >
-                <svg
+                {/* <svg
                   className="w-4.5 h-4.5"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -449,7 +455,9 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
                     d="M9 3h6a2 2 0 012 2v1h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h1V5a2 2 0 012-2z
              M8 11h.01M16 11h.01M9 16h6"
                   />
-                </svg>
+                </svg> */}
+                <img src={robotImage} alt="" />
+                
               </div>
 
               <span>Play vs Computer</span>
@@ -457,6 +465,8 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
           </div>
         </div>
       </div>
+
+      <OpenChallenges />
 
       {/* Right: Game Preview */}
       <div className="relative aspect-video bg-gray-800 rounded-2xl overflow-hidden shadow-2xl borde border-gray-700">

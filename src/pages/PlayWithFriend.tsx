@@ -13,6 +13,7 @@ import PlayerArea from "@/components/PlayerArea";
 import WinnerModal from "@/components/WinnerModal";
 import GameOverModal from "@/components/GameOverModal";
 import {
+  authHeaders,
   dealCards,
   ensureGuest,
   getPlayerIds,
@@ -75,8 +76,9 @@ const PlayWithFriend = () => {
   const [gameNotFound, setGameNotFound] = useState(false);
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
-  
-  console.log('soundOn:', soundOn);
+  const [isJoining, setIsJoining] = useState(false);
+
+  console.log("soundOn:", soundOn);
 
   // Refs for card positions
   const deckRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ const PlayWithFriend = () => {
   const { user, updateUser } = useAppContext();
   const [winningPlayer, setWinningPlayer] = useState<any>(null);
   const [typingPlayer, setTypingPlayer] = useState<any>(null);
-  console.log('typingPlayer:', typingPlayer);
+  console.log("typingPlayer:", typingPlayer);
 
   const navigate = useNavigate();
 
@@ -121,7 +123,7 @@ const PlayWithFriend = () => {
       }
     } else {
       const player = players.find(
-        (player: any) => player.position === game?.current_player_position
+        (player: any) => player.position === game?.current_player_position,
       );
       if (game?.cards.every((card: any) => card.status === "in_deck")) {
         if (me?.is_dealer) {
@@ -178,6 +180,63 @@ const PlayWithFriend = () => {
     }
   };
 
+  const handleJoinGame = async () => {
+    // alert('inside this function')
+
+    try {
+      setIsJoining(true);
+
+      const response = await fetch(`${baseUrl}/games/join/${code}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await authHeaders()),
+        },
+      });
+
+      
+
+      if (!response.ok) {
+        throw new Error("Error message")
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleCancelGame = async () => {
+
+    try { 
+
+    }catch (err) {
+      console.log(err);
+    }
+  }
+
+  const handleLeaveGame = async () => {
+    try {
+      setIsJoining(true);
+
+      const response = await fetch(`${baseUrl}/games/leave/${code}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await authHeaders()),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error message")
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   const chatMessageCallback = (message: Message) => {
     if (!showChat) {
       setUnreadCount((prev) => prev + 1);
@@ -217,7 +276,16 @@ const PlayWithFriend = () => {
       socket?.off("shuffledDeck", shuffledDeckCallback);
       socket?.off("dealtCards", dealtCardsCallback);
     };
-  }, [socket, me, firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]);
+  }, [
+    socket,
+    me,
+    firstOpponent,
+    secondOpponent,
+    thirdOpponent,
+    soundOn,
+    isShuffling,
+    isDealing,
+  ]);
 
   useEffect(() => {
     if (!user) return;
@@ -256,12 +324,12 @@ const PlayWithFriend = () => {
       socket?.off("chatMessage", chatMessageCallback);
       socket?.off("voiceMessage", voiceMessageCallback);
     };
-  }, [user, code, socket]); 
+  }, [user, code, socket]);
 
   useEffect(() => {
-    if (user) {
-      socket?.emit("playerJoin", { userId: user.id, gameCode: code });
-    }
+    // if (user) {
+    //   socket?.emit("playerJoin", { userId: user.id, gameCode: code });
+    // }
   }, [user, socket]);
 
   useEffect(() => {
@@ -289,7 +357,7 @@ const PlayWithFriend = () => {
   const getMyData = (data: any[], cards: []) => {
     const myData = data.find((player) => player.user.id === user?.id);
     const showGameButtons = cards.every(
-      (card: any) => card.status == "in_deck"
+      (card: any) => card.status == "in_deck",
     );
 
     if (myData?.is_dealer && showGameButtons) {
@@ -310,7 +378,7 @@ const PlayWithFriend = () => {
     console.log("Updated game data received:", data);
     setGame(data);
     const myData = data.players.find(
-      (player: any) => player.user.id === user?.id
+      (player: any) => player.user.id === user?.id,
     );
     setMe(myData);
     getOpponentsData(data.players);
@@ -342,7 +410,7 @@ const PlayWithFriend = () => {
       playerPlayAreaRef,
       opponentOnePlayAreaRef,
       opponentTwoPlayAreaRef,
-      opponentThreePlayAreaRef
+      opponentThreePlayAreaRef,
     );
     //setGameCards(data.cards);
     getMyData(data.players, data.cards);
@@ -370,19 +438,26 @@ const PlayWithFriend = () => {
         setGameCards,
         isDealing,
         isShuffling,
-        setIsDealing
+        setIsDealing,
       );
       setShowDealButton(false);
       setShowShuffleButton(false);
     },
-    [firstOpponent, secondOpponent, thirdOpponent, soundOn, isShuffling, isDealing]
+    [
+      firstOpponent,
+      secondOpponent,
+      thirdOpponent,
+      soundOn,
+      isShuffling,
+      isDealing,
+    ],
   );
 
   const shuffledDeckCallback = (cards: any) => {
     setShuffledAtLeastOnce(true);
     console.log("ShuffleCards", cards);
     setGameCards(cards);
-    if(soundOn)playShuffleSound();
+    if (soundOn) playShuffleSound();
     shuffleCards(cards, setGameCards, setIsShuffling, isShuffling, isDealing);
   };
 
@@ -429,7 +504,6 @@ const PlayWithFriend = () => {
     player_id: number;
     trick_number: number;
   }) => {
-   
     handlePlayedCard({
       soundOn,
       card_id,
@@ -505,7 +579,6 @@ const PlayWithFriend = () => {
     socket?.emit("sendMessage", messageData);
   };
 
-  
   const handleLeaveRoom = () => {
     logEvent(analytics, "leave_game_initiated", { gameCode: code });
     setShowLeaveConfirmation(true);
@@ -524,7 +597,6 @@ const PlayWithFriend = () => {
   if (gameNotFound) {
     return <GameNotFoundPage gameCode={code} />;
   }
-
 
   return (
     <div className="relative borde bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover gap-4 bg-center w-full">
@@ -549,6 +621,11 @@ const PlayWithFriend = () => {
             players={players}
             maxPlayers={maxPlayers}
             currentPlayer={me}
+            hostId ={game?.created_by}
+            onJoinGame={handleJoinGame}
+            onCancelGame={handleCancelGame}
+            isJoining={isJoining}
+            onLeaveGame={handleLeaveGame}
           />
         )}
 

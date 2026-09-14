@@ -3,6 +3,7 @@ import { authHeaders, customLog } from "@/utils/Functions";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import CreateChallengeModal from "./CreateChallengeModal";
 
 interface OpenChallenge {
   id: number;
@@ -135,6 +136,9 @@ const OpenChallenges: React.FC = () => {
   const [isLoading, setIsLoading] =
     useState(false);
 
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   const [error, setError] =
     useState<string | null>(null);
 
@@ -215,9 +219,9 @@ const OpenChallenges: React.FC = () => {
     }
   };
 
-//   useEffect(() => {
-//     getOpenChallenges();
-//   }, []);
+  useEffect(() => {
+    getOpenChallenges();
+  }, []);
 
 
   /*
@@ -281,13 +285,16 @@ const OpenChallenges: React.FC = () => {
        * your actual accept endpoint.
        */
       const response = await fetch(
-        `${baseUrl}/challenges/${challenge.id}/accept`,
+        `${baseUrl}/challenges/accept`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(await authHeaders()),
           },
+          body: JSON.stringify({
+            challenge_id: challenge.id
+          })
         }
       );
 
@@ -324,14 +331,20 @@ const OpenChallenges: React.FC = () => {
       /*
        * Go directly into the game.
        */
-      navigate(`/game/${gameCode}`, {
-        state: {
-          gameType:
-            challenge.stake && challenge.stake > 0
-              ? "cashChallenge"
-              : "playWithFriend",
-        },
-      });
+
+      if(challenge.stake){
+          navigate(`/cash-game/${gameCode}`);
+      }
+      else{
+        navigate(`/game/${gameCode}`, {
+          state: {
+            gameType: "playWithFriend"
+              
+          },
+        });
+
+      }
+
 
     } catch (error: any) {
       console.error(
@@ -409,11 +422,31 @@ const OpenChallenges: React.FC = () => {
           </p>
         </div>
 
-        {challenges.length > 0 && (
+          <button
+    onClick={() => setShowCreateModal(true)}
+    className="
+      rounded-full
+      border border-green-600
+      bg-green-600
+      px-3 py-2
+      text-xs
+      font-bold
+      text-white
+      transition
+      hover:border-green-700
+      hover:bg-green-700
+     
+      active:scale-[0.97]
+    "
+  >
+    + 
+  </button>
+
+        {/* {challenges.length > 0 && (
           <span className="rounded-full bg-gray-700 px-2.5 py-1 text-[10px] font-semibold text-gray-400">
             {challenges.length}
           </span>
-        )}
+        )} */}
 
       </div>
 
@@ -535,9 +568,16 @@ const OpenChallenges: React.FC = () => {
                           font-bold
                           text-gray-300
                         ">
-                          {challenge.creator_username
+                          {
+                            challenge.creator_avatar? (
+                              <img src={challenge.creator_avatar} className="rounded-full object-cover" />
+                            ):(
+                              challenge.creator_username?.charAt(0).toUpperCase()
+                            )
+                          }
+                          {/* {challenge.creator_avatar || challenge.creator_username
                             ?.charAt(0)
-                            .toUpperCase()}
+                            .toUpperCase()} */}
                         </div>
 
                         <div className="min-w-0">
@@ -630,9 +670,7 @@ const OpenChallenges: React.FC = () => {
 
                             <p className="text-sm font-black text-emerald-400">
                               ₵
-                              {challenge.stake && challenge.stake.toFixed(
-                                2
-                              )}
+                              {challenge.stake && challenge.stake}
                             </p>
                           </>
                         ) : (
@@ -699,9 +737,7 @@ const OpenChallenges: React.FC = () => {
 
                           <span className="text-xs font-bold text-emerald-400">
                             ₵
-                            {challenge.winner_payout.toFixed(
-                              2
-                            )}
+                            {challenge.winner_payout}
                           </span>
 
                         </div>
@@ -730,16 +766,21 @@ const OpenChallenges: React.FC = () => {
                             : "text-gray-500"
                         }`}
                       >
-                        {countdown
+                        {
+                          countdown == "Expired"? ('Expired'):(`Expires in ${countdown}`)
+                        }
+
+                        {/* {countdown
                           ? `Expires in ${countdown}`
-                          : "No expiry"}
+                          : "No expiry"} */}
                       </span>
 
                     </div>
 
 
                     {/* ACCEPT */}
-
+                        {
+                          countdown !== "Expired" && (
                     <button
                       onClick={() =>
                         handleAcceptChallenge(
@@ -764,6 +805,8 @@ const OpenChallenges: React.FC = () => {
                     >
                       Accept Challenge
                     </button>
+                          )
+                        }
 
                   </div>
 
@@ -774,6 +817,16 @@ const OpenChallenges: React.FC = () => {
 
       </div>
 
+      <CreateChallengeModal
+  isOpen={showCreateModal}
+  onClose={() =>
+    setShowCreateModal(false)
+  }
+  onCreated={() => {
+    // Re-fetch open challenges
+    getOpenChallenges();
+  }}
+/>
 
       {/* FOOTER */}
 

@@ -53,6 +53,9 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
 
   const navigate = useNavigate();
 
+    const canViewPlayerIds = [18, 48, 20]
+    const canViewFriends = user && canViewPlayerIds.includes(user.id)
+
   const emojiCategories = {
     smileys: {
       icon: "😊",
@@ -521,7 +524,9 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   </div>
 
                   {/* Friends Icon */}
-                  {/* <div className="relative">
+                  {
+                    canViewFriends && (
+                  <div className="relative">
                     <button
                       onClick={() => navigate("/friends")}
                       className="mt-2 rounded-lg text-gray-400 hover:text-white"
@@ -540,7 +545,9 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                         />
                       </svg>
                     </button>
-                  </div> */}
+                  </div>
+                    )
+                  }
 
                   {/* Notification Bell */}
                   <div className="relative">

@@ -89,34 +89,34 @@ const TournamentOverviewSkeleton: React.FC = () => (
   </div>
 );
 
-const getFirstPositionPrize = (prize: string, entryFee: string) => {
-  const entryFeeAmount = parseInt(entryFee);
-  // if entry fee is greater than 0, first position gets 60ghc, otherwise they get the entire prize pool
-  if (entryFeeAmount > 0) {
-    return "60 GHC";
-  }
-  return `${prize} GHC`;
-};
+// const getFirstPositionPrize = (prize: string, entryFee: string) => {
+//   const entryFeeAmount = parseInt(entryFee);
+//   // if entry fee is greater than 0, first position gets 60ghc, otherwise they get the entire prize pool
+//   if (entryFeeAmount > 0) {
+//     return "60 GHC";
+//   }
+//   return `${prize} GHC`;
+// };
 
-const getSecondPositionPrize = (prize: string, entryFee: string) => {
- const entryFeeAmount = parseInt(entryFee);
- // if entry fee is greater than 0, second position gets 30ghc, otherwise they get nothing
-  (prize && true)
-  if (entryFeeAmount > 0) {
-    return "30 GHC";
-  }
-  return "";
-}
+// const getSecondPositionPrize = (prize: string, entryFee: string) => {
+//  const entryFeeAmount = parseInt(entryFee);
+//  // if entry fee is greater than 0, second position gets 30ghc, otherwise they get nothing
+//   (prize && true)
+//   if (entryFeeAmount > 0) {
+//     return "30 GHC";
+//   }
+//   return "";
+// }
 
-const getThirdPositionPrize = (prize: string, entryFee: string) => {
-  const entryFeeAmount = parseInt(entryFee);
-  // if entry fee is greater than 0, third position gets nothing, otherwise they get nothing
-  (prize && true)
-  if (entryFeeAmount > 0) {
-    return "";
-  }
-  return "";
-}
+// const getThirdPositionPrize = (prize: string, entryFee: string) => {
+//   const entryFeeAmount = parseInt(entryFee);
+//   // if entry fee is greater than 0, third position gets nothing, otherwise they get nothing
+//   (prize && true)
+//   if (entryFeeAmount > 0) {
+//     return "";
+//   }
+//   return "";
+// }
 
 const TournamentOverview: React.FC<TournamentOverviewProps> = ({
   tournament,
@@ -154,12 +154,12 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                     {tournament?.max_participants}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-2 md:p-3 bg-gray-900 bg-opacity-50 rounded text-xs md:text-sm">
+                {/* <div className="flex items-center justify-between p-2 md:p-3 bg-gray-900 bg-opacity-50 rounded text-xs md:text-sm">
                   <span className="text-gray-400">Prize Pool</span>
                   <span className="font-semibold text-yellow-400">
                     {tournament?.prize} GHC
                   </span>
-                </div>
+                </div> */}
                 <div className="flex items-center justify-between p-2 md:p-3 bg-gray-900 bg-opacity-50 rounded text-xs md:text-sm">
                   <span className="text-gray-400">Difficulty</span>
                   <span className="font-semibold capitalize text-purple-400">
@@ -183,7 +183,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                   <span className="font-semibold text-yellow-400">
                     {/* {tournament?.registration_fee  && parseInt(tournament.prize) * 1} GHC */}
                     {/* {parseInt(tournament?.prize) * 0.5} */}
-                    {getFirstPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")} 
+                    {/* {getFirstPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")}  */}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-gray-700 bg-opacity-30 rounded border border-gray-600 border-opacity-30 text-xs">
@@ -194,7 +194,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                   <span className="font-semibold text-gray-300">
                     {/* {tournament?.prize && parseInt(tournament.prize) * 0} */}
                     {/* {parseInt(tournament.prize) * 0.3} */}
-                     {getSecondPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")} 
+                     {/* {getSecondPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")}  */}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-orange-900 bg-opacity-20 rounded border border-orange-700 border-opacity-30 text-xs">
@@ -205,7 +205,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({
                   <span className="font-semibold text-orange-400">
                     {/* {tournament?.prize && parseInt(tournament.prize) * 0} */}
                     {/* {parseInt(tournament.prize) * 0.2} */}
-                    {getThirdPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")} 
+                    {/* {getThirdPositionPrize(tournament?.prize || "0", tournament?.registration_fee || "0")}  */}
                   </span>
                 </div>
               </div>

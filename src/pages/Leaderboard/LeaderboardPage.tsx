@@ -15,6 +15,13 @@ const LeaderboardPage: React.FC = () => {
     const [topPlayers, setTopPlayers] = React.useState<any>([]);
       const [loading, setLoading] = React.useState<boolean>(true);
 
+
+    const filters = [
+    { id: "global", label: "All Time" },
+    { id: "monthly", label: "This Month" },
+    { id: "weekly", label: "This Week" },
+  ];
+
     useEffect(() => {
       // Fetch player data from the API
       const fetchPlayers = async () => {
@@ -34,26 +41,43 @@ const LeaderboardPage: React.FC = () => {
       fetchPlayers();
     }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      <LeaderboardHeader
-        currentFilter={currentFilter}
-        onFilterChange={setCurrentFilter}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+ return (
+  <div className="min-h-screen bg-gray-900 text-gray-100">
 
-      <div className="containe max-w-4xl mx-auto md:px-4 py-8 space-y-8">
-        <TopThree currentFilter={currentFilter} topPlayers={topPlayers} />
+    <LeaderboardHeader
+      currentFilter={currentFilter}
+      onFilterChange={setCurrentFilter}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      filters={filters}
+    />
+
+    <main className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 lg:px-8">
+
+      <div className="space-y-8">
+
+        {/* TOP 3 */}
+
+        <TopThree
+          currentFilter={currentFilter}
+          topPlayers={topPlayers}
+        />
+
+        {/* TABLE */}
+
         <LeaderboardTable
           currentFilter={currentFilter}
           searchQuery={searchQuery}
           players={players}
           loading={loading}
         />
+
       </div>
-    </div>
-  );
+
+    </main>
+
+  </div>
+);
 };
 
 export default LeaderboardPage;

@@ -25,7 +25,7 @@ interface RecentGame {
     | "cancelled"
     | "forfeited";
 
-  is_stake_game: boolean;
+  //is_stake_game: boolean;
   is_rated: boolean;
 
   players: GamePlayer[];
@@ -256,7 +256,7 @@ const RecentGames: React.FC = () => {
   ) => {
     navigate(`/game/${game.code}`, {
       state: {
-        gameType: game.is_stake_game
+        gameType: game.stake
           ? "cashChallenge"
           : "playWithFriend",
       },
@@ -424,7 +424,7 @@ const RecentGames: React.FC = () => {
 
                     <div className="flex flex-wrap items-center gap-2">
 
-                      {game.is_stake_game ? (
+                      {game.stake ? (
                         <span className="
                           inline-flex
                           items-center
@@ -493,7 +493,7 @@ const RecentGames: React.FC = () => {
 
                   {/* MONEY */}
 
-                  {game.is_stake_game &&
+                  {game.stake &&
                     game.stake !== null && (
                       <div className="shrink-0 text-right">
 
@@ -732,7 +732,7 @@ const RecentGames: React.FC = () => {
 
                 {/* CASH PRIZE */}
 
-                {game.is_stake_game &&
+                {game.stake &&
                   game.prize !== null &&
                   (game.status ===
                     "in_progress" ||
@@ -782,7 +782,7 @@ const RecentGames: React.FC = () => {
                           : "You lost"}
                       </span>
 
-                      {game.is_stake_game &&
+                      {game.stake &&
                         game.winner ===
                           true &&
                         game.prize !==
