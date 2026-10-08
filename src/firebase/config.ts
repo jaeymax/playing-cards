@@ -20,13 +20,36 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const messaging = getMessaging(app);
+//const messaging = getMessaging(app);
 
 export async function getFirebaseMessaging() {
-  if (await isSupported()) {
-    return messaging;
+
+  if (!window.isSecureContext) {
+    console.warn("Firebase Messaging requires a secure context.");
+    return null;
   }
-  return null;
+
+
+  try {
+    const supported = await isSupported();
+
+    if (!supported) {
+      console.warn("Firebase Messaging is not supported in this browser.");
+      return null;
+    }
+
+    return getMessaging(app);
+  } catch (error) {
+    console.warn("Firebase Messaging unavailable:", error);
+    return null;
+  }
+
+  // if (!(await isSupported())) {
+  //   console.warn("Firebase Messaging is not supported in this browser.");
+  //   return null;
+  // }
+
+  // return getMessaging(app);
 }
 
-export { app, analytics, messaging, logEvent };
+export { app, analytics,  logEvent };

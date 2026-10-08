@@ -258,11 +258,11 @@ const WeeklySingleEliminationChampions: React.FC =
 
             <div>
               <h2 className="text-sm font-bold text-white">
-                Weekly Champions
+                Single Elimination Champions
               </h2>
 
               <p className="mt-0.5 text-[11px] text-gray-500">
-                This week's tournament leaders
+                Last single elimination tournament winners
               </p>
             </div>
 

@@ -59,7 +59,7 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
   };
 
   const createBotGame = async () => {
-    const authToken = getToken();
+    const authToken = await getToken();
     let guest = null;
     if (!authToken) {
       const user = await ensureGuest();
@@ -69,6 +69,9 @@ const PlayVsComputerModal: React.FC<PlayVsComputerModalProps> = ({
       }
     }
     console.log(`Creating game with bot`);
+
+    console.log('guest user:', guest);
+    console.log('authenticated user:', user);
     try {
       const response = await fetch(`${baseUrl}/games/create-bot`, {
         method: "POST",

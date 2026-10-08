@@ -37,9 +37,9 @@ const FriendRow = ({ friend, status }: any) => {
               {friend.username}
             </p>
 
-            <span className="hidden sm:inline-flex shrink-0 text-[9px] font-bold text-gray-500 bg-gray-700/70 px-1.5 py-0.5 rounded">
+            {/* <span className="hidden sm:inline-flex shrink-0 text-[9px] font-bold text-gray-500 bg-gray-700/70 px-1.5 py-0.5 rounded">
               #{friend.globalRank}
-            </span>
+            </span> */}
 
           </div>
 

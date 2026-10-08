@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useRef, useState, memo } from "react";
+import { useCallback, useEffect, useRef, useState, memo, useMemo } from "react";
 import { useSocket } from "@/contexts/SocketProvider";
 import MatchHeader from "./MatchHeader";
 import MainLayout from "./MainLayout";
@@ -9,6 +9,7 @@ import MatchStats from "./MatchStats";
 import ShareButtons from "./ShareButtons";
 import GameNotFoundPage from "./GameNotFoundPage";
 import {
+  customLog,
   dealCards,
   ensureGuest,
   getPlayerIdsForSpectator,
@@ -20,10 +21,11 @@ import {
   shuffleCards,
 } from "@/utils/Functions";
 import { useAppContext } from "@/contexts/AppContext";
-import GameForfeitedPage from "./GameForfeitedPage";
 import GameEndedPage from "./GameEndedPage";
 import SpectatorChat from "./SpectatorChat";
 import { baseUrl } from "@/config/api";
+import GameForfeitedPage from "./GameForfeitedPage";
+
 
 const MemoizedMatchHeader = memo(MatchHeader);
 
@@ -53,78 +55,7 @@ const SpectatePage = () => {
   const [playerTwo, setPlayerTwo] = useState<any | null>();
   const [playerThree, setPlayerThree] = useState<any | null>({});
   const [playerFour, setPlayerFour] = useState<any | null>({});
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-       // {
-    //   id: "1",
-    //   user_id: 1,
-    //   username: "Jaey",
-    //   message: "He will lose this match",
-    //   timestamp: new Date(Date.now() - 300000),
-    // },
-    // {
-    //   id: "2",
-    //   user_id: 2,
-    //   username: "ProPlayer92",
-    //   message: "Amazing play right there!",
-    //   timestamp: new Date(Date.now() - 240000),
-    // },
-    // {
-    //   id: "3",
-    //   user_id: 3,
-    //   username: "CardMaster",
-    //   message: "Did you see that trick? Insane!",
-    //   timestamp: new Date(Date.now() - 180000),
-    // },
-    // {
-    //   id: "4",
-    //   user_id: 4,
-    //   username: "SpectatorX",
-    //   message: "Player 2 is playing defensively",
-    //   timestamp: new Date(Date.now() - 120000),
-    // },
-    // {
-    //   id: "5",
-    //   user_id: 5,
-    //   username: "Jaey",
-    //   message: "Yeah, smart move honestly",
-    //   timestamp: new Date(Date.now() - 90000),
-    // },
-    // {
-    //   id: "6",
-    //   user_id: 6,
-    //   username: "TwitchViewer",
-    //   message: "This is the best match I've seen all season",
-    //   timestamp: new Date(Date.now() - 60000),
-    // },
-    // {
-    //   id: "7",
-    //   user_id: 7,
-    //   username: "GamerPete",
-    //   message: "The strategy here is top tier",
-    //   timestamp: new Date(Date.now() - 45000),
-    // },
-    // {
-    //   id: "8",
-    //   user_id: 8,
-    //   username: "ProPlayer92",
-    //   message: "What a comeback!",
-    //   timestamp: new Date(Date.now() - 30000),
-    // },
-    // {
-    //   id: "9",
-    //   user_id: 9,
-    //   username: "CardMaster",
-    //   message: "Did NOT expect that move",
-    //   timestamp: new Date(Date.now() - 15000),
-    // },
-    // {
-    //   id: "10",
-    //   user_id: 10,
-    //   username: "SpectatorX",
-    //   message: "This is intense!",
-    //   timestamp: new Date(Date.now() - 5000),
-    // },
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
  // const [newMessage, setNewMessage] = useState("");
   const [gameCompleted, setGameCompleted] = useState(false);
   const [gameForfeited, setGameForfeited] = useState(false);
@@ -149,6 +80,7 @@ const SpectatePage = () => {
 
   const { user, updateUser } = useAppContext();
 
+
   useEffect(() => {
     if (!user) return;
 
@@ -165,16 +97,6 @@ const SpectatePage = () => {
       socket?.off("game-not-found", handleGameNotFound);
       socket?.off("spectatorChatMessage", handleChatMessage);
       socket?.emit("leave-room", code);
-  //alert('You are leaving the game room');
-//console.log('leaving room ....')
-//alert('You are leaving the game room');
-//console.log('leaving room ....')
-    //alert('You are leaving the game room');
-      //console.log('leaving room ....')
-    //alert('You are leaving the game room');
-      //console.log('leaving room ....')
-    //alert('You are leaving the game room');
-      //console.log('leaving room ....')
     };
   }, [socket, user]);
 
@@ -236,6 +158,7 @@ const SpectatePage = () => {
   const matchForfeitCallback = (data:any)=>{
     console.log('data (spectator) matchforfeit', data);
     setGameForfeited(true);
+   customLog(data, setGameForfeited, "SpectatePage.tsx", "matchForfeitCallback");
   }
 
   const startNewHandCallback = (data: any) => {
@@ -281,7 +204,7 @@ const SpectatePage = () => {
   const handleUpdatedGameData = (data: any) => {
     console.log("Updated game data received (spectator):", data);
     if(data.status == 'completed')setGameCompleted(true);
-    if(data.status == 'forfeited')setGameForfeited(true);
+   if(data.status == 'forfeited')setGameForfeited(true);
     setGame(data);
   };
 
@@ -403,6 +326,11 @@ const SpectatePage = () => {
     }
   }, [user]);
 
+  const spectatorCount = useMemo(() => {
+    return Math.floor(Math.random() * 30) + 1;
+  }, []);
+
+  
   if (gameNotFound) {
     return <GameNotFoundPage gameCode={code} />;
   }
@@ -415,7 +343,6 @@ const SpectatePage = () => {
     return <GameForfeitedPage gameCode={code} />
   }
 
- 
 
   return (
     <div className="relative bg-green-800 bg-[url('https://res.cloudinary.com/dbvame158/image/upload/v1770519565/background1_jx3rry.jpg')] bg-cover min-h-screen flex flex-col">
@@ -426,7 +353,7 @@ const SpectatePage = () => {
         player3={game?.players[2]}
         player4={game?.players[3]}
         eventName={`${eventName} - ${roundName}`}
-        viewers={Math.floor(Math.random() * 30) + 1} // Placeholder for viewer count
+        viewers={spectatorCount} // Placeholder for viewer count
       />
       <MainLayout
         gameBoard={

@@ -34,6 +34,7 @@ const SpectatorChat = ({
   loading,
 }: SpectatorChatProps) => {
   const [newMessage, setNewMessage] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // create a useRef to scroll to the bottom of the chat when a new message is added
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -64,48 +65,288 @@ const SpectatorChat = ({
   };
 
   return (
-    <div className="bg-slate-900/40 backdrop-blur-m border-t border-blue-400/20 px-4 py-4 lg:px-8 lg:py-6">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-white text-lg font-bold mb-3">Chat</h2>
+  <>
+    {/* Mobile chat backdrop */}
+    {isChatOpen && (
+      <div
+        className="fixed inset-0 z-[999] b-black/40 backdrop-blu-[2px] lg:hidden"
+        onClick={() => setIsChatOpen(false)}
+      />
+    )}
 
-        {/* Messages Container */}
+    {/* Mobile Chat */}
+    <div
+      className={`
+        fixed bottom-0 left-0 right-0 z-[1000] lg:hidden
+        bg-slate-950/30 backdrop-blur-exl
+        border-t border-white/[0.08]
+        shadow-[0_-10px_40px_rgba(0,0,0,0.35)]
+        transition-all duration-300 ease-out
+        ${isChatOpen ? "h-[55vh] rounded-t-2xl" : "h-14 rounded-t-xl"}
+      `}
+    >
+      {/* Header */}
+      <button
+        type="button"
+        onClick={() => setIsChatOpen((prev) => !prev)}
+        className="w-full h-14 px-4 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08]">
+            <span className="text-base">💬</span>
+
+            {chatMessages.length > 0 && (
+              <span className="absolute -right-1 -top-1 min-w-4 h-4 px-1 flex items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-white border border-white/10">
+                {chatMessages.length > 99
+                  ? "99+"
+                  : chatMessages.length}
+              </span>
+            )}
+          </div>
+
+          <div className="text-left">
+            <div className="text-sm font-semibold text-white">
+              Live Chat
+            </div>
+
+            {!isChatOpen && (
+              <div className="text-[11px] text-slate-400">
+                {chatMessages.length === 0
+                  ? "Join the conversation"
+                  : `${chatMessages.length} ${
+                      chatMessages.length === 1
+                        ? "message"
+                        : "messages"
+                    }`}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-slate-400">
+          {isChatOpen ? (
+            <span className="text-xs">Close</span>
+          ) : (
+            <span className="text-xs">Open</span>
+          )}
+
+          <svg
+            className={`h-5 w-5 transition-transform duration-300 ${
+              isChatOpen ? "rotate-180" : ""
+            }`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+      </button>
+
+      {/* Expanded Mobile Chat */}
+      {isChatOpen && (
+        <div className="flex h-[calc(100%-56px)] flex-col">
+          {/* Handle */}
+          <div className="flex justify-center pb-2">
+            <div className="h-1 w-10 rounded-full bg-white/15" />
+          </div>
+
+          {/* Messages */}
+          <div
+            ref={messagesEndRef}
+            className="custom-scroll flex-1 overflow-y-auto px-4 pb-3"
+          >
+            {loading ? (
+              <div className="flex h-full items-center justify-center">
+                <LoaderCircle className="h-7 w-7 animate-spin text-white/50" />
+              </div>
+            ) : chatMessages.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.06]">
+                  <span className="text-xl">💬</span>
+                </div>
+
+                <p className="text-sm font-medium text-slate-300">
+                  No messages yet
+                </p>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Be the first to say something.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-2.5"
+                  >
+                    <img
+                      src={
+                        msg.avatar ||
+                        "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
+                      }
+                      alt={msg.username}
+                      className="h-8 w-8 flex-shrink-0 rounded-full object-cover border border-white/10"
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2">
+                        <span
+                          className={`max-w-[65%] truncate text-xs font-semibold ${
+                            msg.user_id === user_id
+                              ? "text-white"
+                              : "text-slate-300"
+                          }`}
+                        >
+                          {msg.user_id === user_id
+                            ? "You"
+                            : msg.username}
+                        </span>
+
+                        <span className="flex-shrink-0 text-[10px] text-slate-400">
+                          {new Date(
+                            msg.timestamp
+                          ).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+
+                      <div
+                        className={`mt-1 inline-block max-w-[90%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
+                          msg.user_id === user_id
+                            ? "rounded-tl-md bg-white/[0.08] text-white border border-white/[0.08]"
+                            : "rounded-tl-md bg-black/20 text-slate-300 border border-white/[0.05]"
+                        }`}
+                      >
+                        {msg.message}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Composer */}
+          <div className="border-t border-white/[0.06] bg-black/10 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/20 p-1.5 backdrop-blur-md focus-within:border-white/[0.15]">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    sendChatMessage();
+                  }
+                }}
+                placeholder="Say something..."
+                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-slate-500 outline-none"
+              />
+
+              <button
+                onClick={sendChatMessage}
+                disabled={!newMessage.trim()}
+                type="button"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-white border border-white/[0.08] transition hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Desktop Chat */}
+    <div className="hidden border-t border-white/[0.08] bg-black/20 backdrop-blur-xl lg:block">
+      <div className="mx-auto max-w-6xl px-6 py-4">
+        {/* Desktop Header */}
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08]">
+              <span className="text-sm">💬</span>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-white">
+                Live Chat
+              </h2>
+
+              <p className="text-[11px] text-slate-500">
+                {chatMessages.length}{" "}
+                {chatMessages.length === 1
+                  ? "message"
+                  : "messages"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Messages */}
         <div
           ref={messagesEndRef}
-          className="bg-slate-900/30 relative backdrop-blur-sm rounded-lg p-4 h-48 overflow-y-auto custom-scroll mb-3 border border-gray-700/30"
+          className="custom-scroll mb-3 h-48 overflow-y-auto rounded-xl border border-white/[0.06] bg-black/10 p-4 backdrop-blur-sm"
         >
           {loading ? (
-            //   <div className="flex justify-center items-center py-8">
-            //   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            // </div>
-            <div className="flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center py-8">
-              <LoaderCircle className="animate-spin" />
+            <div className="flex h-full items-center justify-center">
+              <LoaderCircle className="h-7 w-7 animate-spin text-white/50" />
             </div>
           ) : chatMessages.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-8">
-              No messages yet. Be the first to chat!
-            </p>
+            <div className="flex h-full items-center justify-center">
+              <p className="text-sm text-slate-500">
+                No messages yet. Be the first to chat!
+              </p>
+            </div>
           ) : (
             <div className="space-y-3">
               {chatMessages.map((msg, idx) => (
-                <div key={idx} className="text-sm flex items-start gap-2">
+                <div
+                  key={idx}
+                  className="flex items-start gap-2.5"
+                >
                   <img
                     src={
                       msg.avatar ||
                       "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/no-profile-picture-icon.png"
                     }
                     alt={msg.username}
-                    className="w-6 h-6 rounded-full object-cover flex-shrink-0 border border-blue-400/50"
+                    className="h-7 w-7 flex-shrink-0 rounded-full object-cover border border-white/10"
                   />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-blue-300 font-semibold truncate">
-                        {msg.user_id === user_id ? "You" : msg.username}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className={`truncate text-xs font-semibold ${
+                          msg.user_id === user_id
+                            ? "text-white"
+                            : "text-slate-300"
+                        }`}
+                      >
+                        {msg.user_id === user_id
+                          ? "You"
+                          : msg.username}
                       </span>
-                      <span className="text-gray-500 text-xs flex-shrink-0">
-                        {new Date(msg.timestamp).toLocaleTimeString()}
+
+                      <span className="text-[10px] text-slate-600">
+                        {new Date(
+                          msg.timestamp
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     </div>
-                    <span className="text-gray-300">{msg.message}</span>
+
+                    <p className="mt-0.5 break-words text-sm text-slate-400">
+                      {msg.message}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -113,28 +354,35 @@ const SpectatorChat = ({
           )}
         </div>
 
-        {/* Message Input */}
+        {/* Desktop Composer */}
         <div className="flex gap-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && sendChatMessage()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                sendChatMessage();
+              }
+            }}
             placeholder="Type a message..."
-            className="flex-1 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/50"
+            className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-black/20 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none backdrop-blur-sm transition focus:border-white/[0.15]"
           />
+
           <button
             onClick={sendChatMessage}
             disabled={!newMessage.trim()}
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            type="button"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.08] text-white border border-white/[0.08] transition hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-30"
           >
             <Send size={16} />
           </button>
         </div>
       </div>
     </div>
-  );
+  </>
+);
 };
 
 export default SpectatorChat;

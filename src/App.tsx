@@ -47,6 +47,7 @@ import DepositSuccessPage from "./pages/tests/DepositSuccess";
 import SpectatePage from "./components/SpectatePage";
 import TournamentLobbyPage from "./pages/Tournament/TournamentLobbyPage";
 import PlayCashWithFriend from "./pages/PlayCashWithFriend";
+import OnlinePlayersPage from "./pages/OnlinePlayersPage";
 //import AboutPage from "./pages/About/AboutPage";
 
 // Create an instance of the Mixpanel object, your token is already added to this snippet
@@ -56,6 +57,7 @@ mixpanel.init(import.meta.env.VITE_APP_MIXPANEL_TOKEN, {
 })
 
 registerSW({
+  immediate: true,
   onNeedRefresh() {
     console.log("New update available")
   },
@@ -98,6 +100,8 @@ function App() {
           <Route path="/support" element={<SupportPage />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/deposit/success" element={<DepositSuccessPage />} />
+          <Route path="/online-players" element={<OnlinePlayersPage/>} />
+
           <Route element={<PrivateRoute />}>
             {/* Protected routes go here */}
           <Route path="/profile/:username" element={<ProfilePage />} />

@@ -53,7 +53,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
 
   const navigate = useNavigate();
 
-    const canViewPlayerIds = [18, 48, 20]
+    const canViewPlayerIds = [18, 48, 20, 29]
     const canViewFriends = user && canViewPlayerIds.includes(user.id)
 
   const emojiCategories = {
@@ -379,7 +379,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
     </div>
   );
 
-  console.log("user in navbar:", user);
+ // console.log("user in navbar:", user);
 
   return (
     <>
@@ -511,7 +511,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                   </div> */}
 
                   {/* Wallet Icon */}
-                  <div className="relative">
+                  {/* <div className="relative">
                     <button
                       onClick={() => navigate("/wallet")}
                       className="flex items-center gap-2 rounded-full border border-gray-500/30 bg-gradient-to-r from-gray-900 to-gray-800 px-3 py-1.5 shadow-md transition-all duration-200 hover:scale-105"
@@ -521,7 +521,7 @@ const NavBar: React.FC<NavBarProps> = ({ showSignUps }) => {
                         ₵ {user?.balance}
                       </span>
                     </button>
-                  </div>
+                  </div> */}
 
                   {/* Friends Icon */}
                   {

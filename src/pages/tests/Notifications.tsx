@@ -3,6 +3,7 @@ import { baseUrl } from "@/config/api";
 import { useAppContext } from "@/contexts/AppContext";
 import { authHeaders } from "@/utils/Functions";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -94,8 +95,8 @@ const NotificationsPage = () => {
       notifications.map((notification) =>
         notification.id === id
           ? { ...notification, is_read: true }
-          : notification
-      )
+          : notification,
+      ),
     );
 
     // Optionally, make an API call to update the notification status on the server
@@ -104,7 +105,7 @@ const NotificationsPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...await authHeaders(),
+          ...(await authHeaders()),
         },
       });
     } catch (error) {
@@ -117,6 +118,10 @@ const NotificationsPage = () => {
     if (activeTab === "unread") return notifications.filter((n) => !n.is_read);
     return notifications.filter((n) => n.type === activeTab);
   };
+
+  console.log("notifications", notifications);
+
+  const navigate = useNavigate();
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -153,9 +158,17 @@ const NotificationsPage = () => {
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const challengesCount = notifications.filter((n) => n.type === "challenge" && !n.is_read).length;
-  const tournamentsCount = notifications.filter((n) => n.type === "tournament" && !n.is_read).length;
-  const rewardsCount = notifications.filter((n) => n.type === "reward" && !n.is_read).length;
+  const challengesCount = notifications.filter(
+    (n) => n.type === "challenge" && !n.is_read,
+  ).length;
+  const tournamentsCount = notifications.filter(
+    (n) => n.type === "tournament" && !n.is_read,
+  ).length;
+  const rewardsCount = notifications.filter(
+    (n) => n.type === "reward" && !n.is_read,
+  ).length;
+
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -307,7 +320,7 @@ const NotificationsPage = () => {
                   <div className="flex items-start">
                     <div
                       className={`flex-shrink-0 h-10 w-10 rounded-md ${getTypeColor(
-                        notification.type
+                        notification.type,
                       )} flex items-center justify-center text-xl`}
                     >
                       {getTypeIcon(notification.type)}
@@ -321,7 +334,7 @@ const NotificationsPage = () => {
                           <p>
                             {new Date(notification.created_at).toLocaleString(
                               "default",
-                              { month: "short" }
+                              { month: "short" },
                             )}
                           </p>
                           <p>
@@ -329,7 +342,7 @@ const NotificationsPage = () => {
                           </p>
                           <p>
                             {new Date(
-                              notification.created_at
+                              notification.created_at,
                             ).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -340,12 +353,19 @@ const NotificationsPage = () => {
                       <p className="mt-1 text-sm text-gray-300">
                         {notification.message}
                       </p>
-                      {!notification.is_read && (
+                      {!notification.is_read && notification.type != "friend"  && (
                         <div className="mt-2">
                           <button className="px-4 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition">
-                            Mark as Read
+                            Mark as read
                           </button>
                         </div>
+                      )}
+                      {notification.action == "friend_request" && (
+                          <div className="mt-2">
+                            <button onClick={()=>{navigate('/friends')}} className="px-4 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition">
+                              View Request
+                            </button>
+                          </div>
                       )}
                     </div>
                     {!notification.is_read && (

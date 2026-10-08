@@ -1,5 +1,5 @@
 import  { useEffect, useState } from "react";
-import { Trophy } from "lucide-react";
+import { ChevronRight, Crown, Medal, Trophy } from "lucide-react";
 import { baseUrl } from "@/config/api";
 import { useNavigate } from "react-router-dom";
 
@@ -16,29 +16,60 @@ interface Champion {
 const WeeklySwissChampions = () => {
 
 
-      const rankConfig: Record<
-        number,
-        { bg: string; border: string; text: string; medal: string }
-      > = {
-        1: {
-          bg: "bg-gradient-to-r from-yellow-500/20 to-yellow-600/10",
-          border: "border-yellow-500/40",
-          text: "text-yellow-300",
-          medal: "🥇",
-        },
-        2: {
-          bg: "bg-gradient-to-r from-slate-400/20 to-slate-500/10",
-          border: "border-slate-400/40",
-          text: "text-slate-200",
-          medal: "🥈",
-        },
-        3: {
-          bg: "bg-gradient-to-r from-orange-600/20 to-orange-700/10",
-          border: "border-orange-600/40",
-          text: "text-orange-300",
-          medal: "🥉",
-        },
-      };
+     
+        const getRankConfig = (
+      index: number
+    ) => {
+      switch (index) {
+        case 0:
+          return {
+            medal: "🥇",
+            label: "1st",
+            accent:
+              "text-yellow-400",
+            border:
+              "border-yellow-500/15",
+            background:
+              "bg-yellow-500/[0.04]",
+          };
+
+        case 1:
+          return {
+            medal: "🥈",
+            label: "2nd",
+            accent:
+              "text-gray-300",
+            border:
+              "border-gray-600/30",
+            background:
+              "bg-gray-500/[0.03]",
+          };
+
+        case 2:
+          return {
+            medal: "🥉",
+            label: "3rd",
+            accent:
+              "text-orange-400",
+            border:
+              "border-orange-500/10",
+            background:
+              "bg-orange-500/[0.03]",
+          };
+
+        default:
+          return {
+            medal: "",
+            label: `${index + 1}th`,
+            accent:
+              "text-gray-400",
+            border:
+              "border-gray-700",
+            background:
+              "bg-gray-800/50",
+          };
+      }
+    };
     
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState<string | null>(null);
@@ -86,95 +117,418 @@ const WeeklySwissChampions = () => {
         } 
       };
 
+      if (
+      loading &&
+      champions.length === 0
+    ) {
+      return (
+        <div className="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800">
+
+          {/* Header */}
+
+          <div className="border-b border-gray-700 px-4 py-4">
+            <div className="flex items-center gap-3">
+
+              <div className="h-10 w-10 animate-pulse rounded-xl bg-gray-700" />
+
+              <div className="space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-gray-700" />
+
+                <div className="h-3 w-44 animate-pulse rounded bg-gray-700" />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Skeleton rows */}
+
+          <div className="divide-y divide-gray-700">
+
+            {[1, 2, 3].map(
+              (item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-3 px-4 py-4"
+                >
+                  <div className="h-8 w-8 animate-pulse rounded-lg bg-gray-700" />
+
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-gray-700" />
+
+                  <div className="flex-1">
+                    <div className="h-3.5 w-28 animate-pulse rounded bg-gray-700" />
+
+                    <div className="mt-2 h-2.5 w-16 animate-pulse rounded bg-gray-700" />
+                  </div>
+
+                  <div className="h-7 w-12 animate-pulse rounded-lg bg-gray-700" />
+                </div>
+              )
+            )}
+
+          </div>
+
+          <div className="p-4">
+            <div className="h-10 animate-pulse rounded-xl bg-gray-700" />
+          </div>
+
+        </div>
+      );
+    }
+
+
+
       if(!champions || champions.length == 0)return null;
 
 
-    return (
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 shadow-lg">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-yellow-500/20 rounded-lg">
-              <Trophy className="w-5 h-5 text-yellow-400" />
+     return (
+      <div className="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800">
+
+        {/* ===================================== */}
+        {/* HEADER */}
+        {/* ===================================== */}
+
+        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-4">
+
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-yellow-500/10 bg-yellow-500/[0.07]">
+              <Trophy
+                className="h-5 w-5 text-yellow-400"
+                strokeWidth={1.8}
+              />
             </div>
+
             <div>
-              <h2 className="text-lg font-bold text-white">Weekly Champions</h2>
-              <p className="text-xs text-gray-400">Swiss Round Tournament</p>
+              <h2 className="text-sm font-bold text-white">
+                Swiss Champions
+              </h2>
+
+              <p className="mt-0.5 text-[11px] text-gray-500">
+                Last swiss tournament winners
+              </p>
             </div>
+
           </div>
-    
-          {/* Champions List */}
-          <div className="space-y-2">
-            {loading
-              ? [...Array(3)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-700 backdrop-blur-sm transition-all hover:shadow-md animate-pulse"
-                  >
-                    <div className="flex items-center justify-center w-8 h-8  bg-gray-">
-                      <span className="text-xl w-4 h-4 bg-gray-700 rounded-full"></span>
-                    </div>
-    
-                    <div className="w-9 h-9 rounded-full border border-gray-600 flex-shrink-0"></div>
-    
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-semibold rounded-sm w-24 h-5 bg-gray-700 truncate`}
-                      ></p>
-                    </div>
-    
-                    <span className="text-xs w-7 h-5 font-bold text-gray-300 bg-gray-700/50 px-2 py-1 rounded"></span>
-                  </div>
-                ))
-              : champions.map((champion, index) => {
-                  const config = rankConfig[index + 1];
+
+          <div className="flex items-center gap-1.5 rounded-full border border-gray-700 bg-gray-900/50 px-2.5 py-1">
+
+            <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+
+            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-500">
+              Top 3
+            </span>
+
+          </div>
+
+        </div>
+
+
+        {/* ===================================== */}
+        {/* ERROR */}
+        {/* ===================================== */}
+
+        {error && (
+          <div className="px-5 py-8 text-center">
+
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10">
+              <span className="text-sm font-bold text-red-400">
+                !
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              {error}
+            </p>
+
+            <button
+              onClick={
+                getWeeklyChampions
+              }
+              className="mt-4 rounded-xl border border-gray-700 bg-gray-700/50 px-4 py-2 text-xs font-bold text-gray-400 transition hover:bg-gray-700 hover:text-gray-300"
+            >
+              Try again
+            </button>
+
+          </div>
+        )}
+
+
+        {/* ===================================== */}
+        {/* CHAMPIONS */}
+        {/* ===================================== */}
+
+        {!error && (
+          <div className="divide-y divide-gray-700">
+
+            {champions
+              .slice(0, 3)
+              .map(
+                (
+                  champion,
+                  index
+                ) => {
+                  const config =
+                    getRankConfig(
+                      index
+                    );
+
+                  const isFirst =
+                    index === 0;
+
                   return (
                     <div
-                      key={champion.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg border backdrop-blur-sm transition-all hover:shadow-md ${config.bg} ${config.border}`}
-                    >
-                      {/* Rank & Medal */}
-                      <div className="flex items-center justify-center w-8">
-                        <span className="text-xl">{config.medal}</span>
-                      </div>
-    
-                      {/* Avatar */}
-                      <div className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-600 flex-shrink-0" >
-                      {
-                        champion.image_url?(
-                          <img
-                            src={champion.image_url}
-                            alt={champion.name}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ):(
-                          <span className="text-sm text-white">👤</span>
-                        )
+                      key={
+                        champion.id
                       }
+                      className={`
+                        group
+                        relative
+                        flex
+                        items-center
+                        gap-3
+                        px-4
+                        py-4
+                        transition
+                        hover:bg-white/[0.02]
+                        ${config.background}
+                      `}
+                    >
+
+                      {/* FIRST PLACE ACCENT */}
+
+                      {isFirst && (
+                        <div className="absolute left-0 top-1/2 h-8 w-0.5 -translate-y-1/2 rounded-r-full bg-yellow-400/70" />
+                      )}
+
+
+                      {/* RANK */}
+
+                      <div className="flex w-8 shrink-0 items-center justify-center">
+
+                        {isFirst ? (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-yellow-500/10 bg-yellow-500/[0.06]">
+                            <Crown
+                              className="h-4 w-4 text-yellow-400"
+                              strokeWidth={1.8}
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-lg">
+                            {config.medal}
+                          </span>
+                        )}
+
                       </div>
-    
-                      {/* Name */}
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-sm font-semibold truncate ${config.text}`}
-                        >
-                          {champion.name}
+
+
+                      {/* AVATAR */}
+
+                      <div
+                        className={`
+                          relative
+                          h-9
+                          w-9
+                          shrink-0
+                          overflow-hidden
+                          rounded-full
+                          border
+                          ${config.border}
+                          bg-gray-700
+                        `}
+                      >
+
+                        {champion.image_url ? (
+                          <img
+                            src={
+                              champion.image_url
+                            }
+                            alt={
+                              champion.name
+                            }
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm">
+                            👤
+                          </div>
+                        )}
+
+                      </div>
+
+
+                      {/* PLAYER */}
+
+                      <div className="min-w-0 flex-1">
+
+                        <div className="flex items-center gap-2">
+
+                          <p
+                            className={`
+                              truncate
+                              text-sm
+                              font-bold
+                              ${
+                                isFirst
+                                  ? "text-white"
+                                  : "text-gray-300"
+                              }
+                            `}
+                          >
+                            {
+                              champion.name
+                            }
+                          </p>
+
+                          {isFirst && (
+                            <span className="hidden rounded-full border border-yellow-500/10 bg-yellow-500/[0.06] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-yellow-500 sm:inline">
+                              Champion
+                            </span>
+                          )}
+
+                        </div>
+
+                        <p className="mt-0.5 text-[10px] text-gray-600">
+                          {config.label} place
                         </p>
+
                       </div>
-                      {/* Wins - Losses*/}
-                      <span className="text-xs font-bold text-gray-300 bg-gray-700/50 px-2 py-1 rounded">
-                        {champion.score}W-{champion.losses}L
-                      </span>
+
+
+                      {/* WINS */}
+
+                      <div className="shrink-0 text-right flex ">
+
+                        <p
+                          className={`
+                            text-xs
+                            font-black
+                            ${
+                              isFirst
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }
+                          `}
+                        >
+                          {
+                            champion.score
+                          }W-
+                        </p>
+                          
+                         <p
+                          className={`
+                            text-xs
+                            font-black
+                            ${
+                              isFirst
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }
+                          `}
+                        >
+                          {
+                            champion.losses
+                          }L
+                        </p>
+
+                    
+
+                      </div>
+
+                      {/* <div className="shrink-0 text-right">
+
+                        <p
+                          className={`
+                            text-sm
+                            font-black
+                            ${
+                              isFirst
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }
+                          `}
+                        >
+                          {
+                            champion.losses
+                          }L
+                        </p>
+
+             
+                      </div> */}
+
                     </div>
-                  );
-                })}
+                  )
+                }
+              )}
+
           </div>
-    
-          {/* CTA Button */}
-          <button onClick={handleViewFullStandings} className="w-full mt-6 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-lg hover:bg-blue-700">
-            View Full Standings
-          </button>
-        </div>
-      );
+        )}
+
+
+        {/* ===================================== */}
+        {/* FOOTER */}
+        {/* ===================================== */}
+
+        {!error &&
+          champions.length > 0 && (
+            <div className="border-t border-gray-700 px-4 py-3">
+
+              <button
+                onClick={
+                  handleViewFullStandings
+                }
+                disabled={
+                  !tournamentId
+                }
+                className="
+                  group
+                  flex
+                  w-full
+                  items-center
+                  justify-between
+                  rounded-xl
+                  border
+                  border-gray-700
+                  bg-gray-900/40
+                  px-3
+                  py-2.5
+                  text-xs
+                  font-bold
+                  text-gray-400
+                  transition
+                  hover:border-gray-600
+                  hover:bg-gray-700/40
+                  hover:text-gray-200
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+
+                <span className="flex items-center gap-2">
+
+                  <Medal className="h-3.5 w-3.5 text-gray-500 transition group-hover:text-yellow-400" />
+
+                  View full standings
+
+                </span>
+
+                <ChevronRight
+                  className="
+                    h-4
+                    w-4
+                    text-gray-600
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-gray-400
+                  "
+                />
+
+              </button>
+
+            </div>
+          )}
+
+      </div>
+    );
 }
 
 export default WeeklySwissChampions

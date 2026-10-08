@@ -88,6 +88,8 @@ interface Notification {
   message: string;
   created_at: string;
   action: string;
+  reference_id:number;
+  actor_id:number;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);

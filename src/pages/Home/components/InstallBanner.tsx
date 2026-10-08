@@ -9,7 +9,7 @@ const isInStandaloneMode = () =>
     window.matchMedia("(display-mode: standalone)").matches) ||
   (window.navigator as any).standalone;
 
-//const STORAGE_KEY = "installBannerDismissed";
+const STORAGE_KEY = "installBannerDismissed";
 
 const InstallBanner: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -19,7 +19,7 @@ const InstallBanner: React.FC = () => {
 
 
   useEffect(() => {
-    //if (localStorage.getItem(STORAGE_KEY) === "true") return;
+    if (localStorage.getItem(STORAGE_KEY) === "true") return;
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -30,7 +30,7 @@ const InstallBanner: React.FC = () => {
     window.addEventListener("beforeinstallprompt", handler as EventListener);
 
     // if on iOS and not already installed, show custom hint
-    if (isIOS() && !isInStandaloneMode()) {
+    if (!isInStandaloneMode()) {
       setVisible(true);
     }
 
@@ -48,25 +48,27 @@ const InstallBanner: React.FC = () => {
       const choice = await deferredPrompt.userChoice;
       if (choice && choice.outcome === "accepted") {
         setVisible(false);
-       // localStorage.setItem(STORAGE_KEY, "true");
+        localStorage.setItem(STORAGE_KEY, "true");
       }
       setDeferredPrompt(null);
     } else {
       // show instructions overlay or temporarily keep visible
       // we'll mark dismissed so it doesn't keep showing repeatedly
-      //localStorage.setItem(STORAGE_KEY, "true");
+      localStorage.setItem(STORAGE_KEY, "true");
       setShowInstallModal(true);
       setVisible(false);
     }
   };
 
   const onDismiss = () => {
-   // localStorage.setItem(STORAGE_KEY, "true");
+    localStorage.setItem(STORAGE_KEY, "true");
     setVisible(false);
   };
 
   console.log('inside install banner, visible:', visible)
   if (isPWA()) return null;
+
+  if(!visible) return null;
 
  return (
   <>

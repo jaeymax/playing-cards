@@ -15,6 +15,147 @@ function playDealCardSound() {
   });
 }
 
+const INSTALLATION_KEY = "sparplay_installation_id";
+
+export function getInstallationId() {
+    let id = localStorage.getItem(INSTALLATION_KEY);
+
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem(INSTALLATION_KEY, id);
+    }
+
+    return id;
+}
+
+export function getDeviceInfo() {
+  const ua = navigator.userAgent;
+
+  let platform = "unknown";
+
+  if (/Android/i.test(ua)) {
+    platform = "android";
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    platform = "ios";
+  } else if (/Windows/i.test(ua)) {
+    platform = "windows";
+  } else if (/Mac/i.test(ua)) {
+    platform = "macos";
+  } else if (/Linux/i.test(ua)) {
+    platform = "linux";
+  }
+
+  return {
+    platform,
+    browser: ua,
+  };
+}
+
+export async function registerDevice(
+  token: string | null = null,
+  permissionStatus: NotificationPermission = Notification.permission
+) {
+  const installationId = getInstallationId();
+  const { platform, browser } = getDeviceInfo();
+
+  const response = await fetch(
+    `${baseUrl}/notifications/register/device`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+
+      body: JSON.stringify({
+        installationId,
+        token,
+        permissionStatus,
+        platform,
+        browser,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+
+    throw new Error(
+      data?.message ||
+        "Failed to register device"
+    );
+  }
+
+  return response.json();
+}
+
+export async function getRegisteredDevice() {
+  const installationId = getInstallationId();
+
+  const response = await fetch(
+    `${baseUrl}/notifications/register/device?installationId=${encodeURIComponent(
+      installationId
+    )}`,
+    {
+      method: "GET",
+
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+    }
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+
+    throw new Error(
+      data?.message ||
+        "Failed to get registered device"
+    );
+  }
+
+  const data = await response.json();
+
+  return data.device;
+}
+
+export async function syncDevicePermission() {
+  if (!("Notification" in window)) {
+    return null;
+  }
+
+  const permission =
+    Notification.permission;
+
+  const device =
+    await getRegisteredDevice();
+
+  if (!device) {
+    await registerDevice(
+      null,
+      permission
+    );
+
+     return device;
+  }
+
+  if (
+    device.permission_status !== permission
+  ) {
+    await registerDevice(
+      null,
+      permission
+    );
+  }
+
+  return device;
+}
+
 export function playShuffleSound() {
   const audio = new Audio(shuffleSound);
   audio.play().catch((err) => {
@@ -424,6 +565,7 @@ export const saveToken = async (token: string) => {
 export async function ensureGuest() {
   const token = await getToken();
 
+  console.log('ensureGuest called, token:', token);
   if (token) return;
 
   const res = await fetch(`${baseUrl}/auth/guest`, {

@@ -16,7 +16,7 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
   const {user} = useAppContext();
 
   const isGuest = user?.is_guest? true : false;
-  console.log("isGuest", isGuest);
+  //console.log("isGuest", isGuest);
 
   if (!isOpen) return null;
 

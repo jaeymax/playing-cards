@@ -535,7 +535,6 @@ const RecentGames: React.FC = () => {
 
                     </div>
 
-
                     {/* SCORES */}
 
                     <div className="shrink-0 text-center">

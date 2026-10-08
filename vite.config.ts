@@ -16,7 +16,11 @@ export default defineConfig({
   plugins: [react(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
      // disable:true,
+      srcDir: 'src',
+      filename:'sw.ts',
+
       manifest: {
         name: 'SparPlay',
         short_name: 'SparPlay',

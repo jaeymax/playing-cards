@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import robotImage from '@/assets/robot.png'
 import friendsImage from '@/assets/friendship.png'
 //import CreateChallengeModal from "./CreateChallengeModal";
-import OpenChallenges from "./OpenChallenges";
+//import OpenChallenges from "./OpenChallenges";
 
 
 interface HeroSectionProps {}
@@ -466,7 +466,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         </div>
       </div>
 
-      <OpenChallenges />
+      {/* <OpenChallenges /> */}
 
       {/* Right: Game Preview */}
       <div className="relative aspect-video bg-gray-800 rounded-2xl overflow-hidden shadow-2xl borde border-gray-700">

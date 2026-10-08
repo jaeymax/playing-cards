@@ -9,7 +9,7 @@ import TournamentOverview from "./components/TournamentOverview";
 import TournamentBracket from "../Tournament/components/TournamentBracket";
 import TournamentStandings from "../Tournament/components/TournamentStandings";
 import TournamentRules from "./components/TournamentRules";
-import { MessageSquare } from "lucide-react";
+//import { MessageSquare } from "lucide-react";
 import TournamentFooter from "../Tournament/components/TournamentFooter";
 // import TournamentHeader from "../Tournament/components/TournamentHeader";
 import { baseUrl } from "@/config/api";
@@ -17,7 +17,7 @@ import { authHeaders, customLog } from "@/utils/Functions";
 import RegistrationModal from "./components/RegistrationModal";
 import PhoneNumberRequiredModal from "../Home/components/PhoneNumberRequiredModal";
 import TournamentHeader from "../Tournament/components/TournamentHeader";
-import LobbyChatModal from "./components/LobbyChatModal";
+//import LobbyChatModal from "./components/LobbyChatModal";
 import MatchForfeitedModal from "../Tournament/components/MatchForfeitedModal";
 import TournamentEndedModal from "../Tournament/components/TournamentEndedModal";
 import { useSocket } from "@/contexts/SocketProvider";
@@ -59,7 +59,7 @@ const TournamentDetailsPage: React.FC = () => {
       useState(false);
   const [phoneNumberRequiredModalOpen, setPhoneNumberRequiredModalOpen] =
     useState(false);
-  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [chatModalOpen] = useState(false);
   const { socket } = useSocket();
   const [showTournamentEndedModal, setShowTournamentEndedModal] =
     useState<boolean>(false);
@@ -72,7 +72,7 @@ const TournamentDetailsPage: React.FC = () => {
   const [tournamentReminderModalOpen, setTournamentReminderModalOpen] = useState(false);
   
 
-    myGameCode && true;
+    myGameCode && chatModalOpen && true;
 
 
   useEffect(() => {
@@ -333,9 +333,9 @@ const TournamentDetailsPage: React.FC = () => {
     });
   };
 
-  const handleLobbyChat = () => {
-    setChatModalOpen(true);
-  };
+  // const handleLobbyChat = () => {
+  //   setChatModalOpen(true);
+  // };
 
   const getButtonState = () => {
     if (userRegistered) return "lobby";
@@ -461,13 +461,13 @@ const TournamentDetailsPage: React.FC = () => {
             }
 
 
-            <button
+            {/* <button
               onClick={handleLobbyChat}
               aria-label="Open lobby chat"
               className="fixed right-4 bottom-24 z-50 p-4 rounded-full bg-blue-600 text-white shadow-2xl hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <MessageSquare size={20} />
-            </button>
+            </button> */}
             <div className="bg-gray-800 w-full md:rounded-lg p-4 border-t border-b md:border border-gray-700">
               <div className="flex space-x-4 border-b border-gray-700 overflow-x-scroll scrollbar-hide">
                 {[
@@ -589,11 +589,11 @@ const TournamentDetailsPage: React.FC = () => {
         isOpen={isLoginRequiredModalOpen}
         onClose={() => setIsLoginRequiredModalOpen(false)}
       />
-      <LobbyChatModal
+      {/* <LobbyChatModal
         isOpen={chatModalOpen}
         onClose={() => setChatModalOpen(false)}
         tournamentId={id || ""}
-      />
+      /> */}
     </div>
   );
 };
