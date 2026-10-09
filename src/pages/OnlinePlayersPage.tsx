@@ -36,16 +36,8 @@ interface OnlinePlayersPageProps {
   onSpectate?: (player: OnlinePlayer) => void;
   onPlayOnline?: () => void;
   onBack?: () => void;
-  onRefresh?: () => void;
   loading?: boolean;
 }
-
-const divisionStyles: Record<string, string> = {
-  Grandmaster: "text-amber-300",
-  Master: "text-purple-300",
-  Expert: "text-blue-300",
-  Rookie: "text-emerald-300",
-};
 
 const statusStyles: Record<PlayerStatus, string> = {
   idle: "text-emerald-400",
@@ -64,27 +56,20 @@ const statusLabels: Record<PlayerStatus, string> = {
 const getInitials = (username: string) =>
   username.slice(0, 2).toUpperCase();
 
-const getDivision = (rating = 1000) => {
-  if (rating >= 1400) return "Grandmaster";
-  if (rating >= 1200) return "Master";
-  if (rating >= 1000) return "Expert";
-  return "Rookie";
-};
+
 
 export default function OnlinePlayersPage({
   onPlay,
   onSpectate,
   onPlayOnline,
   onBack,
-  onRefresh,
- 
 }: OnlinePlayersPageProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<
     "all" | "available" | "in_game"
   >("all");
 
-   const { players, count, loading, refreshing, error, refresh } =
+   const { players, count, loading, refreshing,  refresh } =
       useOnlinePlayers();
   const onlineCount = count || players.length;
 
@@ -96,9 +81,7 @@ export default function OnlinePlayersPage({
       !player.status
   );
 
-  const inGamePlayers = players.filter(
-    (player) => player.status === "in_match"
-  );
+  
 
   const filteredPlayers = useMemo(() => {
     let result = players;

@@ -208,7 +208,7 @@ const PlayVsComputer = () => {
       socket?.off("gameMessage", gameMessageCallback);
       socket?.off("game-not-found", handleGameNotFound);
       socket?.off("connect", handleConnect);
-      //socket?.emit("leave-room", code);
+      socket?.emit("leave-room", code);
     };
   }, [user, socket]);
 

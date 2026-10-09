@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import { TournamentMatch, TournamentRound } from "@/pages/Tournaments/types";
+//import { useSocket } from "@/contexts/SocketProvider";
 //import { customLog } from "@/utils/Functions";
 
 
@@ -30,6 +31,7 @@ const TournamentFooter: React.FC<{
 }) => {
 
   const { user } = useAppContext();
+  //const socket = useSocket();
   
   const getMyMatch = (matches: TournamentRound[]): TournamentMatch | undefined => {
     const roundData = matches.find((r) => r.round === currentRoundNumber);
@@ -109,6 +111,7 @@ const TournamentFooter: React.FC<{
     navigate(`/game/${myMatch.game_code}`, {
       state: { gameType: "Tournament", format: tournamentFormat, tournamentId },
     });
+    
   };
 
   useEffect(() => {

@@ -10,6 +10,7 @@ export type OnlinePlayer = {
   image_url?: string | null;
   rating: number;
   online_status: boolean;
+  game_code?: string | null;
   status: PlayerStatus;
   rank:string;
   rank_color:string;
@@ -33,6 +34,7 @@ type OfflineEvent = {
 type StatusEvent = {
   userId: number | string;
   status: PlayerStatus;
+  game_code?: string | null;
 };
 
 export function useOnlinePlayers() {
@@ -130,7 +132,7 @@ export function useOnlinePlayers() {
       );
     };
 
-    const handleStatus = ({ userId, status }: StatusEvent) => {
+    const handleStatus = ({ userId, status, game_code }: StatusEvent) => {
       const id = Number(userId);
 
       setPlayers((currentPlayers) =>
@@ -139,6 +141,7 @@ export function useOnlinePlayers() {
             ? {
                 ...player,
                 status,
+                game_code: game_code ?? null,
               }
             : player
         )

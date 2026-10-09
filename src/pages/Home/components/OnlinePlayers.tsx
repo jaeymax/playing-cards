@@ -13,21 +13,7 @@ import { useNavigate } from "react-router-dom";
 export type PlayerStatus = "idle" | "looking_for_game" | "in_lobby" | "in_match";
 
 
-interface OnlinePlayersProps {
-  players?: OnlinePlayer[];
-  onPlay?: (player: OnlinePlayer) => void;
-  onSpectate?: (player: OnlinePlayer) => void;
-  onPlayOnline?: () => void;
-  loading?: boolean;
-  maxPlayers?: number;
-}
 
-const rankStyles: Record<string, string> = {
-  Grandmaster: "text-amber-300",
-  Master: "text-purple-300",
-  Expert: "text-blue-300",
-  Rookie: "text-emerald-300",
-};
 
 const statusStyles: Record<PlayerStatus, string> = {
   idle: "text-emerald-400",
@@ -45,12 +31,7 @@ const statusLabels: Record<PlayerStatus, string> = {
 
 const getInitials = (username: string) => username.slice(0, 2).toUpperCase();
 
-const getRank = (rating = 1000) => {
-  if (rating >= 1400) return "Grandmaster";
-  if (rating >= 1200) return "Master";
-  if (rating >= 1000) return "Expert";
-  return "Rookie";
-};
+
 
 export default function OnlinePlayers({}) {
   // const players: Array<{
@@ -110,7 +91,13 @@ export default function OnlinePlayers({}) {
 
   const onPlay = () => {};
 
-  const onSpectate = () => {};
+  const onSpectate = (player:OnlinePlayer) => {
+    if (!player.game_code) {
+      console.error("Player does not have a game code.");
+      return;
+    }
+    navigate(`/game/${player.game_code}/spectate`);
+  };
 
   const onPlayOnline = () => {};
 
@@ -304,7 +291,7 @@ export default function OnlinePlayers({}) {
                     {isInGame ? (
                       <button
                         type="button"
-                        onClick={() => onSpectate?.()}
+                        onClick={() => onSpectate(player)}
                         className="rounded-lg border border-white/[0.07] bg-white/[0.035] px-2.5 py-1.5 text-[10px] font-semibold text-gray-400 transition hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-gray-200"
                       >
                         <span className="flex items-center gap-1">
